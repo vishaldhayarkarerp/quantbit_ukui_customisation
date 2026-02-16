@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebPlotDigitizer - Custom</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #wpd-container {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="wpd-container"></div>
+    
+    <!-- Include WebPlotDigitizer styles and scripts -->
+    <link rel="stylesheet" href="/WebPlotDigitizer/styles/styles.css">
+    <link rel="stylesheet" href="/WebPlotDigitizer/styles/widgets.css">
+    <link rel="stylesheet" href="/WebPlotDigitizer/styles/constants.css">
+    <script src="/WebPlotDigitizer/wpd.min.js"></script>
+    
+    <script>
+        // Message listener to handle image loading from parent window
+        window.addEventListener('message', function(event) {
+            // Verify origin for security (optional but recommended)
+            // if (event.origin !== window.location.origin) return;
+            
+            if (event.data && event.data.action === 'loadImage') {
+                const fileData = event.data;
+                
+                // Create a File object from the ArrayBuffer
+                const blob = new Blob([fileData.arrayBuffer], { type: fileData.type });
+                const file = new File([blob], fileData.name, { type: fileData.type });
+                
+                // Initialize WebPlotDigitizer with the file
+                if (typeof wpd !== 'undefined' && wpd.imageManager) {
+                    wpd.imageManager.initializeFileManager([file], true);
+                    wpd.imageManager.loadFromFile(file).then(() => {
+                        console.log('Image loaded successfully in WebPlotDigitizer');
+                        wpd.busyNote.close();
+                        if (!wpd.browserInfo.isElectronBrowser()) {
+                            wpd.popup.show('loadNewImage');
+                        }
+                    }).catch(error => {
+                        console.error('Error loading image:', error);
+                    });
+                } else {
+                    console.error('WebPlotDigitizer not initialized');
+                }
+            }
+        });
+        
+        // Initialize WebPlotDigitizer when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('wpd_custom.html: DOMContentLoaded fired.');
+            console.log('wpd_custom.html: Checking wpd object...', typeof wpd);
+            console.log('wpd_custom.html: window.wpd:', window.wpd);
+            
+            if (typeof wpd !== 'undefined') {
+                console.log('wpd_custom.html: wpd object is defined.');
+                console.log('wpd_custom.html: wpd methods:', Object.keys(wpd));
+                
+                if (typeof wpd.initApp === 'function') {
+                    wpd.initApp();
+                    console.log('wpd_custom.html: wpd.initApp() called');
+                } else {
+                    console.error('wpd_custom.html: wpd.initApp is not a function');
+                }
+                
+                // Override the popup.show function to intercept the calibration dialog
+                if (wpd.popup && typeof wpd.popup.show === 'function') {
+                    const originalPopupShow = wpd.popup.show;
+                    wpd.popup.show = function(dialogId) {
+                        console.log(`wpd_custom.html: wpd.popup.show called with dialogId: ${dialogId}`);
+                        if (dialogId === 'calibrate-axes-options') {
+                            console.log('wpd_custom.html: Auto-selecting 2D XY Axes and calibrating...');
+                            
+                            // Small delay to ensure the dialog is rendered
+                            setTimeout(() => {
+                                // Select 2D XY Axes (first item) and calibrate
+                                const xyAxesOption = document.getElementById('calibrate-axes-option-xy');
+                                if (xyAxesOption) {
+                                    console.log('wpd_custom.html: Found calibrate-axes-option-xy element.');
+                                    // Trigger selection
+                                    xyAxesOption.click();
+                                    console.log('wpd_custom.html: 2D XY Axes selected');
+                                    
+                                    // Small delay then calibrate
+                                    setTimeout(() => {
+                                        wpd.calibrateAxesDialog.calibrate();
+                                        console.log('wpd_custom.html: Calibration triggered - ready for point selection');
+                                    }, 100);
+                                } else {
+                                    console.error('wpd_custom.html: Could not find calibrate-axes-option-xy element.');
+                                }
+                            }, 100);
+                        }
+                        return originalPopupShow.call(this, dialogId);
+                    };
+                } else {
+                    console.error('wpd_custom.html: wpd.popup.show is not available');
+                }
+            } else {
+                console.error('wpd_custom.html: WebPlotDigitizer not loaded (wpd is undefined).');
+                // Try to load wpd.min.js manually
+                console.log('wpd_custom.html: Attempting to load wpd.min.js manually...');
+                const script = document.createElement('script');
+                script.src = '/WebPlotDigitizer/wpd.min.js';
+                script.onload = function() {
+                    console.log('wpd_custom.html: wpd.min.js loaded manually');
+                    if (typeof wpd !== 'undefined') {
+                        wpd.initApp();
+                    }
+                };
+                script.onerror = function() {
+                    console.error('wpd_custom.html: Failed to load wpd.min.js manually');
+                };
+                document.head.appendChild(script);
+            }
+        });
+    </script>
+</body>
+</html>

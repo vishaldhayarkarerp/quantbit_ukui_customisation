@@ -1,0 +1,597 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Base Styles */
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Color Variables */
+:root {
+    --pink-primary: #ec4899;
+    --pink-dark: #be185d;
+    --pink-light: #f472b6;
+    --gray-bg: #111827;
+    --gray-container: #1f2937;
+    --gray-content: #374151;
+    --gray-border: #4b5563;
+    --text-color: #d1d5db;
+}
+
+/* Tabs */
+.tab-btn {
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    color: var(--pink-light) !important;
+    border-bottom-color: var(--pink-light);
+}
+
+.tab-btn:hover:not(.active) {
+    color: white;
+}
+
+/* Sections */
+.section {
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.section.active {
+    display: block;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label, .form-label-small {
+    display: block;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.form-label {
+    font-size: 0.9rem;
+}
+
+.form-label-small {
+    font-size: 0.8rem;
+}
+
+.form-input, .form-select, .form-checkbox {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--gray-content);
+    border: 1px solid var(--gray-border);
+    border-radius: 0.5rem;
+    color: white;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--pink-light);
+    box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2);
+}
+
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f472b6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1.2rem;
+    padding-right: 2.5rem;
+}
+
+/* Custom Checkbox */
+.form-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.form-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--gray-border);
+    border-radius: 0.25rem;
+    background-color: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.form-checkbox:checked {
+    background-color: var(--pink-primary);
+    border-color: var(--pink-primary);
+}
+
+.form-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.3rem;
+    height: 0.6rem;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--pink-primary);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: var(--pink-dark);
+}
+
+.btn-secondary {
+    background-color: var(--gray-content);
+    color: var(--text-color);
+    padding: 0.75rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: var(--gray-border);
+    color: white;
+}
+
+.yes-no-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.yes-btn, .no-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-width: 80px;
+    text-align: center;
+}
+
+.yes-btn {
+    background-color: var(--gray-content);
+    color: var(--text-color);
+    border: 1px solid var(--gray-border);
+}
+
+.no-btn {
+    background-color: var(--gray-content);
+    color: var(--text-color);
+    border: 1px solid var(--gray-border);
+}
+
+.yes-btn.active, .no-btn.active {
+    background-color: var(--pink-primary);
+    color: white;
+    border-color: var(--pink-primary);
+}
+
+.yes-btn:hover:not(.active), .no-btn:hover:not(.active) {
+    background-color: var(--gray-border);
+    color: white;
+}
+
+/* Modals */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-container {
+    background-color: var(--gray-container);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    width: 90%;
+    max-width: 52rem;
+    position: relative;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal:not(.hidden) .modal-container {
+    transform: scale(1);
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    transform: rotate(90deg);
+    color: white;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--pink-light);
+}
+
+.scroll-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Sticky Navigation */
+.sticky-nav-buttons {
+    position: sticky;
+    bottom: 0;
+    padding: 1rem 0;
+    display: flex;
+    justify-content: space-between;
+    background-color: transparent;
+    z-index: 10;
+}
+
+.nav-btn {
+    margin: 0 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.prev-btn {
+    background-color: var(--gray-content);
+    color: var(--text-color);
+}
+
+.prev-btn:hover {
+    background-color: var(--gray-border);
+    color: white;
+}
+
+.next-btn {
+    background-color: var(--pink-primary);
+    color: white;
+}
+
+.next-btn:hover {
+    background-color: var(--pink-dark);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Responsive Overrides */
+@media (min-width: 768px) {
+    .p-8 { padding: 2rem; }
+}
+
+/* Style for disabled buttons */
+.btn-secondary:disabled {
+    background-color: #4b5563; /* A slightly darker gray */
+    color: #9ca3af;           /* A lighter text color for disabled state */
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* NEW --- Helper class to prevent body scrolling when a modal is open --- */
+body.modal-open {
+    overflow: hidden;
+}
+
+/* --- Custom style for the Race selection button --- */
+.btn-lookup {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--gray-content);
+    border: 1px solid var(--gray-border);
+    border-radius: 0.5rem;
+    color: var(--text-color-light); /* Lighter color for placeholder text */
+    font-size: 0.9rem;
+    text-align: left;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    /* Add dropdown arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24' 24' stroke='%23f472b6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1.2rem;
+    padding-right: 2.5rem;
+}
+
+.btn-lookup:hover {
+    border-color: var(--pink-light);
+}
+
+/* Style for when a value is selected */
+.btn-lookup.active {
+    color: white; /* Bolder color for selected text */
+    /* border-color: var(--pink-light); */
+    /* box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2); */
+}
+/* --- NEW: Floating Label Styling --- */
+
+/* 1. Create a container for positioning */
+.floating-label-group {
+    position: relative;
+}
+
+/* 2. Style the label in its default (placeholder) state */
+.floating-label {
+    position: absolute;
+    top: 0.75rem; /* Same as input padding */
+    left: 0.75rem;  /* Same as input padding */
+    color: var(--text-color-light);
+    font-size: 0.9rem;
+    pointer-events: none; /* Allows clicks to go "through" to the input */
+    transition: all 0.2s ease-in-out;
+}
+
+/* 3. Define the "floated" state for the label */
+.form-input:focus + .floating-label,
+.form-input:not(:placeholder-shown) + .floating-label {
+    top: -0.6rem;    /* Move it up */
+    left: 0.5rem;    /* Move it slightly left */
+    font-size: 0.75rem; /* Make it smaller */
+    color: var(--pink-light); /* Change color to pink accent */
+    background-color: var(--gray-800); /* Match the main form background */
+    padding: 0 0.25rem;
+}
+
+/* Ensure textarea works the same way */
+/* This is the corrected rule */
+.floating-label-group .form-input:not(textarea):not(:placeholder-shown) {
+    padding-top: 1.25rem;
+    padding-bottom: 0.25rem;
+}
+/* --- Styles for Specify Text Modal --- */
+.modal-textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+/* Style for when a Specify button has a value selected */
+.btn-specify.active {
+    background-color: var(--pink-primary);
+    border-color: var(--pink-primary);
+    color: white;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.btn-specify.active:hover {
+    background-color: var(--pink-dark);
+    border-color: var(--pink-dark);
+}
+
+
+/* ... (existing CSS code) ... */
+
+/* This targets the form-selects within the conditional div to remove top margin */
+#multiplePregnancyDetails .form-select {
+    margin-top: 0;
+}
+#multiplePregnancyDetails .form-label-small {
+    margin-top: 1rem;
+}
+#multiplePregnancyDetails .form-label-small:first-of-type {
+    margin-top: 0;
+}
+
+/* ... (your existing CSS code) ... */
+
+
+/* --- Flatpickr Theme Overrides --- */
+
+
+
+/* ... (your existing CSS code) ... */
+
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    background-color: var(--gray-border); 
+    border: 1px solid var(--gray-content);
+    
+    color: var(--text-color);
+    width: 2.75rem; 
+    height: 2.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-icon:hover {
+    background-color: var(--gray-content);
+    border-color: var(--pink-light);
+    color: var(--pink-light); 
+
+    transform: translateY(-2px) scale(1.05); 
+}
+
+.btn-icon:focus-visible {
+    outline: none;
+    border-color: var(--pink-light);
+    box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2);
+}
+
+.btn-icon svg {
+    width: 1.6rem;
+    height: 1.6rem;
+}
+
+/* --- Flatpickr and Related Input Styles --- */
+
+/* Correctly sizes the LMP input field next to the icon button */
+#lmpInput + .form-input {
+    width: auto;
+    flex-grow: 1;
+}
+
+/* Icon Button Style (for LMP options) */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--gray-border); 
+    border: 1px solid var(--gray-content);
+    color: var(--text-color);
+    width: 2.75rem; 
+    height: 2.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-icon:hover {
+    background-color: var(--gray-content);
+    border-color: var(--pink-light);
+    color: var(--pink-light); 
+    transform: translateY(-2px) scale(1.05); 
+}
+
+.btn-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+/* Flatpickr Calendar Theme */
+.flatpickr-calendar {
+    font-size: 16px; 
+    font-family: 'Inter', sans-serif;
+    background-color: var(--gray-content);
+    border: 1px solid var(--gray-content);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    min-width: 340px;
+    padding: 0.5rem;
+}
+
+.flatpickr-day {
+    color: var(--text-color);
+    border-radius: 50%; 
+    border: 2px solid transparent;
+    height: 42px;
+    width: 42px;
+    line-height: 38px;
+}
+
+.flatpickr-day:hover, .flatpickr-day:focus {
+    background: var(--gray-content);
+    border-color: var(--gray-content);
+}
+
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+    color: var black; 
+}
+
+.flatpickr-day.today {
+    border-color: var(--pink-light);
+    font-weight: 600;
+}
+
+.flatpickr-day.selected {
+    background: var(--pink-primary);
+    border-color: var(--pink-primary);
+    color: #fff;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover svg,
+.flatpickr-months .flatpickr-next-month:hover svg {
+    fill: var(--pink-primary);
+}
+
+
+.flatpickr-current-month {
+    font-size: 1.25em;
+    font-weight: 600;
+}
+
+span.flatpickr-weekday {
+    color: var(--pink-light);
+    font-weight: 600;
+}
+
+.flatpickr-time {
+    border-top: 1px solid var(--gray-border);
+}

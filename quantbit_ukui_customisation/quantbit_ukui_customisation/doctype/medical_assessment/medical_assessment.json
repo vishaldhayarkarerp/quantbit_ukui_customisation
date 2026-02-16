@@ -1,0 +1,3410 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-10-16 15:37:58.872164",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "maternal_variables_tab",
+  "series_section",
+  "naming_series",
+  "maternal_variables_section",
+  "maternal_age",
+  "column_break_nkne",
+  "maternal_parity",
+  "column_break_purf",
+  "column_break_xitu",
+  "3_number_of_previous_pregnancies_section",
+  "table_vtci",
+  "section_break_yxze",
+  "gestation_weeks",
+  "column_break_fufp",
+  "prev_iud_stillbirth",
+  "column_break_ahpm",
+  "prev_iugr_sga",
+  "column_break_huab",
+  "pregnancy_loss",
+  "pregnancy_loss_details_section",
+  "select_trimester",
+  "number_of_loss",
+  "section_break_wnwp",
+  "hypertension",
+  "diabetes",
+  "column_break_volp",
+  "autoimmune",
+  "column_break_fzos",
+  "papp_a_level",
+  "column_break_iwac",
+  "bmi",
+  "13_select_race__ethnicity_section",
+  "13_select_race__ethnicity_column",
+  "ethnic_category",
+  "column_break_hzwl",
+  "ethnic_subcategory",
+  "section_break_mpja",
+  "column_break_tfjq",
+  "antenatal_problems",
+  "column_break_worm",
+  "smoking_in_pregnancy",
+  "column_break_qjsj",
+  "maternal_autoimmune_disorder",
+  "respiratory_problems",
+  "respiratory_prob_section",
+  "asthma",
+  "asthma_spe",
+  "chronic_obstr",
+  "sarcoidosis",
+  "tuber_past",
+  "column_break_jdbd",
+  "asthma_pre",
+  "chronic_bronchitis",
+  "pulmonary_fibrosis",
+  "tuber_current_treat",
+  "other",
+  "section_break_xjmf",
+  "inherited_disorders",
+  "select_inherited_disorder",
+  "aperts_syndrome",
+  "conge_hip_dys",
+  "down_synd",
+  "marf_synd",
+  "muscul_dyst",
+  "phenylk",
+  "column_break_axgi",
+  "cong_adren_hyper",
+  "cystic_fibrosis",
+  "haemochromatosis",
+  "mcadd",
+  "neurofibromatosis",
+  "inher_other",
+  "section_break_soud",
+  "cardiac_prob",
+  "select_cardiac_problem",
+  "arrhythmia",
+  "cardiac_mur",
+  "cardiac_transplant",
+  "isc_heart",
+  "rheumatic_fever",
+  "card_other",
+  "column_break_pdjg",
+  "car_care",
+  "cardiac_surgery",
+  "card_anom",
+  "peri_card",
+  "valve_lesion",
+  "section_break_cqga",
+  "hypertension_ever",
+  "select_hypertension_option_section",
+  "pul_hyper",
+  "no_medica",
+  "preg_not_med",
+  "no_preg_med",
+  "column_break_jevn",
+  "curr_med",
+  "dur_pre_med",
+  "no_pre_med",
+  "section_break_qvwq",
+  "anaemia_prb",
+  "haem_prb",
+  "anaemia",
+  "antibody_sensitivity",
+  "alpha_thalassaemia",
+  "beta_thalassaemia",
+  "thal_trait",
+  "column_break_oojt",
+  "rh_isoim",
+  "seckel_dis",
+  "cell_trait",
+  "hae_other",
+  "bon_mar",
+  "section_break_bfht",
+  "ther_disord",
+  "thar_disorder",
+  "antipho",
+  "antithrombin_deficiency",
+  "haema_care",
+  "dvt",
+  "dvt_not",
+  "v_leid",
+  "haemophilia",
+  "itp",
+  "pat",
+  "pdvt",
+  "column_break_ijmj",
+  "pcd",
+  "psd",
+  "pmfh",
+  "pe",
+  "thrombocytopenia",
+  "thrombophilia",
+  "vvwp",
+  "vvnp",
+  "vwd",
+  "tharm_other",
+  "section_break_fnmn",
+  "liver_prd",
+  "hep_prd",
+  "afl",
+  "aut_he",
+  "help_synd",
+  "hepa",
+  "hepb",
+  "hepc",
+  "column_break_jnua",
+  "hep_unk",
+  "jnhs",
+  "liver_trans",
+  "obs_chl",
+  "oth_hep_prd",
+  "section_break_fopx",
+  "foetal_movements",
+  "section_break_ldab",
+  "gas_prb",
+  "gastrointent_prb",
+  "achalasia",
+  "cholecystitis",
+  "coeliac_disease",
+  "crohns_disease",
+  "faecal_incontinence",
+  "gastric_band",
+  "gastric_ulcer",
+  "haemorrhoids_treated",
+  "column_break_cixy",
+  "haemorrhoids_not_treated",
+  "hiatus_hernia",
+  "irritable_bowel_syndrome",
+  "malabsorption_syndrome",
+  "pancreatitis",
+  "ulcerative_colitis",
+  "garothr",
+  "section_break_lfxy",
+  "endo",
+  "endocrime_prb_opt",
+  "addison_disease",
+  "autoimmune_hypothyroidism",
+  "cushings_syndrome",
+  "diabetes_type_1",
+  "diabetes_type_2",
+  "endocrine_disease",
+  "gestational_diabetes",
+  "column_break_llnd",
+  "hyperthyroidism_current",
+  "hyperthyroidism",
+  "hypothyroidism",
+  "pituitary_disorder",
+  "posysn",
+  "endocothr",
+  "section_break_socg",
+  "neuro_prd",
+  "neuro_prd_opt",
+  "adhd__add",
+  "asd",
+  "cerebral_palsy",
+  "cfs",
+  "enm",
+  "erm",
+  "multiple_sclerosis",
+  "myotonic_dystrophy",
+  "neuropathy",
+  "column_break_pqxa",
+  "psh",
+  "stroke",
+  "fne",
+  "migraine",
+  "migrain_severe",
+  "neuromuscular_disorder",
+  "spina_bifida",
+  "nuero_prb_othr",
+  "section_break_grix",
+  "auto_dis",
+  "auto_dis_opt",
+  "gestational_pemphigoid",
+  "myasthenia_gravis",
+  "psoriasis",
+  "rheumatoid_arthritis",
+  "systemic_sclerosis",
+  "autodis_othe",
+  "column_break_dflm",
+  "sclerosis",
+  "pernicious_anaemia",
+  "psoriatic_arthropathy",
+  "syst_lup_eryth",
+  "vitiligo",
+  "section_break_cexi",
+  "infection",
+  "infection_opt",
+  "no",
+  "confidential_information",
+  "candida",
+  "c_difficile",
+  "chlamydia",
+  "cytomegalovirus",
+  "genital_herpes",
+  "genital_warts",
+  "glandular_fever",
+  "gonorrhoea",
+  "covid19m6",
+  "covid196m",
+  "column_break_nsat",
+  "groupb",
+  "hiv",
+  "habite",
+  "meningitis",
+  "mrsa",
+  "parvovirus",
+  "polio",
+  "rubella",
+  "syphilis",
+  "toxoplasmosis",
+  "tropical_disease",
+  "infectothr",
+  "section_break_lzuu",
+  "fert_tre",
+  "fert_tre_opt",
+  "fert_no",
+  "artif_insemin",
+  "clomiphene",
+  "icsi_own_egg",
+  "iui",
+  "ivf_donar_egg",
+  "pergonal_or_metrodin",
+  "surrogate_pregnancy",
+  "yes_not_wish",
+  "column_break_mije",
+  "aibd",
+  "bpdi",
+  "gift",
+  "icsi_donor_egg",
+  "ivf_own_egg",
+  "hgc",
+  "reversal_of_sterilisation",
+  "tubal_surgery",
+  "fertiother",
+  "section_break_lgwp",
+  "lmp",
+  "column_break_yopx",
+  "lmpopt",
+  "section_break_plfv",
+  "preg",
+  "section_break_wplj",
+  "med_dur_preg",
+  "preg_opt",
+  "medinone",
+  "analgesics",
+  "antacids",
+  "antibiotics",
+  "antid",
+  "antidepressants",
+  "antihypertensives",
+  "oncology_drugs",
+  "vitamind",
+  "column_break_cqdp",
+  "asthma_drugs",
+  "aspirin",
+  "insulin",
+  "levothyroxine",
+  "lithium",
+  "multivitamins",
+  "oral_hypoglycemics",
+  "roaccutane",
+  "med_opthrt",
+  "specify_other_medication",
+  "section_break_flrs",
+  "smoked",
+  "column_break_obch",
+  "co_ppm",
+  "not_taken",
+  "column_break_okif",
+  "hou_smok",
+  "column_break_rfdi",
+  "alco_wek",
+  "none",
+  "section_break_iuhq",
+  "sub_preg",
+  "sub_preg_opt",
+  "never_used",
+  "declined_to_answer",
+  "acid",
+  "amphetamines",
+  "cannabis",
+  "cocaine",
+  "crack",
+  "lighter_fuel",
+  "methadone",
+  "subutex",
+  "subothr",
+  "column_break_dyyh",
+  "crystal_meth",
+  "diazepam",
+  "ecstasy",
+  "glue",
+  "heroin",
+  "ketamine",
+  "khat",
+  "lsd",
+  "speed",
+  "temazepam",
+  "section_break_kjgw",
+  "wom_hg",
+  "not_performed",
+  "column_break_cgja",
+  "wom_wg",
+  "not_weighed",
+  "column_break_fcmn",
+  "wom_blod_pres",
+  "no_perf",
+  "section_break_ymmp",
+  "abnor_scn",
+  "abnor_scn_opt",
+  "no_abnor",
+  "bra",
+  "diaphragmatic_hernia",
+  "gastroschisis",
+  "osb",
+  "trisomy_13",
+  "admonr_other",
+  "column_break_qnno",
+  "anencephaly",
+  "cleft_lip",
+  "exomphalos",
+  "lethal_sket_dys",
+  "sca",
+  "trisomy_18",
+  "section_break_tfwq",
+  "gr_res_prb",
+  "gr_res_prb_opt",
+  "no_risk",
+  "antiphospholipid",
+  "afa",
+  "chronic_hypertension",
+  "chronic_rental",
+  "drug_misuse",
+  "bpn",
+  "feb",
+  "fgrtp",
+  "hdtp",
+  "hdpp",
+  "column_break_iazy",
+  "mat_age",
+  "med_condi",
+  "stillbirth_sga",
+  "psab",
+  "pre_sga",
+  "red_preg",
+  "suasb",
+  "smoking_at_booking",
+  "ufsfim",
+  "frg_othr",
+  "pappa",
+  "section_break_llir",
+  "fdr",
+  "section_break_pels",
+  "pre_tr_birth",
+  "pre_tr_birth_opt",
+  "no_risk_pre",
+  "cbir",
+  "hotfcc",
+  "lletz",
+  "mul_preg",
+  "prev_aila",
+  "prev_preterm",
+  "column_break_twuu",
+  "lletz_prev",
+  "hosceehr",
+  "intr_adhe_syndro",
+  "lletz_ir",
+  "prev_cerv_cercl",
+  "prev_pre_birth",
+  "uterine_variant",
+  "section_break_fhee",
+  "asssris",
+  "column_break_hdxa",
+  "dvit",
+  "column_break_aidj",
+  "sep",
+  "induction",
+  "method",
+  "medication",
+  "total_dose",
+  "section_break_srxu",
+  "rupt_mem",
+  "sme_liq",
+  "column_break_smuj",
+  "liq_col",
+  "column_break_ypst",
+  "slw_prw",
+  "epid",
+  "oxy_aug",
+  "oxytocin_hr",
+  "section_break_pcjc",
+  "ivf",
+  "ivf_details_section",
+  "own_fresh",
+  "own_frozen",
+  "donor_oocyte",
+  "column_break_umap",
+  "donar_age",
+  "male_fact_indi",
+  "icsiimsi",
+  "section_break_pyzv",
+  "fev_lab",
+  "column_break_ewik",
+  "gyn_his",
+  "column_break_kbes",
+  "mat_cond",
+  "column_break_uoci",
+  "mat_lb",
+  "tab_2_tab",
+  "plac_path",
+  "column_break_lqji",
+  "pre_ecla",
+  "column_break_vjvv",
+  "plac_abnor",
+  "foetal_tab",
+  "iugr",
+  "column_break_qayn",
+  "abnor_drop",
+  "3_multiple_pregnancy_details_section",
+  "type",
+  "chorionicity",
+  "zygosity",
+  "section_break_nfqh",
+  "4_presentation",
+  "column_break_dgni",
+  "birthweight",
+  "column_break_lrgy",
+  "babys",
+  "apgar",
+  "min1",
+  "min5",
+  "min10",
+  "section_break_jwrm",
+  "oligohydra",
+  "modedelivery",
+  "please_select",
+  "indication",
+  "section_break_acbr",
+  "card_neck",
+  "neon_resus",
+  "column_break_qsix",
+  "plactal_abrupt",
+  "neonatal_malfun",
+  "column_break_lrtg",
+  "timendate",
+  "neonatal_icu",
+  "column_break_ikaj",
+  "babycried",
+  "birth_related",
+  "cord_blood_tab",
+  "arterial_section",
+  "ph",
+  "po2",
+  "column_break_xkqh",
+  "base_excess",
+  "pco2",
+  "column_break_zozo",
+  "lactate",
+  "hco3",
+  "column_break_fhqn",
+  "foetal_hb",
+  "venous_section",
+  "phv",
+  "po2v",
+  "column_break_bfud",
+  "basev",
+  "pco2v",
+  "column_break_ksww",
+  "lactatev",
+  "hco3v",
+  "column_break_apxw",
+  "foetalv",
+  "attachments_tab",
+  "section_break_xyyt",
+  "attachments"
+ ],
+ "fields": [
+  {
+   "fieldname": "maternal_variables_tab",
+   "fieldtype": "Tab Break",
+   "label": "Maternal Variables"
+  },
+  {
+   "fieldname": "maternal_variables_section",
+   "fieldtype": "Section Break",
+   "label": "Maternal Variables"
+  },
+  {
+   "fieldname": "maternal_age",
+   "fieldtype": "Int",
+   "label": "1. Maternal Age"
+  },
+  {
+   "fieldname": "column_break_nkne",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "maternal_parity",
+   "fieldtype": "Select",
+   "label": "2. Maternal Parity",
+   "options": "Primigravida\nMultiparous"
+  },
+  {
+   "fieldname": "column_break_purf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xitu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "3_number_of_previous_pregnancies_section",
+   "fieldtype": "Section Break",
+   "label": "3. Number of Previous Pregnancies"
+  },
+  {
+   "fieldname": "table_vtci",
+   "fieldtype": "Table",
+   "options": "Previous Pregnancies Details"
+  },
+  {
+   "fieldname": "section_break_yxze",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "gestation_weeks",
+   "fieldtype": "Int",
+   "label": "4. Current Gestational Age in Weeks",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "column_break_fufp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "prev_iud_stillbirth",
+   "fieldtype": "Select",
+   "label": "5. Previous IUD/Stillbirth?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_ahpm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "prev_iugr_sga",
+   "fieldtype": "Select",
+   "label": "6. Previous IUGR/SGA?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_huab",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pregnancy_loss",
+   "fieldtype": "Select",
+   "label": "7. History of Pregnancy Loss?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval: doc.pregnancy_loss == 'Yes'",
+   "fieldname": "pregnancy_loss_details_section",
+   "fieldtype": "Section Break",
+   "label": "13. Pregnancy Loss Details"
+  },
+  {
+   "fieldname": "select_trimester",
+   "fieldtype": "Select",
+   "label": "Select Trimester",
+   "options": "First Trimester\nSecond Trimester\nThird Trimester"
+  },
+  {
+   "fieldname": "number_of_loss",
+   "fieldtype": "Int",
+   "label": "Number of Loss"
+  },
+  {
+   "fieldname": "section_break_wnwp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "hypertension",
+   "fieldtype": "Select",
+   "label": "8. Hypertension in Pregnancy?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "diabetes",
+   "fieldtype": "Select",
+   "label": "9. Diabetes in Pregnancy?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_volp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "autoimmune",
+   "fieldtype": "Select",
+   "label": "10. Maternal Autoimmune Disorders?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_fzos",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "papp_a_level",
+   "fieldtype": "Float",
+   "label": "11. PAPP-A Level",
+   "non_negative": 1,
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_iwac",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bmi",
+   "fieldtype": "Float",
+   "label": "12. BMI",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "13_select_race__ethnicity_section",
+   "fieldtype": "Section Break",
+   "label": "13. Select Race / Ethnicity"
+  },
+  {
+   "fieldname": "13_select_race__ethnicity_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ethnic_category",
+   "fieldtype": "Select",
+   "label": "Ethnic Category",
+   "options": "White\nMixed or Multiple ethnic groups\nAsian or Asian British\nBlack, African, Caribbean or Black British\nOther ethnic group"
+  },
+  {
+   "fieldname": "column_break_hzwl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ethnic_subcategory",
+   "fieldtype": "Select",
+   "label": "Ethnic Sub-category",
+   "options": "English, Welsh, Scottish, Northern Irish or British\nIrish\nGypsy or Irish Traveller\nOther White\nWhite and Black Caribbean\nWhite and Black African\nWhite and Asian\nOther Mixed or Multiple ethnic background\nIndian\nPakistani\nBangladeshi\nChinese\nOther Asian\nAfrican\nCaribbean\nOther Black, African or Caribbean background\nArab\nOther ethnic group"
+  },
+  {
+   "fieldname": "section_break_mpja",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_tfjq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "antenatal_problems",
+   "fieldtype": "Text",
+   "label": "14. Antenatal Problems (Specify)"
+  },
+  {
+   "fieldname": "column_break_worm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "smoking_in_pregnancy",
+   "fieldtype": "Select",
+   "label": "15. Smoking in pregnancy?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_qjsj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "maternal_autoimmune_disorder",
+   "fieldtype": "Select",
+   "label": "16. Maternal autoimmune disorder?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "respiratory_problems",
+   "fieldtype": "Select",
+   "label": "17. Have You Had Any Respiratory Problems?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.respiratory_problems ==\"Yes\"",
+   "fieldname": "respiratory_prob_section",
+   "fieldtype": "Section Break",
+   "label": "Select Respiratory Problems"
+  },
+  {
+   "default": "0",
+   "fieldname": "asthma",
+   "fieldtype": "Check",
+   "label": "Asthma"
+  },
+  {
+   "default": "0",
+   "fieldname": "asthma_spe",
+   "fieldtype": "Check",
+   "label": "Asthma - Specialist Consultant Care"
+  },
+  {
+   "default": "0",
+   "fieldname": "chronic_obstr",
+   "fieldtype": "Check",
+   "label": "Chronic Obstructive Airway Disease"
+  },
+  {
+   "default": "0",
+   "fieldname": "sarcoidosis",
+   "fieldtype": "Check",
+   "label": "Sarcoidosis"
+  },
+  {
+   "default": "0",
+   "fieldname": "tuber_past",
+   "fieldtype": "Check",
+   "label": "Tuberculosis Past Treatment"
+  },
+  {
+   "fieldname": "column_break_jdbd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "asthma_pre",
+   "fieldtype": "Check",
+   "label": "Asthma - Previous Admission in Last 12 Months"
+  },
+  {
+   "default": "0",
+   "fieldname": "chronic_bronchitis",
+   "fieldtype": "Check",
+   "label": "Chronic Bronchitis"
+  },
+  {
+   "default": "0",
+   "fieldname": "pulmonary_fibrosis",
+   "fieldtype": "Check",
+   "label": "Pulmonary Fibrosis"
+  },
+  {
+   "default": "0",
+   "fieldname": "tuber_current_treat",
+   "fieldtype": "Check",
+   "label": "Tuberculosis Current Treatment"
+  },
+  {
+   "default": "0",
+   "fieldname": "other",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "section_break_xjmf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "inherited_disorders",
+   "fieldtype": "Select",
+   "label": "18. Do You Have Any Of The Following Inherited Disorders?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.inherited_disorders == \"Yes\"",
+   "fieldname": "select_inherited_disorder",
+   "fieldtype": "Section Break",
+   "label": "Select Inherited Disorder(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "aperts_syndrome",
+   "fieldtype": "Check",
+   "label": "Aperts Syndrome"
+  },
+  {
+   "default": "0",
+   "fieldname": "conge_hip_dys",
+   "fieldtype": "Check",
+   "label": "Congenital Hip Dysplasia"
+  },
+  {
+   "default": "0",
+   "fieldname": "down_synd",
+   "fieldtype": "Check",
+   "label": "Down's Syndrome"
+  },
+  {
+   "default": "0",
+   "fieldname": "marf_synd",
+   "fieldtype": "Check",
+   "label": "Marfan's Syndrome"
+  },
+  {
+   "default": "0",
+   "fieldname": "muscul_dyst",
+   "fieldtype": "Check",
+   "label": "Muscular Dystrophy"
+  },
+  {
+   "default": "0",
+   "fieldname": "phenylk",
+   "fieldtype": "Check",
+   "label": "Phenylketonuria"
+  },
+  {
+   "fieldname": "column_break_axgi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "cong_adren_hyper",
+   "fieldtype": "Check",
+   "label": "Congenital Adrenal Hyperplasia"
+  },
+  {
+   "default": "0",
+   "fieldname": "cystic_fibrosis",
+   "fieldtype": "Check",
+   "label": "Cystic Fibrosis"
+  },
+  {
+   "default": "0",
+   "fieldname": "haemochromatosis",
+   "fieldtype": "Check",
+   "label": "Haemochromatosis"
+  },
+  {
+   "default": "0",
+   "fieldname": "mcadd",
+   "fieldtype": "Check",
+   "label": "MCADD"
+  },
+  {
+   "default": "0",
+   "fieldname": "neurofibromatosis",
+   "fieldtype": "Check",
+   "label": "Neurofibromatosis"
+  },
+  {
+   "default": "0",
+   "fieldname": "inher_other",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "section_break_soud",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cardiac_prob",
+   "fieldtype": "Select",
+   "label": "19. Have you had any cardiac problems?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.cardiac_prob ==\"Yes\"",
+   "fieldname": "select_cardiac_problem",
+   "fieldtype": "Section Break",
+   "label": "Select Cardiac Problem(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "arrhythmia",
+   "fieldtype": "Check",
+   "label": "Arrhythmia"
+  },
+  {
+   "default": "0",
+   "fieldname": "cardiac_mur",
+   "fieldtype": "Check",
+   "label": "Cardiac murmur (under cardiac care)"
+  },
+  {
+   "default": "0",
+   "fieldname": "cardiac_transplant",
+   "fieldtype": "Check",
+   "label": "Cardiac Transplant"
+  },
+  {
+   "default": "0",
+   "fieldname": "isc_heart",
+   "fieldtype": "Check",
+   "label": "Ischemic heart disease"
+  },
+  {
+   "default": "0",
+   "fieldname": "rheumatic_fever",
+   "fieldtype": "Check",
+   "label": "Rheumatic fever"
+  },
+  {
+   "default": "0",
+   "fieldname": "card_other",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "column_break_pdjg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "car_care",
+   "fieldtype": "Check",
+   "label": "Cardiac disease (under cardiac care)"
+  },
+  {
+   "default": "0",
+   "fieldname": "cardiac_surgery",
+   "fieldtype": "Check",
+   "label": "Cardiac surgery"
+  },
+  {
+   "default": "0",
+   "fieldname": "card_anom",
+   "fieldtype": "Check",
+   "label": "Congenital cardiac anomaly"
+  },
+  {
+   "default": "0",
+   "fieldname": "peri_card",
+   "fieldtype": "Check",
+   "label": "Peripartum cardiomyopathy"
+  },
+  {
+   "default": "0",
+   "fieldname": "valve_lesion",
+   "fieldtype": "Check",
+   "label": "Valve lesion"
+  },
+  {
+   "fieldname": "section_break_cqga",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "hypertension_ever",
+   "fieldtype": "Select",
+   "label": "20. Have you ever had hypertension?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.hypertension_ever==\"Yes\"",
+   "fieldname": "select_hypertension_option_section",
+   "fieldtype": "Section Break",
+   "label": "Select Hypertension Option"
+  },
+  {
+   "default": "0",
+   "fieldname": "pul_hyper",
+   "fieldtype": "Check",
+   "label": "Pulmonary Hypertension"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_medica",
+   "fieldtype": "Check",
+   "label": "Currently - no medication"
+  },
+  {
+   "default": "0",
+   "fieldname": "preg_not_med",
+   "fieldtype": "Check",
+   "label": "During pregnancy not medicated"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_preg_med",
+   "fieldtype": "Check",
+   "label": "Non pregnant no medication"
+  },
+  {
+   "fieldname": "column_break_jevn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "curr_med",
+   "fieldtype": "Check",
+   "label": "Currently - medicated"
+  },
+  {
+   "default": "0",
+   "fieldname": "dur_pre_med",
+   "fieldtype": "Check",
+   "label": "During pregnancy medicated"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_pre_med",
+   "fieldtype": "Check",
+   "label": "Non pregnant medicated"
+  },
+  {
+   "fieldname": "section_break_qvwq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "anaemia_prb",
+   "fieldtype": "Select",
+   "label": "21. Have you had anaemia or other haematological problems?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.anaemia_prb==\"Yes\"",
+   "fieldname": "haem_prb",
+   "fieldtype": "Section Break",
+   "label": "Select Haematological Problem(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "anaemia",
+   "fieldtype": "Check",
+   "label": "Anaemia"
+  },
+  {
+   "default": "0",
+   "fieldname": "antibody_sensitivity",
+   "fieldtype": "Check",
+   "label": "Antibody sensitivity"
+  },
+  {
+   "default": "0",
+   "fieldname": "alpha_thalassaemia",
+   "fieldtype": "Check",
+   "label": "Alpha Thalassaemia"
+  },
+  {
+   "default": "0",
+   "fieldname": "beta_thalassaemia",
+   "fieldtype": "Check",
+   "label": "Beta Thalassaemia"
+  },
+  {
+   "default": "0",
+   "fieldname": "thal_trait",
+   "fieldtype": "Check",
+   "label": "Beta Thalassaemia Trait"
+  },
+  {
+   "fieldname": "column_break_oojt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "rh_isoim",
+   "fieldtype": "Check",
+   "label": "Rhesus isoimmunisation"
+  },
+  {
+   "default": "0",
+   "fieldname": "seckel_dis",
+   "fieldtype": "Check",
+   "label": "Sickle cell disease"
+  },
+  {
+   "default": "0",
+   "fieldname": "cell_trait",
+   "fieldtype": "Check",
+   "label": "Sickle cell Trait"
+  },
+  {
+   "default": "0",
+   "fieldname": "hae_other",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "default": "0",
+   "fieldname": "bon_mar",
+   "fieldtype": "Check",
+   "label": "Bone marrow transplant"
+  },
+  {
+   "fieldname": "section_break_bfht",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "ther_disord",
+   "fieldtype": "Select",
+   "label": "22. Is there any history of thromboembolic or clotting disorders?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.ther_disord ==\"Yes\"",
+   "fieldname": "thar_disorder",
+   "fieldtype": "Section Break",
+   "label": "Select Thromboembolic Disorder(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "antipho",
+   "fieldtype": "Check",
+   "label": "Antiphospholipid syndrome"
+  },
+  {
+   "default": "0",
+   "fieldname": "antithrombin_deficiency",
+   "fieldtype": "Check",
+   "label": "Antithrombin deficiency"
+  },
+  {
+   "default": "0",
+   "fieldname": "haema_care",
+   "fieldtype": "Check",
+   "label": "Compound heterozygosity under haematological care"
+  },
+  {
+   "default": "0",
+   "fieldname": "dvt",
+   "fieldtype": "Check",
+   "label": "DVT - anticoagulated"
+  },
+  {
+   "default": "0",
+   "fieldname": "dvt_not",
+   "fieldtype": "Check",
+   "label": "DVT - not anticoagulated"
+  },
+  {
+   "default": "0",
+   "fieldname": "v_leid",
+   "fieldtype": "Check",
+   "label": "Factor V Leiden (homozygous)"
+  },
+  {
+   "default": "0",
+   "fieldname": "haemophilia",
+   "fieldtype": "Check",
+   "label": "Haemophilia"
+  },
+  {
+   "default": "0",
+   "fieldname": "itp",
+   "fieldtype": "Check",
+   "label": "Idiopathic Thrombocytopenic Purpura (ITP)"
+  },
+  {
+   "default": "0",
+   "fieldname": "pat",
+   "fieldtype": "Check",
+   "label": "Previous arterial thrombosis"
+  },
+  {
+   "default": "0",
+   "fieldname": "pdvt",
+   "fieldtype": "Check",
+   "label": "Previous DVT"
+  },
+  {
+   "fieldname": "column_break_ijmj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "pcd",
+   "fieldtype": "Check",
+   "label": "Protein C deficiency"
+  },
+  {
+   "default": "0",
+   "fieldname": "psd",
+   "fieldtype": "Check",
+   "label": "Protein S deficiency"
+  },
+  {
+   "default": "0",
+   "fieldname": "pmfh",
+   "fieldtype": "Check",
+   "label": "Posthrombin mutation (Factor II homozygous)"
+  },
+  {
+   "default": "0",
+   "fieldname": "pe",
+   "fieldtype": "Check",
+   "label": "Pulmonary embolus"
+  },
+  {
+   "default": "0",
+   "fieldname": "thrombocytopenia",
+   "fieldtype": "Check",
+   "label": "Thrombocytopenia"
+  },
+  {
+   "default": "0",
+   "fieldname": "thrombophilia",
+   "fieldtype": "Check",
+   "label": "Thrombophilia"
+  },
+  {
+   "default": "0",
+   "fieldname": "vvwp",
+   "fieldtype": "Check",
+   "label": "Varicose veins with phlebits"
+  },
+  {
+   "default": "0",
+   "fieldname": "vvnp",
+   "fieldtype": "Check",
+   "label": "Varicose veins no phlebits"
+  },
+  {
+   "default": "0",
+   "fieldname": "vwd",
+   "fieldtype": "Check",
+   "label": "Von Willebrand disease"
+  },
+  {
+   "default": "0",
+   "fieldname": "tharm_other",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "section_break_fnmn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "liver_prd",
+   "fieldtype": "Select",
+   "label": "23. Have you had jaundice or liver problems?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.liver_prd==\"Yes\"",
+   "fieldname": "hep_prd",
+   "fieldtype": "Section Break",
+   "label": "Select Hepatic Problem(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "afl",
+   "fieldtype": "Check",
+   "label": "Acute Fatty Liver"
+  },
+  {
+   "default": "0",
+   "fieldname": "aut_he",
+   "fieldtype": "Check",
+   "label": "Autoimmune hepatitis"
+  },
+  {
+   "default": "0",
+   "fieldname": "help_synd",
+   "fieldtype": "Check",
+   "label": "HELP syndrome"
+  },
+  {
+   "default": "0",
+   "fieldname": "hepa",
+   "fieldtype": "Check",
+   "label": "Hepatitis A"
+  },
+  {
+   "default": "0",
+   "fieldname": "hepb",
+   "fieldtype": "Check",
+   "label": "Hepatitis B"
+  },
+  {
+   "default": "0",
+   "fieldname": "hepc",
+   "fieldtype": "Check",
+   "label": "Hepatitis C"
+  },
+  {
+   "fieldname": "column_break_jnua",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "hep_unk",
+   "fieldtype": "Check",
+   "label": "Hepatitis type unknown"
+  },
+  {
+   "default": "0",
+   "fieldname": "jnhs",
+   "fieldtype": "Check",
+   "label": "Jaundice not hepatitis specific"
+  },
+  {
+   "default": "0",
+   "fieldname": "liver_trans",
+   "fieldtype": "Check",
+   "label": "Liver transplant"
+  },
+  {
+   "default": "0",
+   "fieldname": "obs_chl",
+   "fieldtype": "Check",
+   "label": "Obstetric cholestasis"
+  },
+  {
+   "default": "0",
+   "fieldname": "oth_hep_prd",
+   "fieldtype": "Check",
+   "label": "Other hepatic problem"
+  },
+  {
+   "fieldname": "section_break_fopx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "foetal_movements",
+   "fieldtype": "Select",
+   "label": "24. Reduced foetal movements in pregnancy?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "section_break_ldab",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "gas_prb",
+   "fieldtype": "Select",
+   "label": "25. Have you had any gastrointestinal problems?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.gas_prb ==\"Yes\"",
+   "fieldname": "gastrointent_prb",
+   "fieldtype": "Section Break",
+   "label": "Select Gastrointestinal Problem(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "achalasia",
+   "fieldtype": "Check",
+   "label": "Achalasia"
+  },
+  {
+   "default": "0",
+   "fieldname": "cholecystitis",
+   "fieldtype": "Check",
+   "label": "Cholecystitis"
+  },
+  {
+   "default": "0",
+   "fieldname": "coeliac_disease",
+   "fieldtype": "Check",
+   "label": "Coeliac disease"
+  },
+  {
+   "default": "0",
+   "fieldname": "crohns_disease",
+   "fieldtype": "Check",
+   "label": "Crohn's disease"
+  },
+  {
+   "default": "0",
+   "fieldname": "faecal_incontinence",
+   "fieldtype": "Check",
+   "label": "Faecal incontinence"
+  },
+  {
+   "default": "0",
+   "fieldname": "gastric_band",
+   "fieldtype": "Check",
+   "label": "Gastric band"
+  },
+  {
+   "default": "0",
+   "fieldname": "gastric_ulcer",
+   "fieldtype": "Check",
+   "label": "Gastric ulcer"
+  },
+  {
+   "default": "0",
+   "fieldname": "haemorrhoids_treated",
+   "fieldtype": "Check",
+   "label": "Haemorrhoids treated"
+  },
+  {
+   "fieldname": "column_break_cixy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "haemorrhoids_not_treated",
+   "fieldtype": "Check",
+   "label": "Haemorrhoids not treated"
+  },
+  {
+   "default": "0",
+   "fieldname": "hiatus_hernia",
+   "fieldtype": "Check",
+   "label": "Hiatus hernia"
+  },
+  {
+   "default": "0",
+   "fieldname": "irritable_bowel_syndrome",
+   "fieldtype": "Check",
+   "label": "Irritable bowel syndrome"
+  },
+  {
+   "default": "0",
+   "fieldname": "malabsorption_syndrome",
+   "fieldtype": "Check",
+   "label": "Malabsorption syndrome"
+  },
+  {
+   "default": "0",
+   "fieldname": "pancreatitis",
+   "fieldtype": "Check",
+   "label": "Pancreatitis"
+  },
+  {
+   "default": "0",
+   "fieldname": "ulcerative_colitis",
+   "fieldtype": "Check",
+   "label": "Ulcerative colitis"
+  },
+  {
+   "default": "0",
+   "fieldname": "garothr",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "section_break_lfxy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "endo",
+   "fieldtype": "Select",
+   "label": "26. Have you had any endocrine problems?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.endo==\"Yes\"",
+   "fieldname": "endocrime_prb_opt",
+   "fieldtype": "Section Break",
+   "label": "Select Endocrine Problem(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "addison_disease",
+   "fieldtype": "Check",
+   "label": "Addison's disease"
+  },
+  {
+   "default": "0",
+   "fieldname": "autoimmune_hypothyroidism",
+   "fieldtype": "Check",
+   "label": "Autoimmune hypothyroidism"
+  },
+  {
+   "default": "0",
+   "fieldname": "cushings_syndrome",
+   "fieldtype": "Check",
+   "label": "Cushing's syndrome"
+  },
+  {
+   "default": "0",
+   "fieldname": "diabetes_type_1",
+   "fieldtype": "Check",
+   "label": "Diabetes type 1"
+  },
+  {
+   "default": "0",
+   "fieldname": "diabetes_type_2",
+   "fieldtype": "Check",
+   "label": "Diabetes type 2"
+  },
+  {
+   "default": "0",
+   "fieldname": "endocrine_disease",
+   "fieldtype": "Check",
+   "label": "Endocrine disease"
+  },
+  {
+   "default": "0",
+   "fieldname": "gestational_diabetes",
+   "fieldtype": "Check",
+   "label": "Gestational diabetes"
+  },
+  {
+   "fieldname": "column_break_llnd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "hyperthyroidism_current",
+   "fieldtype": "Check",
+   "label": "Hyperthyroidism - current"
+  },
+  {
+   "default": "0",
+   "fieldname": "hyperthyroidism",
+   "fieldtype": "Check",
+   "label": "Hyperthyroidism in past"
+  },
+  {
+   "default": "0",
+   "fieldname": "hypothyroidism",
+   "fieldtype": "Check",
+   "label": "Hypothyroidism"
+  },
+  {
+   "default": "0",
+   "fieldname": "pituitary_disorder",
+   "fieldtype": "Check",
+   "label": "Pituitary disorder"
+  },
+  {
+   "default": "0",
+   "fieldname": "posysn",
+   "fieldtype": "Check",
+   "label": "Polycystic ovarian syndrome (PCOS)"
+  },
+  {
+   "default": "0",
+   "fieldname": "endocothr",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "section_break_socg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "neuro_prd",
+   "fieldtype": "Select",
+   "label": "27. Have you had fits, epilepsy or neurological problems?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.neuro_prd==\"Yes\"",
+   "fieldname": "neuro_prd_opt",
+   "fieldtype": "Section Break",
+   "label": "Select Neurological Problem(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "adhd__add",
+   "fieldtype": "Check",
+   "label": "ADHD / ADD"
+  },
+  {
+   "default": "0",
+   "fieldname": "asd",
+   "fieldtype": "Check",
+   "label": "Autism Spectrum Disorder (ASD)"
+  },
+  {
+   "default": "0",
+   "fieldname": "cerebral_palsy",
+   "fieldtype": "Check",
+   "label": "Cerebral palsy"
+  },
+  {
+   "default": "0",
+   "fieldname": "cfs",
+   "fieldtype": "Check",
+   "label": "Chronic fatigue syndrome"
+  },
+  {
+   "default": "0",
+   "fieldname": "enm",
+   "fieldtype": "Check",
+   "label": "Epilepsy no medication"
+  },
+  {
+   "default": "0",
+   "fieldname": "erm",
+   "fieldtype": "Check",
+   "label": "Epilepsy requires medication"
+  },
+  {
+   "default": "0",
+   "fieldname": "multiple_sclerosis",
+   "fieldtype": "Check",
+   "label": "Multiple sclerosis"
+  },
+  {
+   "default": "0",
+   "fieldname": "myotonic_dystrophy",
+   "fieldtype": "Check",
+   "label": "Myotonic dystrophy"
+  },
+  {
+   "default": "0",
+   "fieldname": "neuropathy",
+   "fieldtype": "Check",
+   "label": "Neuropathy"
+  },
+  {
+   "fieldname": "column_break_pqxa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "psh",
+   "fieldtype": "Check",
+   "label": "Previous subarachnoid haemorrhage"
+  },
+  {
+   "default": "0",
+   "fieldname": "stroke",
+   "fieldtype": "Check",
+   "label": "Stroke"
+  },
+  {
+   "default": "0",
+   "fieldname": "fne",
+   "fieldtype": "Check",
+   "label": "Fits not epilepsy"
+  },
+  {
+   "default": "0",
+   "fieldname": "migraine",
+   "fieldtype": "Check",
+   "label": "Migraine"
+  },
+  {
+   "default": "0",
+   "fieldname": "migrain_severe",
+   "fieldtype": "Check",
+   "label": "Migraine - severe"
+  },
+  {
+   "default": "0",
+   "fieldname": "neuromuscular_disorder",
+   "fieldtype": "Check",
+   "label": "Neuromuscular disorder"
+  },
+  {
+   "default": "0",
+   "fieldname": "spina_bifida",
+   "fieldtype": "Check",
+   "label": "Spina bifida"
+  },
+  {
+   "default": "0",
+   "fieldname": "nuero_prb_othr",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "section_break_grix",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "auto_dis",
+   "fieldtype": "Select",
+   "label": "28. Is there any history of autoimmune disease?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.auto_dis==\"Yes\"",
+   "fieldname": "auto_dis_opt",
+   "fieldtype": "Section Break",
+   "label": "Select Autoimmune Disease(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "gestational_pemphigoid",
+   "fieldtype": "Check",
+   "label": "Gestational pemphigoid"
+  },
+  {
+   "default": "0",
+   "fieldname": "myasthenia_gravis",
+   "fieldtype": "Check",
+   "label": "Myasthenia Gravis"
+  },
+  {
+   "default": "0",
+   "fieldname": "psoriasis",
+   "fieldtype": "Check",
+   "label": "Psoriasis"
+  },
+  {
+   "default": "0",
+   "fieldname": "rheumatoid_arthritis",
+   "fieldtype": "Check",
+   "label": "Rheumatoid arthritis"
+  },
+  {
+   "default": "0",
+   "fieldname": "systemic_sclerosis",
+   "fieldtype": "Check",
+   "label": "Systemic sclerosis"
+  },
+  {
+   "default": "0",
+   "fieldname": "autodis_othe",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "column_break_dflm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "sclerosis",
+   "fieldtype": "Check",
+   "label": "Multiple sclerosis"
+  },
+  {
+   "default": "0",
+   "fieldname": "pernicious_anaemia",
+   "fieldtype": "Check",
+   "label": "Pernicious anaemia"
+  },
+  {
+   "default": "0",
+   "fieldname": "psoriatic_arthropathy",
+   "fieldtype": "Check",
+   "label": "Psoriatic arthropathy"
+  },
+  {
+   "default": "0",
+   "fieldname": "syst_lup_eryth",
+   "fieldtype": "Check",
+   "label": "Systemic lupus erythematous"
+  },
+  {
+   "default": "0",
+   "fieldname": "vitiligo",
+   "fieldtype": "Check",
+   "label": "Vitiligo"
+  },
+  {
+   "fieldname": "section_break_cexi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "infection",
+   "fieldtype": "Select",
+   "label": "29. Have you had any of the following infections?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.infection==\"Yes\"",
+   "fieldname": "infection_opt",
+   "fieldtype": "Section Break",
+   "label": "Select Infection(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "no",
+   "fieldtype": "Check",
+   "label": "No"
+  },
+  {
+   "default": "0",
+   "fieldname": "confidential_information",
+   "fieldtype": "Check",
+   "label": "Confidential information"
+  },
+  {
+   "default": "0",
+   "fieldname": "candida",
+   "fieldtype": "Check",
+   "label": "Candida"
+  },
+  {
+   "default": "0",
+   "fieldname": "c_difficile",
+   "fieldtype": "Check",
+   "label": "C Difficile"
+  },
+  {
+   "default": "0",
+   "fieldname": "chlamydia",
+   "fieldtype": "Check",
+   "label": "Chlamydia"
+  },
+  {
+   "default": "0",
+   "fieldname": "cytomegalovirus",
+   "fieldtype": "Check",
+   "label": "Cytomegalovirus"
+  },
+  {
+   "default": "0",
+   "fieldname": "genital_herpes",
+   "fieldtype": "Check",
+   "label": "Genital herpes"
+  },
+  {
+   "default": "0",
+   "fieldname": "genital_warts",
+   "fieldtype": "Check",
+   "label": "Genital warts"
+  },
+  {
+   "default": "0",
+   "fieldname": "glandular_fever",
+   "fieldtype": "Check",
+   "label": "Glandular fever"
+  },
+  {
+   "default": "0",
+   "fieldname": "gonorrhoea",
+   "fieldtype": "Check",
+   "label": "Gonorrhoea"
+  },
+  {
+   "default": "0",
+   "fieldname": "covid19m6",
+   "fieldtype": "Check",
+   "label": "Covid 19 in the last 6 months"
+  },
+  {
+   "default": "0",
+   "fieldname": "covid196m",
+   "fieldtype": "Check",
+   "label": "Covid 19 more than 6 months ago"
+  },
+  {
+   "fieldname": "column_break_nsat",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "groupb",
+   "fieldtype": "Check",
+   "label": "Group B streptococcus"
+  },
+  {
+   "default": "0",
+   "fieldname": "hiv",
+   "fieldtype": "Check",
+   "label": "Human immunodeficiency virus"
+  },
+  {
+   "default": "0",
+   "fieldname": "habite",
+   "fieldtype": "Check",
+   "label": "Habite"
+  },
+  {
+   "default": "0",
+   "fieldname": "meningitis",
+   "fieldtype": "Check",
+   "label": "Meningitis"
+  },
+  {
+   "default": "0",
+   "fieldname": "mrsa",
+   "fieldtype": "Check",
+   "label": "MRSA"
+  },
+  {
+   "default": "0",
+   "fieldname": "parvovirus",
+   "fieldtype": "Check",
+   "label": "Parvovirus"
+  },
+  {
+   "default": "0",
+   "fieldname": "polio",
+   "fieldtype": "Check",
+   "label": "Polio"
+  },
+  {
+   "default": "0",
+   "fieldname": "rubella",
+   "fieldtype": "Check",
+   "label": "Rubella"
+  },
+  {
+   "default": "0",
+   "fieldname": "syphilis",
+   "fieldtype": "Check",
+   "label": "Syphilis"
+  },
+  {
+   "default": "0",
+   "fieldname": "toxoplasmosis",
+   "fieldtype": "Check",
+   "label": "Toxoplasmosis"
+  },
+  {
+   "default": "0",
+   "fieldname": "tropical_disease",
+   "fieldtype": "Check",
+   "label": "Tropical disease"
+  },
+  {
+   "default": "0",
+   "fieldname": "infectothr",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "section_break_lzuu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "fert_tre",
+   "fieldtype": "Select",
+   "label": "30. Was this pregnancy a result of fertility treatment?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.fert_tre==\"Yes\"",
+   "fieldname": "fert_tre_opt",
+   "fieldtype": "Section Break",
+   "label": "Select Fertility Treatment"
+  },
+  {
+   "default": "0",
+   "fieldname": "fert_no",
+   "fieldtype": "Check",
+   "label": "No"
+  },
+  {
+   "default": "0",
+   "fieldname": "artif_insemin",
+   "fieldtype": "Check",
+   "label": "Artificial insemination by partner"
+  },
+  {
+   "default": "0",
+   "fieldname": "clomiphene",
+   "fieldtype": "Check",
+   "label": "Clomiphene"
+  },
+  {
+   "default": "0",
+   "fieldname": "icsi_own_egg",
+   "fieldtype": "Check",
+   "label": "ICSI (own egg)"
+  },
+  {
+   "default": "0",
+   "fieldname": "iui",
+   "fieldtype": "Check",
+   "label": "Intrauterine insemination (IUI)"
+  },
+  {
+   "default": "0",
+   "fieldname": "ivf_donar_egg",
+   "fieldtype": "Check",
+   "label": "In vitro fertilisation (IVF) (donor egg)"
+  },
+  {
+   "default": "0",
+   "fieldname": "pergonal_or_metrodin",
+   "fieldtype": "Check",
+   "label": "Pergonal or Metrodin"
+  },
+  {
+   "default": "0",
+   "fieldname": "surrogate_pregnancy",
+   "fieldtype": "Check",
+   "label": "Surrogate pregnancy"
+  },
+  {
+   "default": "0",
+   "fieldname": "yes_not_wish",
+   "fieldtype": "Check",
+   "label": "Yes, but does not wish to discuss"
+  },
+  {
+   "fieldname": "column_break_mije",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "aibd",
+   "fieldtype": "Check",
+   "label": "Artificial insemination by donor"
+  },
+  {
+   "default": "0",
+   "fieldname": "bpdi",
+   "fieldtype": "Check",
+   "label": "Became pregnant during investigations"
+  },
+  {
+   "default": "0",
+   "fieldname": "gift",
+   "fieldtype": "Check",
+   "label": "GIFT"
+  },
+  {
+   "default": "0",
+   "fieldname": "icsi_donor_egg",
+   "fieldtype": "Check",
+   "label": "ICSI (donor egg)"
+  },
+  {
+   "default": "0",
+   "fieldname": "ivf_own_egg",
+   "fieldtype": "Check",
+   "label": "In vitro fertilization (IVF) (own egg)"
+  },
+  {
+   "default": "0",
+   "fieldname": "hgc",
+   "fieldtype": "Check",
+   "label": "Human chorionic gonadotrophin (hCG)"
+  },
+  {
+   "default": "0",
+   "fieldname": "reversal_of_sterilisation",
+   "fieldtype": "Check",
+   "label": "Reversal of sterilisation"
+  },
+  {
+   "default": "0",
+   "fieldname": "tubal_surgery",
+   "fieldtype": "Check",
+   "label": "Tubal surgery"
+  },
+  {
+   "default": "0",
+   "fieldname": "fertiother",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "section_break_lgwp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "lmp",
+   "fieldtype": "Date",
+   "label": "31. What is the LMP?"
+  },
+  {
+   "fieldname": "column_break_yopx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lmpopt",
+   "fieldtype": "Select",
+   "label": "Select LMP Option",
+   "options": "Date unknown\nNone since last pregnancy\nNone since stopping contraception"
+  },
+  {
+   "fieldname": "section_break_plfv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "preg",
+   "fieldtype": "Select",
+   "label": "32. Has there been any vaginal bleeding during pregnancy?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "section_break_wplj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "med_dur_preg",
+   "fieldtype": "Select",
+   "label": "33. Have you taken any medication during this pregnancy?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.med_dur_preg==\"Yes\"",
+   "fieldname": "preg_opt",
+   "fieldtype": "Section Break",
+   "label": "Select Medication(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "medinone",
+   "fieldtype": "Check",
+   "label": "None"
+  },
+  {
+   "default": "0",
+   "fieldname": "analgesics",
+   "fieldtype": "Check",
+   "label": "Analgesics"
+  },
+  {
+   "default": "0",
+   "fieldname": "antacids",
+   "fieldtype": "Check",
+   "label": "Antacids"
+  },
+  {
+   "default": "0",
+   "fieldname": "antibiotics",
+   "fieldtype": "Check",
+   "label": "Antibiotics"
+  },
+  {
+   "default": "0",
+   "fieldname": "antid",
+   "fieldtype": "Check",
+   "label": "Anti D (Date given, Dose given)"
+  },
+  {
+   "default": "0",
+   "fieldname": "antidepressants",
+   "fieldtype": "Check",
+   "label": "Antidepressants"
+  },
+  {
+   "default": "0",
+   "fieldname": "antihypertensives",
+   "fieldtype": "Check",
+   "label": "Antihypertensives"
+  },
+  {
+   "default": "0",
+   "fieldname": "oncology_drugs",
+   "fieldtype": "Check",
+   "label": "Oncology drugs"
+  },
+  {
+   "default": "0",
+   "fieldname": "vitamind",
+   "fieldtype": "Check",
+   "label": "Vitamin D (recommended)"
+  },
+  {
+   "fieldname": "column_break_cqdp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "asthma_drugs",
+   "fieldtype": "Check",
+   "label": "Asthma drugs"
+  },
+  {
+   "default": "0",
+   "fieldname": "aspirin",
+   "fieldtype": "Check",
+   "label": "Aspirin"
+  },
+  {
+   "default": "0",
+   "fieldname": "insulin",
+   "fieldtype": "Check",
+   "label": "Insulin"
+  },
+  {
+   "default": "0",
+   "fieldname": "levothyroxine",
+   "fieldtype": "Check",
+   "label": "Levothyroxine"
+  },
+  {
+   "default": "0",
+   "fieldname": "lithium",
+   "fieldtype": "Check",
+   "label": "Lithium"
+  },
+  {
+   "default": "0",
+   "fieldname": "multivitamins",
+   "fieldtype": "Check",
+   "label": "Multivitamins"
+  },
+  {
+   "default": "0",
+   "fieldname": "oral_hypoglycemics",
+   "fieldtype": "Check",
+   "label": "Oral hypoglycemics"
+  },
+  {
+   "default": "0",
+   "fieldname": "roaccutane",
+   "fieldtype": "Check",
+   "label": "Roaccutane"
+  },
+  {
+   "default": "0",
+   "fieldname": "med_opthrt",
+   "fieldtype": "Check",
+   "label": "Other "
+  },
+  {
+   "fieldname": "specify_other_medication",
+   "fieldtype": "Small Text",
+   "label": "Specify other medication"
+  },
+  {
+   "fieldname": "section_break_flrs",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "smoked",
+   "fieldtype": "Select",
+   "label": "34. Has the woman ever smoked?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_obch",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "co_ppm",
+   "fieldtype": "Int",
+   "label": "35. What is the CO reading at booking (ppm)?"
+  },
+  {
+   "default": "0",
+   "fieldname": "not_taken",
+   "fieldtype": "Check",
+   "label": "Not taken"
+  },
+  {
+   "fieldname": "column_break_okif",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hou_smok",
+   "fieldtype": "Select",
+   "label": "36. Does anyone else in the household smoke?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_rfdi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "alco_wek",
+   "fieldtype": "Int",
+   "label": "37. How many units of alcohol per week are consumed now?"
+  },
+  {
+   "default": "0",
+   "fieldname": "none",
+   "fieldtype": "Check",
+   "label": "None"
+  },
+  {
+   "fieldname": "section_break_iuhq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sub_preg",
+   "fieldtype": "Select",
+   "label": "38. Did the woman use any substance before pregnancy?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.sub_preg==\"Yes\"",
+   "fieldname": "sub_preg_opt",
+   "fieldtype": "Section Break",
+   "label": "Select Substance(s)"
+  },
+  {
+   "default": "0",
+   "fieldname": "never_used",
+   "fieldtype": "Check",
+   "label": "Never used"
+  },
+  {
+   "default": "0",
+   "fieldname": "declined_to_answer",
+   "fieldtype": "Check",
+   "label": "Declined to answer"
+  },
+  {
+   "default": "0",
+   "fieldname": "acid",
+   "fieldtype": "Check",
+   "label": "Acid"
+  },
+  {
+   "default": "0",
+   "fieldname": "amphetamines",
+   "fieldtype": "Check",
+   "label": "Amphetamines"
+  },
+  {
+   "default": "0",
+   "fieldname": "cannabis",
+   "fieldtype": "Check",
+   "label": "Cannabis"
+  },
+  {
+   "default": "0",
+   "fieldname": "cocaine",
+   "fieldtype": "Check",
+   "label": "Cocaine"
+  },
+  {
+   "default": "0",
+   "fieldname": "crack",
+   "fieldtype": "Check",
+   "label": "Crack"
+  },
+  {
+   "default": "0",
+   "fieldname": "lighter_fuel",
+   "fieldtype": "Check",
+   "label": "Lighter fuel"
+  },
+  {
+   "default": "0",
+   "fieldname": "methadone",
+   "fieldtype": "Check",
+   "label": "Methadone"
+  },
+  {
+   "default": "0",
+   "fieldname": "subutex",
+   "fieldtype": "Check",
+   "label": "Subutex"
+  },
+  {
+   "default": "0",
+   "fieldname": "subothr",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "column_break_dyyh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "crystal_meth",
+   "fieldtype": "Check",
+   "label": "Crystal meth"
+  },
+  {
+   "default": "0",
+   "fieldname": "diazepam",
+   "fieldtype": "Check",
+   "label": "Diazepam"
+  },
+  {
+   "default": "0",
+   "fieldname": "ecstasy",
+   "fieldtype": "Check",
+   "label": "Ecstasy"
+  },
+  {
+   "default": "0",
+   "fieldname": "glue",
+   "fieldtype": "Check",
+   "label": "Glue"
+  },
+  {
+   "default": "0",
+   "fieldname": "heroin",
+   "fieldtype": "Check",
+   "label": "Heroin"
+  },
+  {
+   "default": "0",
+   "fieldname": "ketamine",
+   "fieldtype": "Check",
+   "label": "Ketamine"
+  },
+  {
+   "default": "0",
+   "fieldname": "khat",
+   "fieldtype": "Check",
+   "label": "Khat"
+  },
+  {
+   "default": "0",
+   "fieldname": "lsd",
+   "fieldtype": "Check",
+   "label": "LSD"
+  },
+  {
+   "default": "0",
+   "fieldname": "speed",
+   "fieldtype": "Check",
+   "label": "Speed"
+  },
+  {
+   "default": "0",
+   "fieldname": "temazepam",
+   "fieldtype": "Check",
+   "label": "Temazepam"
+  },
+  {
+   "fieldname": "section_break_kjgw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "wom_hg",
+   "fieldtype": "Float",
+   "label": "39. What is the woman's height? (m)"
+  },
+  {
+   "default": "0",
+   "fieldname": "not_performed",
+   "fieldtype": "Check",
+   "label": "Not performed"
+  },
+  {
+   "fieldname": "column_break_cgja",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wom_wg",
+   "fieldtype": "Float",
+   "label": "40. What was the woman's weight at booking? (kg)"
+  },
+  {
+   "default": "0",
+   "fieldname": "not_weighed",
+   "fieldtype": "Check",
+   "label": "Not weighed"
+  },
+  {
+   "fieldname": "column_break_fcmn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wom_blod_pres",
+   "fieldtype": "Float",
+   "label": "41. What was the woman's blood pressure at booking?"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_perf",
+   "fieldtype": "Check",
+   "label": "Not performed"
+  },
+  {
+   "fieldname": "section_break_ymmp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "abnor_scn",
+   "fieldtype": "Select",
+   "label": "42. Was an abnormality detected at the anomaly scan?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.abnor_scn==\"Yes\"",
+   "fieldname": "abnor_scn_opt",
+   "fieldtype": "Section Break",
+   "label": "Select Abnormality Detected"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_abnor",
+   "fieldtype": "Check",
+   "label": "No abnormality detected"
+  },
+  {
+   "default": "0",
+   "fieldname": "bra",
+   "fieldtype": "Check",
+   "label": "Bilateral renal agenesis"
+  },
+  {
+   "default": "0",
+   "fieldname": "diaphragmatic_hernia",
+   "fieldtype": "Check",
+   "label": "Diaphragmatic hernia"
+  },
+  {
+   "default": "0",
+   "fieldname": "gastroschisis",
+   "fieldtype": "Check",
+   "label": "Gastroschisis"
+  },
+  {
+   "default": "0",
+   "fieldname": "osb",
+   "fieldtype": "Check",
+   "label": "Open spina bifida"
+  },
+  {
+   "default": "0",
+   "fieldname": "trisomy_13",
+   "fieldtype": "Check",
+   "label": "Trisomy 13"
+  },
+  {
+   "default": "0",
+   "fieldname": "admonr_other",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "column_break_qnno",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "anencephaly",
+   "fieldtype": "Check",
+   "label": "Anencephaly"
+  },
+  {
+   "default": "0",
+   "fieldname": "cleft_lip",
+   "fieldtype": "Check",
+   "label": "Cleft lip"
+  },
+  {
+   "default": "0",
+   "fieldname": "exomphalos",
+   "fieldtype": "Check",
+   "label": "Exomphalos"
+  },
+  {
+   "default": "0",
+   "fieldname": "lethal_sket_dys",
+   "fieldtype": "Check",
+   "label": "Lethal skeletal dysplasia"
+  },
+  {
+   "default": "0",
+   "fieldname": "sca",
+   "fieldtype": "Check",
+   "label": "Serious cardiac abnormality"
+  },
+  {
+   "default": "0",
+   "fieldname": "trisomy_18",
+   "fieldtype": "Check",
+   "label": "Trisomy 18"
+  },
+  {
+   "fieldname": "section_break_tfwq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "gr_res_prb",
+   "fieldtype": "Select",
+   "label": "43. At Booking are there any known risk factors for fetal growth restriction, or stillbirth?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.gr_res_prb==\"Yes\"",
+   "fieldname": "gr_res_prb_opt",
+   "fieldtype": "Section Break",
+   "label": "Select FGR Risk Factors"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_risk",
+   "fieldtype": "Check",
+   "label": "No risk factors identified"
+  },
+  {
+   "default": "0",
+   "fieldname": "antiphospholipid",
+   "fieldtype": "Check",
+   "label": "Antiphospholipid"
+  },
+  {
+   "default": "0",
+   "fieldname": "afa",
+   "fieldtype": "Check",
+   "label": "AFA - Significant"
+  },
+  {
+   "default": "0",
+   "fieldname": "chronic_hypertension",
+   "fieldtype": "Check",
+   "label": "Chronic Hypertension"
+  },
+  {
+   "default": "0",
+   "fieldname": "chronic_rental",
+   "fieldtype": "Check",
+   "label": "Chronic renal failure"
+  },
+  {
+   "default": "0",
+   "fieldname": "drug_misuse",
+   "fieldtype": "Check",
+   "label": "Drug misuse"
+  },
+  {
+   "default": "0",
+   "fieldname": "bpn",
+   "fieldtype": "Check",
+   "label": "BPN <10th centile this pregnancy"
+  },
+  {
+   "default": "0",
+   "fieldname": "feb",
+   "fieldtype": "Check",
+   "label": "Fetal echogenic bowel"
+  },
+  {
+   "default": "0",
+   "fieldname": "fgrtp",
+   "fieldtype": "Check",
+   "label": "Fetal growth restriction this pregnancy"
+  },
+  {
+   "default": "0",
+   "fieldname": "hdtp",
+   "fieldtype": "Check",
+   "label": "Hypertensive disease this pregnancy"
+  },
+  {
+   "default": "0",
+   "fieldname": "hdpp",
+   "fieldtype": "Check",
+   "label": "Hypertensive disease, prev. pregnancy"
+  },
+  {
+   "fieldname": "column_break_iazy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "mat_age",
+   "fieldtype": "Check",
+   "label": "Maternal Age >40yrs at booking"
+  },
+  {
+   "default": "0",
+   "fieldname": "med_condi",
+   "fieldtype": "Check",
+   "label": "Medical conditions - high FGR risk (diabetes etc)"
+  },
+  {
+   "default": "0",
+   "fieldname": "stillbirth_sga",
+   "fieldtype": "Check",
+   "label": "Prev. stillbirth - SGA"
+  },
+  {
+   "default": "0",
+   "fieldname": "psab",
+   "fieldtype": "Check",
+   "label": "Prev stillbirth - appropriate gest. birthweight"
+  },
+  {
+   "default": "0",
+   "fieldname": "pre_sga",
+   "fieldtype": "Check",
+   "label": "Prev stillbirth - SGA"
+  },
+  {
+   "default": "0",
+   "fieldname": "red_preg",
+   "fieldtype": "Check",
+   "label": "Reduced P(I) this pregnancy"
+  },
+  {
+   "default": "0",
+   "fieldname": "suasb",
+   "fieldtype": "Check",
+   "label": "Significant Uterine anomalies (septate, bicornuate)"
+  },
+  {
+   "default": "0",
+   "fieldname": "smoking_at_booking",
+   "fieldtype": "Check",
+   "label": "Smoking at booking"
+  },
+  {
+   "default": "0",
+   "fieldname": "ufsfim",
+   "fieldtype": "Check",
+   "label": "Unsuitable for SFl monitoring i.e. BMI >35"
+  },
+  {
+   "default": "0",
+   "fieldname": "frg_othr",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "default": "0",
+   "fieldname": "pappa",
+   "fieldtype": "Check",
+   "label": "Low PAPP-A"
+  },
+  {
+   "fieldname": "section_break_llir",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "fdr",
+   "fieldtype": "Select",
+   "label": "44. What is the FGR risk status at booking?",
+   "options": "High\nLow\nOther - significant uterine anomalies\nOther - unsuitable for SFH"
+  },
+  {
+   "fieldname": "section_break_pels",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "pre_tr_birth",
+   "fieldtype": "Select",
+   "label": "45. At booking are there any known risk factors for pre-term birth?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.pre_tr_birth==\"Yes\"",
+   "fieldname": "pre_tr_birth_opt",
+   "fieldtype": "Section Break",
+   "label": "Select Pre-term Birth Risk Factors"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_risk_pre",
+   "fieldtype": "Check",
+   "label": "No risks identified"
+  },
+  {
+   "default": "0",
+   "fieldname": "cbir",
+   "fieldtype": "Check",
+   "label": "Cone Biopsy (Knife or Lazer typically) (IR)"
+  },
+  {
+   "default": "0",
+   "fieldname": "hotfcc",
+   "fieldtype": "Check",
+   "label": "H/O trachelectomy for cervical cancer (HR)"
+  },
+  {
+   "default": "0",
+   "fieldname": "lletz",
+   "fieldtype": "Check",
+   "label": "LLETZ > 10mm depth removed (IR)"
+  },
+  {
+   "default": "0",
+   "fieldname": "mul_preg",
+   "fieldtype": "Check",
+   "label": "Multiple Pregnancy (Needs multiple preg. ANC ref)"
+  },
+  {
+   "default": "0",
+   "fieldname": "prev_aila",
+   "fieldtype": "Check",
+   "label": "Previous c/s at full dilatation (IR)"
+  },
+  {
+   "default": "0",
+   "fieldname": "prev_preterm",
+   "fieldtype": "Check",
+   "label": "Prev. preterm prelabour SROM <34wks (IR)"
+  },
+  {
+   "fieldname": "column_break_twuu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "lletz_prev",
+   "fieldtype": "Check",
+   "label": "LLETZ unknown depth"
+  },
+  {
+   "default": "0",
+   "fieldname": "hosceehr",
+   "fieldtype": "Check",
+   "label": "H/O significant cervical excisional event (HR)"
+  },
+  {
+   "default": "0",
+   "fieldname": "intr_adhe_syndro",
+   "fieldtype": "Check",
+   "label": "Intrauterine adhesions (Ashermann's syndrome) (HR)"
+  },
+  {
+   "default": "0",
+   "fieldname": "lletz_ir",
+   "fieldtype": "Check",
+   "label": "LLETZ 2 or more procedures (IR)"
+  },
+  {
+   "default": "0",
+   "fieldname": "prev_cerv_cercl",
+   "fieldtype": "Check",
+   "label": "Prev. cervical cerclage (HR)"
+  },
+  {
+   "default": "0",
+   "fieldname": "prev_pre_birth",
+   "fieldtype": "Check",
+   "label": "Prev. preterm birth 16-34wks (HR)"
+  },
+  {
+   "default": "0",
+   "fieldname": "uterine_variant",
+   "fieldtype": "Check",
+   "label": "Uterine variant (HR) (Bicornuate etc)"
+  },
+  {
+   "fieldname": "section_break_fhee",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "asssris",
+   "fieldtype": "Select",
+   "label": "46. Has an Aspirin Risk Assessment been completed at booking?",
+   "options": "Yes - aspirin required, prescribed today\nYes - aspirin required but NOT prescribed\nYes - aspirin required, GP to prescribe\nYes - aspirin not required\nAssessment not completed"
+  },
+  {
+   "fieldname": "column_break_hdxa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dvit",
+   "fieldtype": "Select",
+   "label": "47. Has Vitamin D been recommended?",
+   "options": "Yes - standard dose recommended\nNo - state reason"
+  },
+  {
+   "fieldname": "column_break_aidj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sep",
+   "fieldtype": "Select",
+   "label": "48. Maternal sepsis in labor?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "induction",
+   "fieldtype": "Section Break",
+   "label": "49.Induction of labor?"
+  },
+  {
+   "fieldname": "method",
+   "fieldtype": "Data",
+   "label": "Method"
+  },
+  {
+   "fieldname": "medication",
+   "fieldtype": "Data",
+   "label": "Medication"
+  },
+  {
+   "fieldname": "total_dose",
+   "fieldtype": "Int",
+   "label": "Total Dose"
+  },
+  {
+   "fieldname": "section_break_srxu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "rupt_mem",
+   "fieldtype": "Date",
+   "label": "50. Date and time of rupture of membranes"
+  },
+  {
+   "fieldname": "sme_liq",
+   "fieldtype": "Select",
+   "label": "52. Smell of liquor",
+   "options": "No smell\nOffensive smell"
+  },
+  {
+   "fieldname": "column_break_smuj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "liq_col",
+   "fieldtype": "Select",
+   "label": "51. Color of liquor",
+   "options": "Clear\nMeconium\nBlood stained\nPus"
+  },
+  {
+   "fieldname": "column_break_ypst",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "slw_prw",
+   "fieldtype": "Select",
+   "label": "53. Slow progress?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "epid",
+   "fieldtype": "Select",
+   "label": "54. Epidural?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "oxy_aug",
+   "fieldtype": "Section Break",
+   "label": "55. Oxytocin augmentation?"
+  },
+  {
+   "fieldname": "oxytocin_hr",
+   "fieldtype": "Int",
+   "label": "How many hours of oxytocin ?"
+  },
+  {
+   "fieldname": "section_break_pcjc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "ivf",
+   "fieldtype": "Select",
+   "label": "56. IVF Details",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.ivf==\"Yes\"",
+   "fieldname": "ivf_details_section",
+   "fieldtype": "Section Break",
+   "label": "IVF Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "own_fresh",
+   "fieldtype": "Check",
+   "label": "Own fresh embryos"
+  },
+  {
+   "default": "0",
+   "fieldname": "own_frozen",
+   "fieldtype": "Check",
+   "label": "Own frozen embryos"
+  },
+  {
+   "default": "0",
+   "fieldname": "donor_oocyte",
+   "fieldtype": "Check",
+   "label": "Donor oocyte"
+  },
+  {
+   "fieldname": "column_break_umap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "donar_age",
+   "fieldtype": "Int",
+   "label": "Age of donor, if known"
+  },
+  {
+   "default": "0",
+   "fieldname": "male_fact_indi",
+   "fieldtype": "Check",
+   "label": "Male factor indicated IVF?"
+  },
+  {
+   "default": "0",
+   "fieldname": "icsiimsi",
+   "fieldtype": "Check",
+   "label": "ICSI/IMSI"
+  },
+  {
+   "fieldname": "section_break_pyzv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "fev_lab",
+   "fieldtype": "Select",
+   "label": "57. Maternal fever in labor?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_ewik",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gyn_his",
+   "fieldtype": "Text",
+   "label": "58. Gynaecological history ?"
+  },
+  {
+   "fieldname": "column_break_kbes",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mat_cond",
+   "fieldtype": "Text",
+   "label": "59. Any other maternal condition?"
+  },
+  {
+   "fieldname": "column_break_uoci",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mat_lb",
+   "fieldtype": "Text",
+   "label": "60. Maternal medications in labor"
+  },
+  {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "Placental Variables"
+  },
+  {
+   "fieldname": "plac_path",
+   "fieldtype": "Select",
+   "label": "1. APLA Syndrome/Placental Pathology?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_lqji",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pre_ecla",
+   "fieldtype": "Select",
+   "label": "2. Previous/Current Pre-eclampsia?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_vjvv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "plac_abnor",
+   "fieldtype": "Select",
+   "label": "3. Placental Abnormality",
+   "options": "Calcified\nNone\nAbruption\nCalcified\nSmall Placenta\nTrue Knot in Cord\nAbnormal Placentation"
+  },
+  {
+   "fieldname": "foetal_tab",
+   "fieldtype": "Tab Break",
+   "label": "Foetal"
+  },
+  {
+   "fieldname": "iugr",
+   "fieldtype": "Select",
+   "label": "1. Current IUGR?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_qayn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "abnor_drop",
+   "fieldtype": "Select",
+   "label": "2. Abnormal Dopplers?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "3_multiple_pregnancy_details_section",
+   "fieldtype": "Section Break",
+   "label": "3. Multiple Pregnancy Details"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nTwins\nTriplets"
+  },
+  {
+   "fieldname": "chorionicity",
+   "fieldtype": "Select",
+   "label": "Chorionicity",
+   "options": "Dichorionic\nMonochorionic\nTrichorionic\nUnknown"
+  },
+  {
+   "fieldname": "zygosity",
+   "fieldtype": "Select",
+   "label": "Zygosity",
+   "options": "Monozygotic (Identical)\nDizygotic (Fraternal)\nUnknown"
+  },
+  {
+   "fieldname": "section_break_nfqh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "4_presentation",
+   "fieldtype": "Select",
+   "label": "4. Presentation",
+   "options": "Cephalic\nBreech\nTransverse\nOblique Lie\nOthers"
+  },
+  {
+   "fieldname": "column_break_dgni",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "birthweight",
+   "fieldtype": "Float",
+   "label": "5. Birth Weight (grams)"
+  },
+  {
+   "fieldname": "column_break_lrgy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "babys",
+   "fieldtype": "Select",
+   "label": "6. Baby's Sex",
+   "options": "Male\nFemale\nAmbiguous Genitalia"
+  },
+  {
+   "fieldname": "apgar",
+   "fieldtype": "Section Break",
+   "label": "7. APGAR Scores"
+  },
+  {
+   "fieldname": "min1",
+   "fieldtype": "Int",
+   "label": "1 Minute"
+  },
+  {
+   "fieldname": "min5",
+   "fieldtype": "Int",
+   "label": "5 Minute"
+  },
+  {
+   "fieldname": "min10",
+   "fieldtype": "Int",
+   "label": "10 Minute"
+  },
+  {
+   "fieldname": "section_break_jwrm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "oligohydra",
+   "fieldtype": "Select",
+   "label": "8. Oligohydramnios?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "modedelivery",
+   "fieldtype": "Section Break",
+   "label": "9. Mode of delivery"
+  },
+  {
+   "fieldname": "please_select",
+   "fieldtype": "Select",
+   "label": "Please Select",
+   "options": "Spontaneous\nInstrumental\nCaesarean section"
+  },
+  {
+   "fieldname": "indication",
+   "fieldtype": "Small Text",
+   "label": "Indication (if Caesarean)"
+  },
+  {
+   "fieldname": "section_break_acbr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "card_neck",
+   "fieldtype": "Select",
+   "label": "10. Cord around neck?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "neon_resus",
+   "fieldtype": "Small Text",
+   "label": "14. Neonatal resuscitation required?"
+  },
+  {
+   "fieldname": "column_break_qsix",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "plactal_abrupt",
+   "fieldtype": "Select",
+   "label": "11. Placental abruption?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "neonatal_malfun",
+   "fieldtype": "Small Text",
+   "label": "15. Suspected neonatal congenital malformations?"
+  },
+  {
+   "fieldname": "column_break_lrtg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "timendate",
+   "fieldtype": "Datetime",
+   "label": "12. Time and date of birth"
+  },
+  {
+   "fieldname": "neonatal_icu",
+   "fieldtype": "Small Text",
+   "label": "16. Neonatal ICU admission?"
+  },
+  {
+   "fieldname": "column_break_ikaj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "babycried",
+   "fieldtype": "Select",
+   "label": "13. Baby cried at birth?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "birth_related",
+   "fieldtype": "Small Text",
+   "label": "17. Any other birth related findings"
+  },
+  {
+   "fieldname": "cord_blood_tab",
+   "fieldtype": "Tab Break",
+   "label": "Cord Blood"
+  },
+  {
+   "fieldname": "arterial_section",
+   "fieldtype": "Section Break",
+   "label": "Arterial"
+  },
+  {
+   "fieldname": "ph",
+   "fieldtype": "Float",
+   "label": "pH",
+   "non_negative": 1,
+   "precision": "3"
+  },
+  {
+   "fieldname": "po2",
+   "fieldtype": "Float",
+   "label": "pO2"
+  },
+  {
+   "fieldname": "column_break_xkqh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "base_excess",
+   "fieldtype": "Float",
+   "label": "Base Excess"
+  },
+  {
+   "fieldname": "pco2",
+   "fieldtype": "Float",
+   "label": "pCO2"
+  },
+  {
+   "fieldname": "column_break_zozo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lactate",
+   "fieldtype": "Float",
+   "label": "Lactate"
+  },
+  {
+   "fieldname": "hco3",
+   "fieldtype": "Float",
+   "label": "HCO3"
+  },
+  {
+   "fieldname": "column_break_fhqn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "foetal_hb",
+   "fieldtype": "Float",
+   "label": "Foetal Hb"
+  },
+  {
+   "fieldname": "venous_section",
+   "fieldtype": "Section Break",
+   "label": "Venous"
+  },
+  {
+   "fieldname": "phv",
+   "fieldtype": "Float",
+   "label": "pH"
+  },
+  {
+   "fieldname": "po2v",
+   "fieldtype": "Float",
+   "label": "pO2"
+  },
+  {
+   "fieldname": "column_break_bfud",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "basev",
+   "fieldtype": "Float",
+   "label": "Base Excess",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "pco2v",
+   "fieldtype": "Float",
+   "label": "pCO2"
+  },
+  {
+   "fieldname": "column_break_ksww",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lactatev",
+   "fieldtype": "Float",
+   "label": "Lactate"
+  },
+  {
+   "fieldname": "hco3v",
+   "fieldtype": "Float",
+   "label": "HCO3"
+  },
+  {
+   "fieldname": "column_break_apxw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "foetalv",
+   "fieldtype": "Float",
+   "label": "Foetal Hb"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "series_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Series"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "MA-"
+  },
+  {
+   "fieldname": "attachments_tab",
+   "fieldtype": "Tab Break",
+   "label": "Attachments"
+  },
+  {
+   "fieldname": "section_break_xyyt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attachments",
+   "fieldtype": "Table",
+   "label": "Attachments",
+   "options": "Medical Assessment Attachment"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-12 11:57:33.436361",
+ "modified_by": "Administrator",
+ "module": "quantbit_ukui_customisation",
+ "name": "Medical Assessment",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "taruna.patil@erpdata.in",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
