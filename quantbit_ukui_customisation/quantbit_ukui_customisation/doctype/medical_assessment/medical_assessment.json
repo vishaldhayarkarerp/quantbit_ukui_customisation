@@ -14,6 +14,7 @@
   "column_break_nkne",
   "maternal_parity",
   "column_break_purf",
+  "patient_name",
   "column_break_xitu",
   "3_number_of_previous_pregnancies_section",
   "table_vtci",
@@ -3377,13 +3378,18 @@
    "fieldtype": "Table",
    "label": "Attachments",
    "options": "Medical Assessment Attachment"
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-12 11:57:33.436361",
- "modified_by": "Administrator",
+ "modified": "2026-02-19 12:48:25.299427",
+ "modified_by": "vishal.dhayarkar@erpdata.in",
  "module": "quantbit_ukui_customisation",
  "name": "Medical Assessment",
  "naming_rule": "By \"Naming Series\" field",

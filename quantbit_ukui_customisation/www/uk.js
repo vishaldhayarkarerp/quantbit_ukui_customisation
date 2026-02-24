@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // --- Test API Credentials Access ---
     debugCredentials(); // Debug credentials on page load
-    
+
     // --- Element Selectors ---
     const medicalForm = document.getElementById('medicalForm');
     const tabs = document.querySelectorAll('.tab-btn');
@@ -293,7 +293,39 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 for (let i = 1; i <= numPreg; i++) {
                     const row = document.createElement('tr');
-                    row.innerHTML = `<td class="p-2 border border-gray-600">${i}</td><td class="p-2 border border-gray-600"><input type="text" name="prev_preg_${i}_problems" class="form-input" placeholder="Specify problems"></td><td class="p-2 border border-gray-600"><select name="prev_preg_${i}_outcome" class="form-select"><option value="">Select</option><option value="Live Birth">Live Birth</option><option value="Stillbirth">Stillbirth</option><option value="Miscarriage">Miscarriage</option><option value="IUD">IUD</option><option value="Other">Other</option></select></td><td class="p-2 border border-gray-600"><select name="prev_preg_${i}_mode" class="form-select"><option value="">Select</option><option value="Vaginal">Vaginal</option><option value="C-Section">C-Section</option><option value="Instrumental">Instrumental</option><option value="Other">Other</option></select></td><td class="p-2 border border-gray-600"><input type="number" name="prev_preg_${i}_weight" class="form-input" placeholder="grams"></td><td class="p-2 border border-gray-600"><input type="number" name="prev_preg_${i}_ga" class="form-input" placeholder="weeks"></td>`;
+
+                    row.innerHTML = `
+                        <td class="p-2 border border-gray-600">${i}</td>
+                        <td class="p-2 border border-gray-600">
+                            <input type="text" name="prev_preg_${i}_problems" class="form-input" placeholder="Specify problems">
+                        </td>
+                        <td class="p-2 border border-gray-600">
+                            <select name="prev_preg_${i}_outcome" class="form-select">
+                                <option value="">Select</option>
+                                <option value="Live Birth">Live Birth</option>
+                                <option value="Stillbirth">Stillbirth</option>
+                                <option value="Miscarriage">Miscarriage</option>
+                                <option value="IUD">IUD</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </td>
+                        <td class="p-2 border border-gray-600">
+                            <select name="prev_preg_${i}_mode" class="form-select">
+                                <option value="">Select</option>
+                                <option value="Vaginal">Vaginal</option>
+                                <option value="C-Section">C-Section</option>
+                                <option value="Instrumental">Instrumental</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </td>
+                        <td class="p-2 border border-gray-600">
+                            <input type="number" name="prev_preg_${i}_weight" class="form-input" placeholder="grams">
+                        </td>
+                        <td class="p-2 border border-gray-600">
+                            <input type="number" name="prev_preg_${i}_ga" class="form-input" placeholder="weeks">
+                        </td>
+                    `;
+
                     previousPregnanciesTableBody.appendChild(row);
                 }
             }
@@ -424,39 +456,39 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('File upload manager:', fileUploadMgr);
             console.log('Files:', fileUploadMgr.files);
             console.log('First file:', file);
-            
+
             if (file) {
                 wpdIframe.style.display = 'block';
                 console.log('Showing iframe, loading file:', file.name);
                 console.log('Iframe src:', wpdIframe.src);
-                
+
                 // Wait for iframe to load before sending message
                 wpdIframe.onload = function() {
                     console.log('Iframe loaded successfully');
                     console.log('Iframe contentWindow:', wpdIframe.contentWindow);
                     console.log('Iframe readyState:', wpdIframe.contentWindow?.document?.readyState);
-                    
+
                     // Wait for WebPlotDigitizer to be fully initialized
                     const waitForWPD = setInterval(() => {
-                        if (wpdIframe.contentWindow && wpdIframe.contentWindow.wpd && 
+                        if (wpdIframe.contentWindow && wpdIframe.contentWindow.wpd &&
                             (wpdIframe.contentWindow.wpd.popup || wpdIframe.contentWindow.wpd.dataTable)) {
                             console.log('WebPlotDigitizer is fully initialized');
                             clearInterval(waitForWPD);
-                            
+
                             // Inject automation script into iframe
                             const script = document.createElement('script');
                             script.src = '/wpd_automation.js';
                             script.onload = function() {
                                 console.log('Automation script injected successfully');
-                                
+
                                 // Get the current record name from Frappe context
                                 let recordName = 'Unknown Document';
                                 if (typeof cur_frm !== 'undefined' && cur_frm && cur_frm.doc && cur_frm.doc.name) {
                                     recordName = cur_frm.doc.name;
                                 }
-                                
+
                                 console.log('Current record name:', recordName);
-                                
+
                                 // Send record name to iframe immediately after script loads
                                 setTimeout(() => {
                                     wpdIframe.contentWindow.postMessage({
@@ -464,21 +496,21 @@ document.addEventListener('DOMContentLoaded', function () {
                                         recordName: recordName
                                     }, '*');
                                     console.log('Record name sent to iframe:', recordName);
-                                    
+
                                     // Now send the image data
                                     setTimeout(() => {
                                         const reader = new FileReader();
                                         reader.onload = function(e) {
                                             console.log('File read complete, sending message with data');
                                             console.log('Message data size:', e.target.result.byteLength);
-                                            
+
                                             const messageData = {
                                                 action: 'loadImage',
                                                 name: file.name,
                                                 type: file.type,
                                                 arrayBuffer: e.target.result
                                             };
-                                            
+
                                             console.log('Message data structure:', {
                                                 action: messageData.action,
                                                 name: messageData.name,
@@ -486,11 +518,11 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 hasArrayBuffer: !!messageData.arrayBuffer,
                                                 arrayBufferSize: messageData.arrayBuffer.byteLength
                                             });
-                                            
+
                                             // Send message to iframe
                                             wpdIframe.contentWindow.postMessage(messageData, '*');
                                             console.log('Message sent to iframe');
-                                            
+
                                             // Also try to verify the message was received
                                             setTimeout(() => {
                                                 console.log('Checking if iframe received message...');
@@ -508,18 +540,18 @@ document.addEventListener('DOMContentLoaded', function () {
                             console.log('Waiting for WebPlotDigitizer to initialize...');
                         }
                     }, 500);
-                    
+
                     // Timeout after 30 seconds
                     setTimeout(() => {
                         clearInterval(waitForWPD);
                         console.error('WebPlotDigitizer failed to initialize within timeout');
                     }, 30000);
                 };
-                
+
                 wpdIframe.onerror = function() {
                     console.error('Iframe failed to load');
                 };
-                
+
                 // If iframe is already loaded, send message immediately
                 if (wpdIframe.contentWindow && wpdIframe.contentWindow.document.readyState === 'complete') {
                     console.log('Iframe already loaded, sending message immediately');
@@ -604,7 +636,7 @@ function debugCredentials() {
     // console.log('API_SECRET:', API_SECRET);
     // console.log('FRAPPE_API_BASE:', FRAPPE_API_BASE);
     // console.log('Current origin:', window.location.origin);
-    
+
     // Check if credentials are properly set
     if (!API_KEY || API_KEY === "" || API_KEY.length < 10) {
         console.error('API Key is not properly set or too short');
@@ -633,7 +665,7 @@ async function testApiCredentials() {
                 api_secret: API_SECRET
             })
         });
-        
+
         if (testResponse.ok) {
             const result = await testResponse.json();
             console.log('API credentials test result:', result);
@@ -1168,7 +1200,7 @@ async function uploadFile(file, apiKey, apiSecret, methodUrl) {
     const formData = new FormData();
     formData.append('file', file, file.name);
     formData.append('is_private', '0'); // 0 = Public, 1 = Private
-    
+
     try {
         // Note: The base URL for this MUST be root, not /api/resource
         const resp = await fetch(methodUrl + "/api/method/upload_file", {
@@ -1179,12 +1211,12 @@ async function uploadFile(file, apiKey, apiSecret, methodUrl) {
             credentials: 'include',
             body: formData
         });
-        
+
         if (!resp.ok) {
             const errorData = await resp.json().catch(() => ({}));
             throw new Error(errorData.message || 'File upload failed');
         }
-        
+
         const result = await resp.json();
         if (result.message && result.message.file_url) {
             return result.message.file_url; // This is the files/filename.jpg URL
@@ -1200,7 +1232,7 @@ async function uploadFile(file, apiKey, apiSecret, methodUrl) {
 async function saveToFrappe(formData) {
     try {
         showStatus('Saving data...', 'info');
-        
+
         // Debug credentials first
         if (!debugCredentials()) {
             throw new Error('API credentials are not properly configured. Please contact your administrator.');
@@ -1209,17 +1241,16 @@ async function saveToFrappe(formData) {
         // Extract attachments BEFORE JSON stringification (File objects can't be serialized)
         const attachments = formData.attachments || [];
         console.log('Extracted attachments before JSON conversion:', attachments.length, 'files');
-        
+
         // Remove attachments from formData before JSON conversion
         const formDataCopy = JSON.parse(JSON.stringify(formData));
         delete formDataCopy.attachments;
-        
+
         const payload = formDataCopy;
-        console.log("Payload:", payload);
 
         // First, save the main record without attachments
         console.log('Authorization header:', `token ${API_KEY}:${API_SECRET}`);
-        
+
         const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}`, {
             method: 'POST',
             headers: {
@@ -1261,13 +1292,13 @@ async function saveToFrappe(formData) {
 
         const result = await response.json();
         const recordName = result.data.name; // Get the name of the created record
-        
+
         console.log('Main record saved:', recordName);
-        
+
         // Store the record name globally for CSV attachment
         window.currentRecordName = recordName;
         console.log('Record name stored for CSV attachment:', window.currentRecordName);
-        
+
         // Update global record name in HTML context
         if (typeof globalRecordName !== 'undefined') {
             globalRecordName = recordName;
@@ -1284,11 +1315,11 @@ async function saveToFrappe(formData) {
                     if (file instanceof File) {
                         try {
                             console.log(`Processing file ${index + 1}:`, file.name, file.size);
-                            
+
                             // First upload the file
                             const fileUrl = await uploadFile(file, API_KEY, API_SECRET, FRAPPE_API_BASE.replace("/api/resource", ""));
                             console.log(`File uploaded successfully: ${file.name} -> ${fileUrl}`);
-                            
+
                             // Then create a File document linked to the main record
                             const fileDocPayload = {
                                 doctype: 'File',
@@ -1298,9 +1329,9 @@ async function saveToFrappe(formData) {
                                 attached_to_name: recordName,
                                 is_private: 0
                             };
-                            
+
                             console.log(`Creating File document with payload:`, JSON.stringify(fileDocPayload, null, 2));
-                            
+
                             const fileDocResponse = await fetch(`${FRAPPE_API_BASE.replace("/api/resource", "")}/api/resource/File`, {
                                 method: 'POST',
                                 headers: {
@@ -1321,7 +1352,7 @@ async function saveToFrappe(formData) {
                                 console.error(`Failed to attach file ${file.name}:`, fileDocResponse.status, fileDocResult);
                                 console.error(`Full error details:`, JSON.stringify(fileDocResult, null, 2));
                             }
-                            
+
                         } catch (err) {
                             console.error(`Failed to upload file: ${file.name}`, err);
                             // Continue with other files even if one fails
@@ -1336,7 +1367,7 @@ async function saveToFrappe(formData) {
         }
 
         showStatus('Data saved successfully!', 'success');
-        
+
         // Reset form after successful save
         // setTimeout(() => {
         //     medicalForm.reset();
@@ -1391,70 +1422,70 @@ class FileUploadManager {
         this.fileList = document.getElementById('fileList');
         this.maxFiles = 10; // Maximum number of files
         this.maxFileSize = 5 * 1024 * 1024; // 5MB per file
-        
+
         this.init();
     }
-    
+
     init() {
         if (this.fileInput && this.fileList) {
             this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
             this.renderFileList();
         }
     }
-    
+
     handleFileSelect(event) {
         const newFiles = Array.from(event.target.files);
-        
+
         // Check total file limit
         if (this.files.length + newFiles.length > this.maxFiles) {
             showStatus(`Maximum ${this.maxFiles} files allowed. You selected ${newFiles.length} files but already have ${this.files.length} files.`, 'error');
             return;
         }
-        
+
         // Validate and add files (accept all file types)
         let validFiles = [];
         let errors = [];
-        
+
         newFiles.forEach(file => {
             // Check file size only (no file type restrictions)
             if (file.size > this.maxFileSize) {
                 errors.push(`${file.name}: File size must be less than 5MB`);
                 return;
             }
-            
+
             // Check for duplicates
             if (this.files.some(existingFile => existingFile.name === file.name)) {
                 errors.push(`${file.name}: File already selected`);
                 return;
             }
-            
+
             validFiles.push(file);
         });
-        
+
         // Show errors if any
         if (errors.length > 0) {
             showStatus(errors.join(', '), 'error');
             return;
         }
-        
+
         // Add valid files
         if (validFiles.length > 0) {
             this.files.push(...validFiles);
             this.renderFileList();
             showStatus(`${validFiles.length} file(s) added successfully`, 'success');
         }
-        
+
         // Clear the input
         this.fileInput.value = '';
     }
-    
+
     removeFile(index) {
         const removedFile = this.files[index];
         this.files.splice(index, 1);
         this.renderFileList();
         showStatus(`${removedFile.name} removed`, 'info');
     }
-    
+
     formatFileSize(bytes) {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
@@ -1462,7 +1493,7 @@ class FileUploadManager {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
-    
+
     getFileIcon(fileName) {
         const extension = fileName.split('.').pop().toLowerCase();
         if (extension === 'pdf') {
@@ -1472,15 +1503,15 @@ class FileUploadManager {
         }
         return '📎';
     }
-    
+
     renderFileList() {
         if (!this.fileList) return;
-        
+
         if (this.files.length === 0) {
             this.fileList.innerHTML = '<div class="empty-file-list">No files selected</div>';
             return;
         }
-        
+
         const fileListHTML = `
             <div class="file-list">
                 ${this.files.map((file, index) => `
@@ -1502,14 +1533,14 @@ class FileUploadManager {
                 ${this.files.length} file(s) selected • Total size: ${this.formatFileSize(this.files.reduce((total, file) => total + file.size, 0))}
             </div>
         `;
-        
+
         this.fileList.innerHTML = fileListHTML;
     }
-    
+
     getFiles() {
         return this.files;
     }
-    
+
     clearFiles() {
         this.files = [];
         this.renderFileList();
@@ -1526,7 +1557,7 @@ window._fileUploadManager = fileUploadManager;
 // Update the form data collection to include files
 const originalCollectFormData = window.collectFormData;
 if (typeof originalCollectFormData === 'function') {
-    window.collectFormData = function() {
+    window.collectFormData = function () {
         const formData = originalCollectFormData();
         // Add files to the form data (they will be processed separately in saveToFrappe)
         formData.attachments = fileUploadManager.getFiles();
@@ -1534,7 +1565,7 @@ if (typeof originalCollectFormData === 'function') {
     };
 } else {
     // If collectFormData doesn't exist, create it
-    window.collectFormData = function() {
+    window.collectFormData = function () {
         const formData = {};
         // Add files to the form data (they will be processed separately in saveToFrappe)
         formData.attachments = fileUploadManager.getFiles();
@@ -1564,11 +1595,11 @@ if (resetBtnUpdated) {
 //         // Access the API credentials from the template context
 //         const apiKey = "{{ api_key }}";
 //         const apiSecret = "{{ api_secret }}";
-        
+
 //         // Log the credentials to console for testing
 //         console.log("API Key:", apiKey);
 //         console.log("API Secret:", apiSecret);
-        
+
 //         // You can use these credentials for API calls
 //         // Example:
 //         // fetch('https://your-api-endpoint.com/data', {

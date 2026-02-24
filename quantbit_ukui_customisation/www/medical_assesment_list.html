@@ -1,0 +1,187 @@
+{% if user == "Guest" %}
+<script>
+    window.location.href = "/login?redirect-to=/medical_assesment_list";
+</script>
+{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Assessment List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="medical_assesment_list.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen font-inter px-4 pb-4 md:px-8 md:pb-8 pt-0 md:pt-0 ">
+    <div class="container mx-auto">
+        <div class="header">
+            <h1>Medical Assessments</h1>
+        </div>
+
+        <div class="content-area">
+            <div class="filters-container mt-0">
+                <div class="filter-group">
+                    <label for="assessmentIdFilter" class="filter-label">Assessment ID</label>
+                    <input type="text" id="assessmentIdFilter" class="filter-input" placeholder="Search by ID...">
+                </div>
+                <div class="filter-group">
+                    <label for="patientNameFilter" class="filter-label">Patient Name</label>
+                    <input type="text" id="patientNameFilter" class="filter-input"
+                        placeholder="Search by patient name...">
+                </div>
+                <button id="applyFiltersBtn" class="btn-filter">Search</button>
+            </div>
+
+            <div id="loader" class="loader">
+                <div class="spinner"></div>
+            </div>
+
+            <div id="listContainer" class="list-container hidden">
+                <table class="assessment-table">
+                    <thead>
+                        <tr>
+                            <th>Assessment ID</th>
+                            <th>Patient Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assessmentTableBody">
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="pagination" class="pagination-container hidden">
+                <button id="prevBtn" class="btn-pagination" disabled>Previous</button>
+                <span id="pageInfo" class="page-info">Page 1</span>
+                <button id="nextBtn" class="btn-pagination">Next</button>
+            </div>
+
+            <div id="errorMessage"
+                class="hidden p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 text-center">
+                Failed to load assessments. Please try again later.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const pageSize = 10;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAssessments();
+
+            document.getElementById('applyFiltersBtn').addEventListener('click', () => {
+                currentPage = 1;
+                fetchAssessments();
+            });
+
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchAssessments();
+                }
+            });
+
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                currentPage++;
+                fetchAssessments();
+            });
+
+            // Allow enter key to trigger search
+            document.querySelectorAll('.filter-input').forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        currentPage = 1;
+                        fetchAssessments();
+                    }
+                });
+            });
+        });
+
+        async function fetchAssessments() {
+            const loader = document.getElementById('loader');
+            const listContainer = document.getElementById('listContainer');
+            const pagination = document.getElementById('pagination');
+            const errorMessage = document.getElementById('errorMessage');
+            const tableBody = document.getElementById('assessmentTableBody');
+
+            const assessmentId = document.getElementById('assessmentIdFilter').value;
+            const patientName = document.getElementById('patientNameFilter').value;
+
+            // Show loader, hide others
+            loader.classList.remove('hidden');
+            listContainer.classList.add('hidden');
+            pagination.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+
+            try {
+                const start = (currentPage - 1) * pageSize;
+                let url = `http://103.219.1.138:4426/api/resource/Medical%20Assessment?order_by=modified%20desc&fields=["name","patient_name","modified"]&limit_start=${start}&limit_page_length=${pageSize}`;
+
+                let filters = [];
+                if (assessmentId) {
+                    filters.push(["name", "like", `%${assessmentId}%`]);
+                }
+                if (patientName) {
+                    filters.push(["patient_name", "like", `%${patientName}%`]);
+                }
+
+                if (filters.length > 0) {
+                    url += `&filters=${JSON.stringify(filters)}`;
+                }
+
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                const assessments = result.data || [];
+
+                if (assessments.length === 0 && currentPage === 1) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400">No assessments found.</td></tr>';
+                    pagination.classList.add('hidden');
+                } else {
+                    tableBody.innerHTML = assessments.map(item => `
+                        <tr>
+                            <td class="assessment-name">${item.name}</td>
+                            <td>${item.patient_name || '--'}</td>
+                            <td>
+                                <a href="medical_attachments.html?name=${item.name}" class="btn-view">View Details</a>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    updatePaginationUI(assessments.length);
+                    pagination.classList.remove('hidden');
+                }
+
+                loader.classList.add('hidden');
+                listContainer.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error fetching assessments:', error);
+                loader.classList.add('hidden');
+                errorMessage.classList.remove('hidden');
+            }
+        }
+
+        function updatePaginationUI(currentCount) {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const pageInfo = document.getElementById('pageInfo');
+
+            prevBtn.disabled = currentPage === 1;
+            // If we have fewer items than the page size, there's likely no next page
+            nextBtn.disabled = currentCount < pageSize;
+
+            pageInfo.textContent = `Page ${currentPage}`;
+        }
+    </script>
+</body>
+
+</html>

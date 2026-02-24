@@ -3,24 +3,9 @@
 
 import frappe
 import pandas as pd
-import numpy as np
 import os
 from frappe.model.document import Document
 
-
-def hampel_filter(series, window=7, n_sigma=3):
-    cleaned = series.copy()
-    k = 1.4826
-
-    for i in range(window, len(series) - window):
-        window_slice = series.iloc[i - window : i + window]
-        median = np.median(window_slice)
-        mad = k * np.median(np.abs(window_slice - median))
-
-        if mad > 0 and abs(series.iloc[i] - median) > n_sigma * mad:
-            cleaned.iloc[i] = median
-
-    return cleaned
 
 
 class MedicalAssessment(Document):
@@ -31,9 +16,6 @@ class MedicalAssessment(Document):
             return
 
         try:
-            # ----------------------------------
-            # Load first two attachments
-            # ----------------------------------
             attachment_fhr = self.attachments[0]
             attachment_uc  = self.attachments[1]
 
@@ -50,30 +32,7 @@ class MedicalAssessment(Document):
             df_uc  = pd.read_csv(csv_uc,  header=None, names=["x", "uc"])
 
             # ----------------------------------
-            # FHR PROCESSING (ONLY FHR)
-            # ----------------------------------
-            df_fhr["fhr"] = hampel_filter(df_fhr["fhr"], window=7)
-
-            # Physiological limits
-            df_fhr.loc[(df_fhr["fhr"] < 50) | (df_fhr["fhr"] > 210), "fhr"] = None
-
-            # Sudden jumps
-            df_fhr.loc[df_fhr["fhr"].diff().abs() > 25, "fhr"] = None
-
-            df_fhr["fhr"] = df_fhr["fhr"].interpolate()
-
-            # ----------------------------------
-            # UC PROCESSING (ONLY UC)
-            # ----------------------------------
-            df_uc["uc"] = hampel_filter(df_uc["uc"], window=11)
-
-            df_uc.loc[df_uc["uc"] < 0, "uc"] = None
-            df_uc.loc[df_uc["uc"].diff().abs() > 20, "uc"] = None
-
-            df_uc["uc"] = df_uc["uc"].interpolate()
-
-            # ----------------------------------
-            # MERGE AFTER CLEANING
+            # MERGE DATA
             # ----------------------------------
             merged = pd.merge(df_fhr, df_uc, on="x", how="outer")
 
@@ -92,26 +51,12 @@ class MedicalAssessment(Document):
 
             merged.to_csv(merged_filepath, index=False)
 
-            # ----------------------------------
-            # Attach merged file as 3rd attachment
-            # ----------------------------------
-            with open(merged_filepath, "rb") as f:
-                file_doc = frappe.get_doc({
-                    "doctype": "File",
-                    "file_name": merged_filename,
-                    "attached_to_doctype": self.doctype,
-                    "attached_to_name": self.name,
-                    "is_private": 0,
-                    "content": f.read(),
-                })
-                file_doc.save()
-
             self.append("attachments", {
                 "name_of_document": merged_filename,
-                "attachment": file_doc.file_url,
+                "attachment": "/files/" + merged_filename,
             })
 
-            frappe.msgprint("FHR & UC cleaned and merged successfully")
+            frappe.msgprint("FHR & UC merged successfully")
 
         except Exception as e:
             frappe.log_error(str(e), "CTG Processing Error")
