@@ -447,123 +447,743 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const getDataPointsBtn = document.getElementById('get-data-points-btn');
     const wpdIframe = document.getElementById('wpd-iframe');
+
+    // Helper function to process file with WebPlotDigitizer
+    function processFileWithWPD(file, wpdIframe) {
+        wpdIframe.style.display = 'block';
+        console.log('Showing iframe, loading file:', file.name);
+        console.log('Iframe src:', wpdIframe.src);
+
+        // Wait for iframe to load before sending message
+        wpdIframe.onload = function () {
+            console.log('Iframe loaded successfully');
+            console.log('Iframe contentWindow:', wpdIframe.contentWindow);
+            console.log('Iframe readyState:', wpdIframe.contentWindow?.document?.readyState);
+
+            // Wait for WebPlotDigitizer to be fully initialized
+            const waitForWPD = setInterval(() => {
+                if (wpdIframe.contentWindow && wpdIframe.contentWindow.wpd &&
+                    (wpdIframe.contentWindow.wpd.popup || wpdIframe.contentWindow.wpd.dataTable)) {
+                    console.log('WebPlotDigitizer is fully initialized');
+                    clearInterval(waitForWPD);
+
+                    // Inject automation script into iframe
+                    const script = document.createElement('script');
+                    script.src = '/wpd_automation.js';
+                    script.onload = function () {
+                        console.log('Automation script injected successfully');
+
+                        // Get the current record name from Frappe context
+                        let recordName = 'Unknown Document';
+                        if (typeof cur_frm !== 'undefined' && cur_frm && cur_frm.doc && cur_frm.doc.name) {
+                            recordName = cur_frm.doc.name;
+                        }
+
+                        console.log('Current record name:', recordName);
+
+                        // Send record name to iframe immediately after script loads
+                        setTimeout(() => {
+                            wpdIframe.contentWindow.postMessage({
+                                action: 'setRecordName',
+                                recordName: recordName
+                            }, '*');
+                            console.log('Record name sent to iframe:', recordName);
+
+                            // Now send the image data
+                            setTimeout(() => {
+                                const reader = new FileReader();
+                                reader.onload = function (e) {
+                                    console.log('File read complete, sending message with data');
+                                    console.log('Message data size:', e.target.result.byteLength);
+
+                                    const messageData = {
+                                        action: 'loadImage',
+                                        name: file.name,
+                                        type: file.type,
+                                        arrayBuffer: e.target.result
+                                    };
+
+                                    console.log('Message data structure:', {
+                                        action: messageData.action,
+                                        name: messageData.name,
+                                        type: messageData.type,
+                                        hasArrayBuffer: !!messageData.arrayBuffer,
+                                        arrayBufferSize: messageData.arrayBuffer.byteLength
+                                    });
+
+                                    // Send message to iframe
+                                    wpdIframe.contentWindow.postMessage(messageData, '*');
+                                    console.log('Message sent to iframe');
+
+                                    // Also try to verify the message was received
+                                    setTimeout(() => {
+                                        console.log('Checking if iframe received message...');
+                                    }, 1000);
+                                };
+                                reader.readAsArrayBuffer(file);
+                            }, 500);
+                        }, 100);
+                    };
+                    script.onerror = function () {
+                        console.error('Failed to inject automation script');
+                    };
+                    wpdIframe.contentWindow.document.head.appendChild(script);
+                } else {
+                    console.log('Waiting for WebPlotDigitizer to initialize...');
+                }
+            }, 500);
+
+            // Timeout after 30 seconds
+            setTimeout(() => {
+                clearInterval(waitForWPD);
+                console.error('WebPlotDigitizer failed to initialize within timeout');
+            }, 30000);
+        };
+
+        wpdIframe.onerror = function () {
+            console.error('Iframe failed to load');
+        };
+
+        // If iframe is already loaded, send message immediately
+        if (wpdIframe.contentWindow && wpdIframe.contentWindow.document.readyState === 'complete') {
+            console.log('Iframe already loaded, sending message immediately');
+            wpdIframe.onload();
+        } else {
+            console.log('Waiting for iframe to load...');
+        }
+    }
+
     if (getDataPointsBtn && wpdIframe) {
         getDataPointsBtn.addEventListener('click', function () {
-            // Only use the first uploaded file for now
-            const fileUploadMgr = window._fileUploadManager || new FileUploadManager();
-            const file = fileUploadMgr.files[0];
             console.log('WebPlotDigitizer button clicked');
-            console.log('File upload manager:', fileUploadMgr);
-            console.log('Files:', fileUploadMgr.files);
-            console.log('First file:', file);
+            console.log('Selected files:', selectedFiles);
+            console.log('Current files:', currentFiles);
 
-            if (file) {
-                wpdIframe.style.display = 'block';
-                console.log('Showing iframe, loading file:', file.name);
-                console.log('Iframe src:', wpdIframe.src);
+            if (selectedFiles.length === 0) {
+                alert('Please select at least one file to send to WebPlotDigitizer');
+                return;
+            }
 
-                // Wait for iframe to load before sending message
-                wpdIframe.onload = function() {
-                    console.log('Iframe loaded successfully');
-                    console.log('Iframe contentWindow:', wpdIframe.contentWindow);
-                    console.log('Iframe readyState:', wpdIframe.contentWindow?.document?.readyState);
+            // Start processing the first file
+            processNextFile(0);
+        });
 
-                    // Wait for WebPlotDigitizer to be fully initialized
+        // Function to process files sequentially
+        window.processNextFile = async function (index) {
+            if (index >= selectedFiles.length) {
+                alert('All selected files have been processed!');
+                return;
+            }
+
+            const fileToProcess = selectedFiles[index];
+            console.log('Processing file', index + 1, 'of', selectedFiles.length, ':', fileToProcess);
+
+            wpdIframe.style.display = 'block';
+
+            // Load the ArrayBuffer
+            let arrayBuffer;
+            try {
+                if (fileToProcess.type === 'local') {
+                    arrayBuffer = await fileToProcess.raw.arrayBuffer();
+                } else {
+                    const resp = await fetch(fileToProcess.url);
+                    arrayBuffer = await resp.arrayBuffer();
+                }
+            } catch (e) {
+                console.error('Error loading file data:', e);
+                alert(`Failed to load file: ${fileToProcess.name}. Skipping...`);
+                processNextFile(index + 1);
+                return;
+            }
+
+            // We need to ensure the iframe is ready or re-use the existing one
+            // If it's already loaded, we can just postMessage
+            if (wpdIframe.contentWindow && wpdIframe.contentWindow.wpd) {
+                injectAndLoad(wpdIframe, fileToProcess, arrayBuffer, index);
+            } else {
+                wpdIframe.onload = function () {
                     const waitForWPD = setInterval(() => {
-                        if (wpdIframe.contentWindow && wpdIframe.contentWindow.wpd &&
-                            (wpdIframe.contentWindow.wpd.popup || wpdIframe.contentWindow.wpd.dataTable)) {
-                            console.log('WebPlotDigitizer is fully initialized');
+                        if (wpdIframe.contentWindow && wpdIframe.contentWindow.wpd) {
                             clearInterval(waitForWPD);
-
-                            // Inject automation script into iframe
-                            const script = document.createElement('script');
-                            script.src = '/wpd_automation.js';
-                            script.onload = function() {
-                                console.log('Automation script injected successfully');
-
-                                // Get the current record name from Frappe context
-                                let recordName = 'Unknown Document';
-                                if (typeof cur_frm !== 'undefined' && cur_frm && cur_frm.doc && cur_frm.doc.name) {
-                                    recordName = cur_frm.doc.name;
-                                }
-
-                                console.log('Current record name:', recordName);
-
-                                // Send record name to iframe immediately after script loads
-                                setTimeout(() => {
-                                    wpdIframe.contentWindow.postMessage({
-                                        action: 'setRecordName',
-                                        recordName: recordName
-                                    }, '*');
-                                    console.log('Record name sent to iframe:', recordName);
-
-                                    // Now send the image data
-                                    setTimeout(() => {
-                                        const reader = new FileReader();
-                                        reader.onload = function(e) {
-                                            console.log('File read complete, sending message with data');
-                                            console.log('Message data size:', e.target.result.byteLength);
-
-                                            const messageData = {
-                                                action: 'loadImage',
-                                                name: file.name,
-                                                type: file.type,
-                                                arrayBuffer: e.target.result
-                                            };
-
-                                            console.log('Message data structure:', {
-                                                action: messageData.action,
-                                                name: messageData.name,
-                                                type: messageData.type,
-                                                hasArrayBuffer: !!messageData.arrayBuffer,
-                                                arrayBufferSize: messageData.arrayBuffer.byteLength
-                                            });
-
-                                            // Send message to iframe
-                                            wpdIframe.contentWindow.postMessage(messageData, '*');
-                                            console.log('Message sent to iframe');
-
-                                            // Also try to verify the message was received
-                                            setTimeout(() => {
-                                                console.log('Checking if iframe received message...');
-                                            }, 1000);
-                                        };
-                                        reader.readAsArrayBuffer(file);
-                                    }, 500);
-                                }, 100);
-                            };
-                            script.onerror = function() {
-                                console.error('Failed to inject automation script');
-                            };
-                            wpdIframe.contentWindow.document.head.appendChild(script);
-                        } else {
-                            console.log('Waiting for WebPlotDigitizer to initialize...');
+                            injectAndLoad(wpdIframe, fileToProcess, arrayBuffer, index);
                         }
                     }, 500);
-
-                    // Timeout after 30 seconds
-                    setTimeout(() => {
-                        clearInterval(waitForWPD);
-                        console.error('WebPlotDigitizer failed to initialize within timeout');
-                    }, 30000);
                 };
-
-                wpdIframe.onerror = function() {
-                    console.error('Iframe failed to load');
-                };
-
-                // If iframe is already loaded, send message immediately
-                if (wpdIframe.contentWindow && wpdIframe.contentWindow.document.readyState === 'complete') {
-                    console.log('Iframe already loaded, sending message immediately');
-                    wpdIframe.onload();
-                } else {
-                    console.log('Waiting for iframe to load...');
+                // If already complete but onload didn't fire (cached)
+                if (wpdIframe.contentWindow?.document?.readyState === 'complete') {
+                    // trigger load logic manually if needed, or just wait for interval
                 }
-            } else {
-                alert('Please upload an image file before proceeding.');
-                console.log('No file found in file upload manager');
+            }
+        };
+
+        function injectAndLoad(iframe, file, buffer, index) {
+            // We always try to inject existing script or ensure it's there
+            const script = iframe.contentWindow.document.createElement('script');
+            script.src = '/wpd_automation.js';
+            script.onload = function () {
+                sendLoadMessage(iframe, file, buffer, index);
+            };
+            // If script is already there, we might not need to append, but appending again usually interprets it again 
+            // or we can just send message. Safest is to append or check.
+            // For simplicity, we just append. WPD automation script handles re-injection gracefully (console log).
+            iframe.contentWindow.document.head.appendChild(script);
+
+            // Fallback if script load event doesn't fire (e.g. already cached/loaded)
+            setTimeout(() => sendLoadMessage(iframe, file, buffer, index), 500);
+        }
+
+        function sendLoadMessage(iframe, file, buffer, currentIndex) {
+            // Store current index in a data attribute or global variable to track
+            iframe.setAttribute('data-current-index', currentIndex);
+
+            iframe.contentWindow.postMessage({ action: 'setRecordName', recordName: globalRecordName }, '*');
+            iframe.contentWindow.postMessage({
+                action: 'loadImage',
+                name: file.name,
+                type: file.fileType || 'image/png',
+                arrayBuffer: buffer
+            }, '*');
+        }
+
+        // Listen for CSV data from WebPlotDigitizer iframe
+        window.addEventListener('message', function (event) {
+            if (event.data && event.data.action === 'csvDownload') {
+                handleCSVDownload(event.data.csvData, event.data.filename);
             }
         });
+
+        async function handleCSVDownload(csvData, filename) {
+            const wpdIframe = document.getElementById('wpd-iframe');
+            const currentIndex = parseInt(wpdIframe.getAttribute('data-current-index') || '0');
+
+            // Use the name of the file currently being processed
+            const currentFile = selectedFiles[currentIndex];
+            const baseName = currentFile ? currentFile.name : globalRecordName;
+
+            // Just show success message and move to next file
+            showStatus(`Data for ${baseName} processed successfully!`, 'success');
+
+            // Move to next file
+            processNextFile(currentIndex + 1);
+        }
+    }
+
+    // --- Load Document from URL Parameter ---
+    async function loadDocumentData(docname) {
+        if (!docname) return;
+
+        try {
+            console.log(`Attempting to load document: ${docname}`);
+            const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}/${docname}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `token ${API_KEY}:${API_SECRET}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to load document: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            if (result.data) {
+                console.log('Document data received:', result.data);
+                fillFormFields(result.data);
+                showStatus(`Document ${docname} loaded`, 'success');
+            }
+        } catch (error) {
+            console.error('Error loading document:', error);
+            showStatus('Failed to load document data', 'error');
+        }
+    }
+
+    function fillFormFields(data) {
+        if (!data) return;
+
+        // 1. Direct field mappings (DB Key -> Form Input Name)
+        const directMapping = {
+            select_trimester: "trimester",
+            number_of_loss: "loss_count",
+            ethnic_category: "race_category",
+            ethnic_subcategory: "race_subcategory",
+            respiratory_problems: "respiratory",
+            inherited_disorders: "inherited_disorder",
+            cardiac_prob: "cardiac_problems",
+            hypertension_ever: "hypertension_history",
+            anaemia_prb: "haematological_problems",
+            ther_disord: "thromboembolic_disorder",
+            liver_prd: "hepatic_problems",
+            gas_prb: "gastrointestinal_problems",
+            endo: "endocrine_problems",
+            neuro_prd: "neurological_problems",
+            auto_dis: "autoimmune_disease",
+            infection: "infections",
+            fert_tre: "fertility_treatment",
+            lmp: "lmp_date",
+            lmpopt: "lmp_option",
+            preg: "bleeding_in_pregnancy",
+            med_dur_preg: "medication_in_pregnancy",
+            specify_other_medication: "other_medication",
+            smoked: "ever_smoked",
+            co_ppm: "co_reading_ppm",
+            hou_smok: "smoker_in_household",
+            alco_wek: "alcohol_at_booking",
+            sub_preg: "substance_use_before",
+            wom_hg: "height_m",
+            wom_wg: "weight_at_booking",
+            wom_blod_pres: "bp_at_booking",
+            abnor_scn: "anomaly_scan_result",
+            gr_res_prb: "fgr_risks",
+            fdr: "fgr_risk_status",
+            pre_tr_birth: "preterm_birth_risks",
+            asssris: "aspirin_risk_assessment",
+            dvit: "vitamin_d_assessment",
+            sep: "maternal_sepsis",
+            method: "induction_method",
+            medication: "induction_medication",
+            total_dose: "induction_dose",
+            rupt_mem: "rom_datetime",
+            liq_col: "liquor_color",
+            sme_liq: "liquor_smell",
+            slw_prw: "slow_progress",
+            epid: "epidural",
+            oxytocin_hr: "oxytocin_duration",
+            ivf: "ivf_details",
+            donar_age: "donor_age",
+            fev_lab: "maternal_fever",
+            gyn_his: "gynaecological_history",
+            mat_cond: "maternal_condition",
+            mat_lb: "maternal_medication",
+            plac_path: "apla_syndrome",
+            pre_ecla: "preeclampsia",
+            plac_abnor: "placental_abnormality",
+            iugr: "current_iugr",
+            abnor_drop: "abnormal_dopplers",
+            type: "multiple_pregnancy_type",
+            chorionicity: "multiple_pregnancy_chorionicity",
+            zygosity: "multiple_pregnancy_zygosity",
+            birthweight: "birth_weight",
+            babys: "baby_sex",
+            min1: "apgar_1min",
+            min5: "apgar_5min",
+            min10: "apgar_10min",
+            oligohydra: "oligohydramnios",
+            please_select: "current_mode_of_delivery",
+            card_neck: "cord_around_neck",
+            plactal_abrupt: "placental_abruption",
+            timendate: "birth_datetime",
+            babycried: "baby_cried",
+            neon_resus: "resuscitation_reason",
+            neonatal_malfun: "congenital_malformations_details",
+            neonatal_icu: "nicu_reason",
+            birth_related: "birth_related",
+            ph: "arterial_ph",
+            base_excess: "arterial_base_excess",
+            lactate: "arterial_lactate",
+            foetal_hb: "arterial_hb",
+            po2: "arterial_po2",
+            pco2: "arterial_pco2",
+            hco3: "arterial_hco3",
+            phv: "venous_ph",
+            basev: "venous_base_excess",
+            lactatev: "venous_lactate",
+            foetalv: "venous_hb",
+            po2v: "venous_po2",
+            pco2v: "venous_pco2",
+            hco3v: "venous_hco3"
+        };
+
+        // 2. Fill All fields
+        Object.keys(data).forEach(key => {
+            const value = data[key];
+            const formName = directMapping[key] || key;
+
+            // Try to set by name
+            const inputs = document.querySelectorAll(`[name="${formName}"]`);
+            inputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    input.checked = (value === 1 || value === true || value === 'Yes');
+                } else if (input.tagName === 'SELECT' || input.tagName === 'INPUT' || input.tagName === 'TEXTAREA') {
+                    input.value = value || '';
+                }
+
+                // Trigger events
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+
+            // Handle Yes/No Groups
+            const yesNoBtns = document.querySelectorAll(`.yes-no-group button[data-target="${formName}"]`);
+            if (yesNoBtns.length > 0) {
+                const normalizedValue = (value === 1 || value === true || value === 'Yes') ? 'Yes' : 'No';
+                const targetBtn = Array.from(yesNoBtns).find(btn => btn.dataset.value === normalizedValue);
+                if (targetBtn) {
+                    handleYesNoClick(targetBtn);
+                }
+            }
+        });
+
+        // 3. Special handling for Race modal buttons
+        if (data.ethnic_category || data.ethnic_subcategory) {
+            const catHidden = document.getElementById('race_category_hidden');
+            const subHidden = document.getElementById('race_subcategory_hidden');
+            if (catHidden) catHidden.value = data.ethnic_category || '';
+            if (subHidden) subHidden.value = data.ethnic_subcategory || '';
+
+            if (raceCategorySelect) {
+                raceCategorySelect.value = data.ethnic_category || '';
+                handleRaceCategoryChange();
+                if (raceSubCategorySelect) {
+                    raceSubCategorySelect.value = data.ethnic_subcategory || '';
+                }
+            }
+            saveRaceModalState();
+        }
+
+        // 4. Special handling for Specify buttons
+        document.querySelectorAll('.btn-specify').forEach(btn => {
+            const targetId = btn.dataset.targetId;
+            const targetTextarea = document.getElementById(targetId);
+            if (targetTextarea && targetTextarea.value.trim() !== '') {
+                btn.textContent = 'View/Edit...';
+                btn.classList.add('active');
+            } else {
+                btn.textContent = 'Specify...';
+                btn.classList.remove('active');
+            }
+        });
+
+        // 5. Handle Previous Pregnancies table
+        if (data.previous_pregnancies) {
+            const numVal = parseInt(data.previous_pregnancies) || 0;
+            const numInput = document.querySelector('input[name="previous_pregnancies"]');
+            if (numInput) numInput.value = numVal;
+
+            const btn = document.getElementById('previousPregnanciesBtn');
+            if (btn) {
+                btn.click(); // Trigger table generation
+
+                if (data.table_vtci && Array.isArray(data.table_vtci)) {
+                    data.table_vtci.forEach((row, i) => {
+                        const idx = i + 1;
+                        const fieldsMap = {
+                            problems: row.antenatal_problems,
+                            outcome: row.outcome,
+                            mode: row.mode_of_delivery,
+                            weight: row.birth_weight,
+                            ga: row.gestational_age
+                        };
+                        Object.keys(fieldsMap).forEach(fKey => {
+                            const input = document.querySelector(`[name="prev_preg_${idx}_${fKey}"]`);
+                            if (input) input.value = fieldsMap[fKey] || '';
+                        });
+                    });
+                }
+            }
+        }
+
+        // 6. Handle individual boolean/checkbox fields (reversing the multi-select logic in collectFormData)
+        const checkboxMappings = {
+            // key in data : [input name, checkbox value]
+            "asthma": ["respiratory_problems", "Asthma"],
+            "asthma_spe": ["respiratory_problems", "Asthma-Specialist-Consultant-Care"],
+            "asthma_pre": ["respiratory_problems", "Asthma-Previous-Admission-In-Last-12-Months"],
+            "chronic_bronchitis": ["respiratory_problems", "Chronic-Bronchitis"],
+            "chronic_obstr": ["respiratory_problems", "Chronic-Obstructive-Airway-Disease"],
+            "pulmonary_fibrosis": ["respiratory_problems", "Pulmonary-Fibrosis"],
+            "sarcoidosis": ["respiratory_problems", "Sarcoidosis"],
+            "tuber_current_treat": ["respiratory_problems", "Tuberculosis-Current-Treatment"],
+            "tuber_past": ["respiratory_problems", "Tuberculosis-Past-Treatment"],
+
+            "aperts_syndrome": ["inherited_disorders", "Aperts-Syndrome"],
+            "cong_adren_hyper": ["inherited_disorders", "Congenital-Adrenal-Hyperplasia"],
+            "conge_hip_dys": ["inherited_disorders", "Congenital-Hip-Dysplasia"],
+            "cystic_fibrosis": ["inherited_disorders", "Cystic-Fibrosis"],
+            "down_synd": ["inherited_disorders", "DownsSyndrome"],
+            "haemochromatosis": ["inherited_disorders", "Haemochromatosi"],
+            "marf_synd": ["inherited_disorders", "Marfans-Syndromea"],
+            "mcadd": ["inherited_disorders", "MCADD"],
+            "muscul_dyst": ["inherited_disorders", "Muscular-Dystrophy"],
+            "neurofibromatosis": ["inherited_disorders", "Neurofibromatosis"],
+            "phenylk": ["inherited_disorders", "Phenylketonuria"],
+            "inher_other": ["inherited_disorders", "Other"],
+
+            "arrhythmia": ["cardiac_problems_list", "Arrhythmia"],
+            "car_care": ["cardiac_problems_list", "Cardiac-disease"],
+            "cardiac_mur": ["cardiac_problems_list", "Cardiac-Murmur"],
+            "cardiac_surgery": ["cardiac_problems_list", "Cardiac-Surgery"],
+            "cardiac_transplante": ["cardiac_problems_list", "Cardiac-Transplant"],
+            "card_anom": ["cardiac_problems_list", "Congenital-Cardiac-Anomaly"],
+            "isc_heart": ["cardiac_problems_list", "Ischemic-Heart-Disease"],
+            "peri_card": ["cardiac_problems_list", "Peripartum-Cardiomyopathy"],
+            "rheumatic_fever": ["cardiac_problems_list", "Rheumatic-Fever"],
+            "valve_lesion": ["cardiac_problems_list", "Valve-Lesion"],
+            "card_other": ["cardiac_problems_list", "Other"],
+
+            "pul_hyper": ["hypertension_history_list", "Pulmonary-Hypertension"],
+            "curr_med": ["hypertension_history_list", "Currently-Medicated"],
+            "no_medica": ["hypertension_history_list", "Currently-No-Medication"],
+            "dur_pre_med": ["hypertension_history_list", "During-Pregnancy-Medicated"],
+            "preg_not_med": ["hypertension_history_list", "During-Pregnancy-Not-Medicated"],
+            "no_pre_med": ["hypertension_history_list", "Non-Pregnant-Medicated"],
+            "no_preg_med": ["hypertension_history_list", "Non-Pregnant-No-Medication"],
+
+            "anaemia": ["haematological_problems_list", "Anaemia"],
+            "rh_isoim": ["haematological_problems_list", "Rhesus-isoimmunisation"],
+            "antibody_sensitivity": ["haematological_problems_list", "Antibody-sensitivity"],
+            "seckel_dis": ["haematological_problems_list", "Sickle-cell-disease"],
+            "alpha_thalassaemia": ["haematological_problems_list", "Alpha-Thalassaemia"],
+            "cell_trait": ["haematological_problems_list", "Sickle-cell-trait"],
+            "beta_thalassaemia": ["haematological_problems_list", "Beta-Thalassaemia"],
+            "hae_other": ["haematological_problems_list", "Other"],
+            "thal_trait": ["haematological_problems_list", "Beta-Thalassaemia-Trait"],
+            "bon_mar": ["haematological_problems_list", "Bone-marrow-transplant"],
+
+            "antipho": ["thromboembolic_disorder_list", "Antiphospholipid-syndrome"],
+            "pcd": ["thromboembolic_disorder_list", "Protein-C-deficiency"],
+            "antithrombin_deficiency": ["thromboembolic_disorder_list", "Antithrombin-deficiency"],
+            "psd": ["thromboembolic_disorder_list", "Protein-S-deficiency"],
+            "haema_care": ["thromboembolic_disorder_list", "Compound-heterozygosity-under-haematological-care"],
+            "pmfh": ["thromboembolic_disorder_list", "Prothrombin-mutation"],
+            "dvt": ["thromboembolic_disorder_list", "DVT-anticoagulated"],
+            "pe": ["thromboembolic_disorder_list", "Pulmonary-embolus"],
+            "dvt_not": ["thromboembolic_disorder_list", "DVT-not-anticoagulated"],
+            "thrombocytopenia": ["thromboembolic_disorder_list", "Thrombocytopenia"],
+            "v_leid": ["thromboembolic_disorder_list", "Factor-V-Leiden-(homozygous)"],
+            "thrombophilia": ["thromboembolic_disorder_list", "Thrombophilia"],
+            "haemophilia": ["thromboembolic_disorder_list", "Haemophilia"],
+            "vvwp": ["thromboembolic_disorder_list", "Varicose-veins-with-phlebits"],
+            "itp": ["thromboembolic_disorder_list", "Idiopathic-Thrombocytopenic-Purpura-(ITP)"],
+            "vvnp": ["thromboembolic_disorder_list", "Varicose-veins-no-phlebits"],
+            "pat": ["thromboembolic_disorder_list", "Previous-arterial-thrombosis"],
+            "vwd": ["thromboembolic_disorder_list", "Von-Willebrand-disease"],
+            "pdvt": ["thromboembolic_disorder_list", "Previous-DVT"],
+            "tharm_other": ["thromboembolic_disorder_list", "Other"],
+
+            "afl": ["hepatic_problems_list", "Acute-Fatty-Liver"],
+            "hep_unk": ["hepatic_problems_list", "Hepatitis-type-unknown"],
+            "aut_he": ["hepatic_problems_list", "Autoimmune-hepatitis"],
+            "jnhs": ["hepatic_problems_list", "Jaundice-not-hepatitis-specific"],
+            "help_synd": ["hepatic_problems_list", "HELP-syndrome"],
+            "liver_trans": ["hepatic_problems_list", "Liver-transplant"],
+            "hepa": ["hepatic_problems_list", "Hepatitis-A"],
+            "obs_chl": ["hepatic_problems_list", "Obstetric-cholestasis"],
+            "hepb": ["hepatic_problems_list", "Hepatitis-B"],
+            "oth_hep_prd": ["hepatic_problems_list", "Other-hepatic-problem"],
+            "hepc": ["hepatic_problems_list", "Hepatitis-C"],
+
+            "achalasia": ["gastrointestinal_problems_list", "Achalasia"],
+            "haemorrhoids_not_treated": ["gastrointestinal_problems_list", "Haemorrhoids-not-treated"],
+            "cholecystitis": ["gastrointestinal_problems_list", "Cholecystitis"],
+            "hiatus_hernia": ["gastrointestinal_problems_list", "Hiatus-hernia"],
+            "coeliac_disease": ["gastrointestinal_problems_list", "Coeliac-disease"],
+            "irritable_bowel_syndrome": ["gastrointestinal_problems_list", "Irritable-bowel-syndrome"],
+            "crohns_disease": ["gastrointestinal_problems_list", "Crohns-disease"],
+            "malabsorption_syndrome": ["gastrointestinal_problems_list", "Malabsorption-syndrome"],
+            "faecal_incontinence": ["gastrointestinal_problems_list", "Faecal-incontinence"],
+            "pancreatitis": ["gastrointestinal_problems_list", "Pancreatitis"],
+            "gastric_band": ["gastrointestinal_problems_list", "Gastric-band"],
+            "ulcerative_colitis": ["gastrointestinal_problems_list", "Ulcerative-colitis"],
+            "gastric_ulcer": ["gastrointestinal_problems_list", "Gastric-ulcer"],
+            "gerothr": ["gastrointestinal_problems_list", "Other"],
+            "haemorrhoids_treated": ["gastrointestinal_problems_list", "Haemorrhoids-treated"],
+
+            "addison_disease": ["endocrine_problems_list", "Addisons-disease"],
+            "hyperthyroidism_current": ["endocrine_problems_list", "Hyperthyroidism-current"],
+            "autoimmune_hypothyroidism": ["endocrine_problems_list", "Autoimmune-hypothyroidism"],
+            "hyperthyroidism": ["endocrine_problems_list", "Hyperthyroidism-past"],
+            "cushings_syndrome": ["endocrine_problems_list", "Cushings-syndrome"],
+            "hypothyroidism": ["endocrine_problems_list", "Hypothyroidism"],
+            "diabetes_type_1": ["endocrine_problems_list", "Diabetes-type-1"],
+            "pituitary_disorder": ["endocrine_problems_list", "Pituitary-disorder"],
+            "diabetes_type_2": ["endocrine_problems_list", "Diabetes-type-2"],
+            "posysn": ["endocrine_problems_list", "Polycystic-ovarian-syndrome"],
+            "endocrine_disease": ["endocrine_problems_list", "Endocrine-disease"],
+            "endocothr": ["endocrine_problems_list", "Other"],
+            "gestational_diabetes": ["endocrine_problems_list", "Gestational-diabetes"],
+
+            "adhd__add": ["neurological_problems_list", "ADHD/ADD"],
+            "psh": ["neurological_problems_list", "Previous-subarachnoid-haemorrhage"],
+            "asd": ["neurological_problems_list", "Autism-Spectrum-Disorder"],
+            "stroke": ["neurological_problems_list", "Stroke"],
+            "cerebral_palsy": ["neurological_problems_list", "Cerebral-palsy"],
+            "fne": ["neurological_problems_list", "Fits-not-epilepsy"],
+            "cfs": ["neurological_problems_list", "Chronic-fatigue-syndrome"],
+            "migraine": ["neurological_problems_list", "Migraine"],
+            "enm": ["neurological_problems_list", "Epilepsy-no-medication"],
+            "migrain_severe": ["neurological_problems_list", "Migraine-severe"],
+            "erm": ["neurological_problems_list", "Epilepsy-requires-medication"],
+            "neuromuscular_disorder": ["neurological_problems_list", "Neuromuscular-disorder"],
+            "multiple_sclerosis": ["neurological_problems_list", "Multiple-sclerosis"],
+            "spina_bifida": ["neurological_problems_list", "Spina-bifida"],
+            "myotonic_dystrophy": ["neurological_problems_list", "Myotonic-dystrophy"],
+            "nuero_prb_othr": ["neurological_problems_list", "Other"],
+            "neuropathy": ["neurological_problems_list", "Neuropathy"],
+
+            "gestational_pemphigoid": ["autoimmune_disease_list", "Gestational-pemphigoid"],
+            "sclerosis": ["autoimmune_disease_list", "Multiple-sclerosis"],
+            "myasthenia_gravis": ["autoimmune_disease_list", "Myasthenia-Gravis"],
+            "pernicious_anaemia": ["autoimmune_disease_list", "Pernicious-anaemia"],
+            "psoriasis": ["autoimmune_disease_list", "Psoriasis"],
+            "psoriatic_arthropathy": ["autoimmune_disease_list", "Psoriatic-arthropathy"],
+            "rheumatoid_arthritis": ["autoimmune_disease_list", "Rheumatoid-arthritis"],
+            "syst_lup_eryth": ["autoimmune_disease_list", "Systemic-lupus-erythematosus"],
+            "systemic_sclerosis": ["autoimmune_disease_list", "Systemic-sclerosis"],
+            "vitiligo": ["autoimmune_disease_list", "Vitiligo"],
+            "autodis_othe": ["autoimmune_disease_list", "Other"],
+
+            "no": ["infections_list", "No"],
+            "groupb": ["infections_list", "Group-B-streptococcus"],
+            "confidential_information": ["infections_list", "Confidential-information"],
+            "hiv": ["infections_list", "Human-immunodeficiency-virus"],
+            "candida": ["infections_list", "Candida"],
+            "habite": ["infections_list", "Habite"],
+            "c_difficile": ["infections_list", "C-Difficile"],
+            "meningitis": ["infections_list", "Meningitis"],
+            "chlamydia": ["infections_list", "Chlamydia"],
+            "mrsa": ["infections_list", "MRSA"],
+            "cytomegalovirus": ["infections_list", "Cytomegalovirus"],
+            "parvovirus": ["infections_list", "Parvovirus"],
+            "genital_herpes": ["infections_list", "Genital-herpes"],
+            "polio": ["infections_list", "Polio"],
+            "genital_warts": ["infections_list", "Genital-warts"],
+            "rubella": ["infections_list", "Rubella"],
+            "glandular_fever": ["infections_list", "Glandular-fever"],
+            "syphilis": ["infections_list", "Syphilis"],
+            "gonorrhoea": ["infections_list", "Gonorrhea"],
+            "toxoplasmosis": ["infections_list", "Toxoplasmosis"],
+            "covid19m6": ["infections_list", "Covid-19-in-the-last-6-months"],
+            "tropical_disease": ["infections_list", "Tropical-disease"],
+            "covid196m": ["infections_list", "Covid-19-more-than-6-months-ago"],
+            "infectothr": ["infections_list", "Other"],
+
+            "fert_no": ["fertility_treatment_list", "No"],
+            "aibd": ["fertility_treatment_list", "Artificial-insemination-by-donor"],
+            "artif_insemin": ["fertility_treatment_list", "Artificial-insemination-by-partner"],
+            "bpdi": ["fertility_treatment_list", "Became-pregnant-during-investigations"],
+            "clomiphene": ["fertility_treatment_list", "Clomiphene"],
+            "gift": ["fertility_treatment_list", "GIFT"],
+            "icsi_own_egg": ["fertility_treatment_list", "ICSI-(own-egg)"],
+            "icsi_donor_egg": ["fertility_treatment_list", "ICSI-(donor-egg)"],
+            "iui": ["fertility_treatment_list", "Intrauterine-insemination-(IUI)"],
+            "ivf_own_egg": ["fertility_treatment_list", "In-vitro-fertilization-(IVF)-(own-egg)"],
+            "ivf_donar_egg": ["fertility_treatment_list", "In-vitro-fertilization-(IVF)-(donor-egg)"],
+            "hgc": ["fertility_treatment_list", "Human-chorionic-gonadotrophin-(HCG)"],
+            "pergonal_or_metrodin": ["fertility_treatment_list", "Pergonal-or-Metrodin"],
+            "reversal_of_sterilisation": ["fertility_treatment_list", "Reversal-of-sterilisation"],
+            "surrogate_pregnancy": ["fertility_treatment_list", "Surrogate-pregnancy"],
+            "tubal_surgery": ["fertility_treatment_list", "Tubal-surgery"],
+            "yes_not_wish": ["fertility_treatment_list", "Yes,-but-does-not-wish-to-discuss"],
+            "fertiother": ["fertility_treatment_list", "Other"],
+
+            "medinone": ["medication_in_pregnancy_list", "None"],
+            "asthma_drugs": ["medication_in_pregnancy_list", "Asthma-drugs"],
+            "analgesics": ["medication_in_pregnancy_list", "Analgesics"],
+            "aspirin": ["medication_in_pregnancy_list", "Aspirin"],
+            "antacids": ["medication_in_pregnancy_list", "Antacids"],
+            "insulin": ["medication_in_pregnancy_list", "Insulin"],
+            "antibiotics": ["medication_in_pregnancy_list", "Antibiotics"],
+            "levothyroxine": ["medication_in_pregnancy_list", "Levothyroxine"],
+            "antid": ["medication_in_pregnancy_list", "Anti-D"],
+            "lithium": ["medication_in_pregnancy_list", "Lithium"],
+            "antidepressants": ["medication_in_pregnancy_list", "Antidepressants"],
+            "multivitamins": ["medication_in_pregnancy_list", "Multivitamins"],
+            "antihypertensives": ["medication_in_pregnancy_list", "Antihypertensives"],
+            "oral_hypoglycemics": ["medication_in_pregnancy_list", "Oral-hypoglycemics"],
+            "oncology_drugs": ["medication_in_pregnancy_list", "Oncology-drugs"],
+            "roaccutane": ["medication_in_pregnancy_list", "Roaccutane"],
+            "vitamind": ["medication_in_pregnancy_list", "Vitamin-D"],
+            "med_opthrt": ["medication_in_pregnancy_list", "Other"],
+
+            "never_used": ["substance_use_before_list", "Never-used"],
+            "crystal_meth": ["substance_use_before_list", "Crystal-meth"],
+            "declined_to_answer": ["substance_use_before_list", "Declined-to-answer"],
+            "diazepam": ["substance_use_before_list", "Diazepam"],
+            "acid": ["substance_use_before_list", "Acid"],
+            "ecstasy": ["substance_use_before_list", "Ecstasy"],
+            "amphetamines": ["substance_use_before_list", "Amphetamines"],
+            "glue": ["substance_use_before_list", "Glue"],
+            "cannabis": ["substance_use_before_list", "Cannabis"],
+            "heroin": ["substance_use_before_list", "Heroin"],
+            "cocaine": ["substance_use_before_list", "Cocaine"],
+            "ketamine": ["substance_use_before_list", "Ketamine"],
+            "crack": ["substance_use_before_list", "Crack"],
+            "khat": ["substance_use_before_list", "Khat"],
+            "lighter_fuel": ["substance_use_before_list", "Lighter-fuel"],
+            "lsd": ["substance_use_before_list", "LSD"],
+            "methadone": ["substance_use_before_list", "Methadone"],
+            "speed": ["substance_use_before_list", "Speed"],
+            "subutex": ["substance_use_before_list", "Subutex"],
+            "temazepam": ["substance_use_before_list", "Temazepam"],
+            "subothr": ["substance_use_before_list", "Other"],
+
+            "no_abnor": ["anomaly_scan_result_list", "No-abnormality-detected"],
+            "anencephaly": ["anomaly_scan_result_list", "Anencephaly"],
+            "bra": ["anomaly_scan_result_list", "Bilateral-renal-agenesis"],
+            "cleft_lip": ["anomaly_scan_result_list", "Cleft-lip"],
+            "diaphragmatic_hernia": ["anomaly_scan_result_list", "Diaphragmatic-hernia"],
+            "exomphalos": ["anomaly_scan_result_list", "Exomphalos"],
+            "gastroschisis": ["anomaly_scan_result_list", "Gastroschisis"],
+            "lethal_sket_dys": ["anomaly_scan_result_list", "Lethal-skeletal-dysplasia"],
+            "osb": ["anomaly_scan_result_list", "Open-spina-bifida"],
+            "sca": ["anomaly_scan_result_list", "Serious-cardiac-abnormality"],
+            "trisomy_13": ["anomaly_scan_result_list", "Trisomy-13"],
+            "trisomy_18": ["anomaly_scan_result_list", "Trisomy-18"],
+            "admonr_other": ["anomaly_scan_result_list", "Other"],
+
+            "no_risk": ["fgr_risks_list", "No-risk-factors-identified"],
+            "antiphospholipid": ["fgr_risks_list", "Antiphospholipid"],
+            "chronic_hypertension": ["fgr_risks_list", "Chronic-Hypertension"],
+            "chronic_rental": ["fgr_risks_list", "Chronic-renal-failure"],
+            "drug_misuse": ["fgr_risks_list", "Drug-misuse"],
+            "suasb": ["fgr_risks_list", "Significant-Uterine-Anomalies"],
+            "smoking_at_booking": ["fgr_risks_list", "Smoking-at-booking"],
+            "ufsfim": ["fgr_risks_list", "Unsuitable-for-SFI-monitoring"],
+            "pappa": ["fgr_risks_list", "Low-PAPP-A"],
+            "frg_othr": ["fgr_risks_list", "Other"],
+
+            "no_risk_pre": ["preterm_birth_risks_list", "No-risks-identified"],
+            "lletz_prev": ["preterm_birth_risks_list", "LLETZ-unknown-depth"],
+            "cbir": ["preterm_birth_risks_list", "Cone-Biopsy"],
+            "hosceehr": ["preterm_birth_risks_list", "HO-significant-cervical-excisional-event"],
+            "hotfcc": ["preterm_birth_risks_list", "HO-trachelectomy-for-cervical-cancer"],
+            "intr_adhe_syndro": ["preterm_birth_risks_list", "Intrauterine-adhesions"],
+            "lletz": ["preterm_birth_risks_list", "LLETZ-gt-10mm-depth-removed"],
+            "lletz_ir": ["preterm_birth_risks_list", "LLETZ-2-or-more-procedures"],
+            "mul_preg": ["preterm_birth_risks_list", "Multiple-Pregnancy"],
+            "prev_cerv_cercl": ["preterm_birth_risks_list", "Prev-cervical-cerclage"],
+            "prev_aila": ["preterm_birth_risks_list", "Previous-c/s-at-full-dilatation"],
+            "prev_pre_birth": ["preterm_birth_risks_list", "Prev-preterm-birth-16-34wks"],
+            "prev_preterm": ["preterm_birth_risks_list", "Prev-preterm-prelabour-SROM"],
+            "uterine_variant": ["preterm_birth_risks_list", "Uterine-variant"],
+
+            "own_fresh": ["ivf_details_list", "Own-fresh-embryos"],
+            "own_frozen": ["ivf_details_list", "Own-frozen-embryos"],
+            "donor_oocyte": ["ivf_details_list", "Donor-oocyte"],
+            "male_fact_indi": ["ivf_details_list", "Male-factor"],
+            "icsiimsi": ["ivf_details_list", "ICSI/IMSI"]
+        };
+
+        Object.keys(checkboxMappings).forEach(key => {
+            if (data[key] === 1 || data[key] === true) {
+                const [inputName, value] = checkboxMappings[key];
+                const checkbox = document.querySelector(`input[name="${inputName}"][value="${value}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const modal = checkbox.closest('.modal');
+                    if (modal) saveCheckboxModalState(modal);
+                }
+            }
+        });
+    }
+
+    // Check for 'name' parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const docName = urlParams.get('name');
+    if (docName) {
+        // Wait a small bit to ensure all setup is complete
+        setTimeout(() => loadDocumentData(docName), 500);
     }
 });
 
@@ -1302,28 +1922,35 @@ async function saveToFrappe(formData) {
         // Update global record name in HTML context
         if (typeof globalRecordName !== 'undefined') {
             globalRecordName = recordName;
+            // Fetch attachments after record name is updated
+            setTimeout(fetchAttachments, 500);
         }
 
-        // Now handle file attachments if any
-        if (attachments && Array.isArray(attachments) && attachments.length > 0) {
-            showStatus('Uploading attachments...', 'info');
-            console.log('Processing attachments:', attachments.length, 'files');
+        // Now handle file attachments if any - only process local files (not yet uploaded)
+        const localFiles = attachments ? attachments.filter(file =>
+            file instanceof File || (file.type === 'local' && file.raw)
+        ) : [];
 
-            // Upload each file and create File documents linked to the main record
+        if (localFiles.length > 0) {
+            showStatus('Uploading pending attachments...', 'info');
+            console.log('Processing local attachments:', localFiles.length, 'files');
+
+            // Upload each local file and create File documents linked to the main record
             await Promise.all(
-                attachments.map(async (file, index) => {
-                    if (file instanceof File) {
+                localFiles.map(async (file, index) => {
+                    const fileToUpload = file.raw || file; // Handle both File objects and file objects with raw property
+                    if (fileToUpload instanceof File) {
                         try {
-                            console.log(`Processing file ${index + 1}:`, file.name, file.size);
+                            console.log(`Processing local file ${index + 1}:`, fileToUpload.name, fileToUpload.size);
 
                             // First upload the file
-                            const fileUrl = await uploadFile(file, API_KEY, API_SECRET, FRAPPE_API_BASE.replace("/api/resource", ""));
-                            console.log(`File uploaded successfully: ${file.name} -> ${fileUrl}`);
+                            const fileUrl = await uploadFile(fileToUpload, API_KEY, API_SECRET, FRAPPE_API_BASE.replace("/api/resource", ""));
+
 
                             // Then create a File document linked to the main record
                             const fileDocPayload = {
                                 doctype: 'File',
-                                file_name: file.name,
+                                file_name: fileToUpload.name,
                                 file_url: fileUrl,
                                 attached_to_doctype: DOCTYPE_NAME,
                                 attached_to_name: recordName,
@@ -1332,7 +1959,7 @@ async function saveToFrappe(formData) {
 
                             console.log(`Creating File document with payload:`, JSON.stringify(fileDocPayload, null, 2));
 
-                            const fileDocResponse = await fetch(`${FRAPPE_API_BASE.replace("/api/resource", "")}/api/resource/File`, {
+                            const fileDocResponse = await fetch(`${FRAPPE_API_BASE}/File`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -1343,37 +1970,33 @@ async function saveToFrappe(formData) {
                             });
 
                             const fileDocResult = await fileDocResponse.json();
-                            console.log(`File document creation response for ${file.name}:`, fileDocResponse.status, fileDocResult);
+                            console.log(`File document creation response for ${fileToUpload.name}:`, fileDocResponse.status, fileDocResult);
                             console.log(`File document creation body:`, JSON.stringify(fileDocResult, null, 2));
 
                             if (fileDocResponse.ok) {
-                                console.log(`File ${file.name} attached to record ${recordName} successfully`);
+                                console.log(`File ${fileToUpload.name} attached to record ${recordName} successfully`);
                             } else {
-                                console.error(`Failed to attach file ${file.name}:`, fileDocResponse.status, fileDocResult);
+                                console.error(`Failed to attach file ${fileToUpload.name}:`, fileDocResponse.status, fileDocResult);
                                 console.error(`Full error details:`, JSON.stringify(fileDocResult, null, 2));
                             }
 
                         } catch (err) {
-                            console.error(`Failed to upload file: ${file.name}`, err);
+                            console.error(`Failed to upload file: ${fileToUpload.name}`, err);
                             // Continue with other files even if one fails
                         }
                     } else {
-                        console.log(`Skipping attachment ${index} - not a File object:`, typeof file);
+                        console.log(`Skipping attachment ${index} - not a File object:`, typeof fileToUpload);
                     }
                 })
             );
         } else {
-            console.log('No attachments to process');
+            console.log('No local attachments to process (files already uploaded)');
         }
 
-        showStatus('Data saved successfully!', 'success');
+        // Refresh attachments list after upload
+        setTimeout(fetchAttachments, 1000);
 
-        // Reset form after successful save
-        // setTimeout(() => {
-        //     medicalForm.reset();
-        //     fileUploadManager.clearFiles();
-        //     handleTabClick(document.getElementById('maternalTab'));
-        // }, 2000);
+        showStatus('Data saved successfully!', 'success');
 
         return result;
 
@@ -1419,7 +2042,6 @@ class FileUploadManager {
     constructor() {
         this.files = [];
         this.fileInput = document.getElementById('file-upload');
-        this.fileList = document.getElementById('fileList');
         this.maxFiles = 10; // Maximum number of files
         this.maxFileSize = 5 * 1024 * 1024; // 5MB per file
 
@@ -1427,13 +2049,12 @@ class FileUploadManager {
     }
 
     init() {
-        if (this.fileInput && this.fileList) {
+        if (this.fileInput) {
             this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
-            this.renderFileList();
         }
     }
 
-    handleFileSelect(event) {
+    async handleFileSelect(event) {
         const newFiles = Array.from(event.target.files);
 
         // Check total file limit
@@ -1471,8 +2092,92 @@ class FileUploadManager {
         // Add valid files
         if (validFiles.length > 0) {
             this.files.push(...validFiles);
-            this.renderFileList();
-            showStatus(`${validFiles.length} file(s) added successfully`, 'success');
+
+            // Check if a record already exists
+            const hasExistingRecord = (typeof globalRecordName !== 'undefined' && globalRecordName && globalRecordName !== 'Unknown Document') ||
+                (typeof window.currentRecordName !== 'undefined' && window.currentRecordName);
+
+            if (hasExistingRecord) {
+                // Upload files immediately if record exists
+                showStatus(`Uploading ${validFiles.length} file(s) to existing record...`, 'info');
+
+                // Upload each file immediately
+                await Promise.all(
+                    validFiles.map(async (file) => {
+                        try {
+                            // Upload the file
+                            const fileUrl = await uploadFile(file, API_KEY, API_SECRET, FRAPPE_API_BASE.replace("/api/resource", ""));
+                            // Create File document linked to the existing record
+                            const recordName = globalRecordName || window.currentRecordName;
+                            const fileDocPayload = {
+                                doctype: 'File',
+                                file_name: file.name,
+                                file_url: fileUrl,
+                                attached_to_doctype: DOCTYPE_NAME,
+                                attached_to_name: recordName,
+                                is_private: 0
+                            };
+
+                            const fileDocResponse = await fetch(`${FRAPPE_API_BASE}/File`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `token ${API_KEY}:${API_SECRET}`
+                                },
+                                credentials: 'include',
+                                body: JSON.stringify(fileDocPayload)
+                            });
+
+                            if (fileDocResponse.ok) {
+                                console.log(`File ${file.name} attached to existing record ${recordName} immediately`);
+
+                                // Add to attachment system as uploaded file
+                                const fileObject = {
+                                    type: 'uploaded',
+                                    name: file.name,
+                                    fileType: file.type,
+                                    url: fileUrl,
+                                    raw: file
+                                };
+                                currentFiles.push(fileObject);
+                            } else {
+                                throw new Error('Failed to create File document');
+                            }
+                        } catch (err) {
+                            console.error(`Failed to upload file immediately: ${file.name}`, err);
+                            // Add as local file for retry during submit
+                            const fileObject = {
+                                type: 'local',
+                                name: file.name,
+                                fileType: file.type,
+                                raw: file
+                            };
+                            currentFiles.push(fileObject);
+                        }
+                    })
+                );
+
+                // Refresh attachments display
+                updateAttachmentsDisplay(currentFiles);
+                fetchAttachments(); // Refresh from server
+                showStatus(`${validFiles.length} file(s) uploaded successfully`, 'success');
+
+            } else {
+                // No record exists, add files for later upload during submit
+                validFiles.forEach(file => {
+                    const fileObject = {
+                        type: 'local',
+                        name: file.name,
+                        fileType: file.type,
+                        raw: file
+                    };
+                    currentFiles.push(fileObject);
+                });
+
+                // Update the attachment display
+                updateAttachmentsDisplay(currentFiles);
+                showStatus(`${validFiles.length} file(s) added. Will be uploaded when record is saved.`, 'success');
+            }
         }
 
         // Clear the input
@@ -1482,7 +2187,26 @@ class FileUploadManager {
     removeFile(index) {
         const removedFile = this.files[index];
         this.files.splice(index, 1);
-        this.renderFileList();
+
+        // Also remove from the attachment system
+        const attachmentIndex = currentFiles.findIndex(f =>
+            f.type === 'local' && f.name === removedFile.name
+        );
+        if (attachmentIndex > -1) {
+            currentFiles.splice(attachmentIndex, 1);
+
+            // Also remove from selected files if it was selected
+            const selectedIndex = selectedFiles.findIndex(f =>
+                f.type === 'local' && f.name === removedFile.name
+            );
+            if (selectedIndex > -1) {
+                selectedFiles.splice(selectedIndex, 1);
+            }
+
+            // Update the attachment display
+            updateAttachmentsDisplay(currentFiles);
+        }
+
         showStatus(`${removedFile.name} removed`, 'info');
     }
 
@@ -1504,46 +2228,12 @@ class FileUploadManager {
         return '📎';
     }
 
-    renderFileList() {
-        if (!this.fileList) return;
-
-        if (this.files.length === 0) {
-            this.fileList.innerHTML = '<div class="empty-file-list">No files selected</div>';
-            return;
-        }
-
-        const fileListHTML = `
-            <div class="file-list">
-                ${this.files.map((file, index) => `
-                    <div class="file-item">
-                        <div class="file-info">
-                            <span class="file-icon">${this.getFileIcon(file.name)}</span>
-                            <span class="file-name" title="${file.name}">${file.name}</span>
-                            <span class="file-size">${this.formatFileSize(file.size)}</span>
-                        </div>
-                        <button type="button" class="delete-file" onclick="fileUploadManager.removeFile(${index})" title="Remove file">
-                            <svg fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                    </div>
-                `).join('')}
-            </div>
-            <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #9ca3af;">
-                ${this.files.length} file(s) selected • Total size: ${this.formatFileSize(this.files.reduce((total, file) => total + file.size, 0))}
-            </div>
-        `;
-
-        this.fileList.innerHTML = fileListHTML;
-    }
-
     getFiles() {
         return this.files;
     }
 
     clearFiles() {
         this.files = [];
-        this.renderFileList();
         if (this.fileInput) {
             this.fileInput.value = '';
         }
@@ -1617,3 +2307,520 @@ if (resetBtnUpdated) {
 //         console.error("Error accessing API credentials:", error);
 //     }
 // }
+
+// Attachment Management Functions
+let currentAttachments = [];
+let currentFiles = []; // Stores both local and server files
+let selectedFiles = []; // Array of selected file objects
+let currentCropper = null;
+let pendingImageFile = null;
+let croppingExistingImage = false;
+let existingImageIndex = null;
+
+async function fetchAttachments() {
+    try {
+        if (!globalRecordName || globalRecordName === 'Unknown Document') {
+            console.log('No valid record name available for fetching attachments');
+            updateAttachmentsDisplay([]);
+            return;
+        }
+
+        const filters = JSON.stringify([
+            ["attached_to_doctype", "=", DOCTYPE_NAME],
+            ["attached_to_name", "=", globalRecordName]
+        ]);
+        const fields = JSON.stringify(["name", "file_name", "file_url", "is_private", "creation"]);
+        const url = `${FRAPPE_API_BASE}/File?filters=${filters}&fields=${fields}`;
+
+        const response = await fetch(url, {
+            headers: { 'Authorization': `token ${API_KEY}:${API_SECRET}` }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.data && result.data.length > 0) {
+            const serverFiles = result.data.map(f => ({
+                type: 'server',
+                fid: f.name,
+                name: f.file_name,
+                url: f.file_url,
+                creation: f.creation,
+                fileType: f.file_name.endsWith('.csv') ? 'text/csv' : 'image/png'
+            }));
+            currentFiles = [...serverFiles, ...currentFiles.filter(f => f.type === 'local')];
+        }
+
+        updateAttachmentsDisplay(currentFiles);
+        console.log('Attachments fetched:', currentFiles);
+
+    } catch (error) {
+        console.error('Error fetching attachments:', error);
+        updateAttachmentsDisplay([]);
+        document.getElementById('attachmentsList').innerHTML = '<div class="text-red-500 italic">Error loading attachments.</div>';
+    }
+}
+
+function updateAttachmentsDisplay(attachments) {
+    const list = document.getElementById('attachmentsList');
+    const btn = document.getElementById('get-data-points-btn');
+    list.innerHTML = '';
+
+    if (currentFiles.length === 0) {
+        list.innerHTML = '<div class="text-gray-500 italic">No files currently attached.</div>';
+        btn.textContent = 'Get Data Points';
+        return;
+    }
+
+    // Update button text
+    btn.textContent = selectedFiles.length > 0
+        ? `Get Data Points (${selectedFiles.length})`
+        : 'Get Data Points';
+
+    list.innerHTML = currentFiles.map((f, i) => {
+        const isSelected = selectedFiles.some(sf =>
+            (f.type === 'server' && f.url === sf.url) ||
+            (f.type === 'local' && f.name === sf.name)
+        );
+
+        const cardClass = isSelected
+            ? "border-pink-500 bg-pink-900/40"
+            : "border-gray-700 bg-gray-800 hover:bg-gray-700";
+
+        return `
+            <div onclick="selectFile(${i})" class="flex justify-between items-center p-3 border rounded mt-2 cursor-pointer transition ${cardClass}">
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" ${isSelected ? 'checked' : ''} class="w-4 h-4 accent-pink-600" onclick="event.stopPropagation(); selectFile(${i})">
+                    <span class="text-sm">${f.type === 'server' ? '✅' : '⏳'} ${f.name}</span>
+                </div>
+                <div class="flex gap-4">
+                    ${isImageFile(f) ? `<button onclick="event.stopPropagation(); cropExistingImage(${i})" class="text-xs text-green-400 hover:text-green-300 hover:underline">Crop</button>` : ''}
+                    ${f.url ? `<a href="${f.url}" target="_blank" class="text-xs text-blue-400 hover:underline" onclick="event.stopPropagation()">View</a>` : ''}
+                    ${f.type === 'server' ? `<button onclick="event.stopPropagation(); deleteServerFile(${i})" class="text-xs text-red-500 hover:text-red-400 hover:underline">Delete</button>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// 1. Handles the UI and triggers the API
+async function deleteServerFile(index) {
+    const file = currentFiles[index];
+
+    // Safety check: Make sure we have the fid
+    if (!file || file.type !== 'server' || !file.fid) {
+        alert("Cannot delete this file: Missing File ID.");
+        return;
+    }
+
+    // Confirm with the user
+    if (!confirm(`Are you sure you want to permanently delete "${file.name}"?`)) {
+        return;
+    }
+
+    try {
+        // Call the API (using the globalRecordName variable you already use)
+        await removeAttachmentFromFrappe(file.fid, DOCTYPE_NAME, globalRecordName);
+
+        // If successful, remove it from the frontend arrays
+        currentFiles.splice(index, 1);
+
+        // Also remove from selectedFiles if it was checked
+        const selectedIdx = selectedFiles.findIndex(sf => sf.fid === file.fid);
+        if (selectedIdx > -1) selectedFiles.splice(selectedIdx, 1);
+
+        // Refresh the UI
+        updateAttachmentsDisplay(currentFiles);
+
+    } catch (error) {
+        console.error("Deletion failed:", error);
+    }
+}
+
+// 2. The API Call
+async function removeAttachmentFromFrappe(fileId, docType, docName) {
+    const url = `${FRAPPE_API_BASE.replace('/api/resource', '')}/api/method/frappe.desk.form.utils.remove_attach`;
+
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `token ${API_KEY}:${API_SECRET}`
+        },
+        body: JSON.stringify({
+            fid: fileId,
+            dt: docType,
+            dn: docName
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to delete attachment from server');
+    }
+
+    showStatus('Attachment removed successfully', 'success');
+    return await response.json();
+}
+
+function selectFile(index) {
+    const file = currentFiles[index];
+    const existingIndex = selectedFiles.findIndex(f =>
+        (f.type === 'server' && f.url === file.url) ||
+        (f.type === 'local' && f.name === file.name)
+    );
+
+    if (existingIndex > -1) {
+        selectedFiles.splice(existingIndex, 1);
+    } else {
+        selectedFiles.push(file);
+    }
+    updateAttachmentsDisplay(currentFiles);
+}
+
+// Helper function to check if file is an image
+function isImageFile(file) {
+    const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+    return imageTypes.includes(file.fileType) ||
+        (file.name && /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(file.name));
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'Unknown date';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+        return 'Invalid date';
+    }
+}
+
+function cropExistingImage(index) {
+    const file = currentFiles[index];
+    if (!isImageFile(file)) {
+        alert('This file is not an image and cannot be cropped.');
+        return;
+    }
+
+    // Create cropper modal if it doesn't exist
+    if (!document.getElementById('cropperModal')) {
+        createCropperModal();
+    }
+
+    croppingExistingImage = true;
+    existingImageIndex = index;
+
+    if (file.type === 'server') {
+        // For server files, load from URL
+        openCropperModalForServerImage(file);
+    } else {
+        // For local files, use existing function
+        pendingImageFile = file.raw;
+        openCropperModal(file.raw);
+    }
+}
+
+// Cropper Modal Functions
+function openCropperModal(file) {
+    const modal = document.getElementById('cropperModal');
+    const image = document.getElementById('cropperImage');
+    const filenameInput = document.getElementById('croppedFileName');
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        image.src = e.target.result;
+        // Set the filename input to original filename (without extension for editing)
+        const originalName = file.name.replace(/\.[^/.]+$/, "");
+        filenameInput.value = originalName;
+        modal.classList.remove('hidden');
+
+        // Initialize Cropper.js
+        setTimeout(() => {
+            currentCropper = new Cropper(image, {
+                aspectRatio: NaN, // Free aspect ratio
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.8,
+                restore: false,
+                guides: true,
+                center: true,
+                highlight: true,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: true,
+            });
+        }, 100);
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function closeCropperModal() {
+    const modal = document.getElementById('cropperModal');
+    const filenameInput = document.getElementById('croppedFileName');
+
+    if (currentCropper) {
+        currentCropper.destroy();
+        currentCropper = null;
+    }
+
+    modal.classList.add('hidden');
+    filenameInput.value = '';
+    pendingImageFile = null;
+    croppingExistingImage = false;
+    existingImageIndex = null;
+}
+
+function openCropperModalForServerImage(file) {
+    const modal = document.getElementById('cropperModal');
+    const image = document.getElementById('cropperImage');
+    const filenameInput = document.getElementById('croppedFileName');
+
+    image.src = file.url;
+    // Set the filename input to original filename (without extension for editing)
+    const originalName = file.name.replace(/\.[^/.]+$/, "");
+    filenameInput.value = originalName;
+    modal.classList.remove('hidden');
+
+    // Initialize Cropper.js for server image
+    setTimeout(() => {
+        currentCropper = new Cropper(image, {
+            aspectRatio: NaN, // Free aspect ratio
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 0.8,
+            restore: false,
+            guides: true,
+            center: true,
+            highlight: true,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: true,
+        });
+    }, 100);
+}
+
+function createCropperModal() {
+    const modalHTML = `
+        <div id="cropperModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center">
+            <div class="bg-gray-800 rounded-lg p-6 max-w-4xl max-h-[90vh] overflow-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-white">Crop Image</h3>
+                    <button onclick="closeCropperModal()" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <img id="cropperImage" style="max-width: 100%; display: block;">
+                </div>
+                <div class="mb-4">
+                    <label for="croppedFileName" class="block text-sm font-medium text-gray-300 mb-2">
+                        Filename (optional):
+                    </label>
+                    <input type="text" id="croppedFileName" placeholder="Leave empty to use original filename"
+                        class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                    <p class="text-xs text-gray-400 mt-1">Leave empty to keep original filename, or enter a custom name</p>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeCropperModal()"
+                        class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition">
+                        Cancel
+                    </button>
+                    <button onclick="cropAndSaveImage()"
+                        class="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg transition">
+                        Crop & Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function closeCropperModal() {
+    const modal = document.getElementById('cropperModal');
+    const filenameInput = document.getElementById('croppedFileName');
+
+    if (currentCropper) {
+        currentCropper.destroy();
+        currentCropper = null;
+    }
+
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    if (filenameInput) {
+        filenameInput.value = '';
+    }
+
+    pendingImageFile = null;
+    croppingExistingImage = false;
+    existingImageIndex = null;
+}
+
+async function cropAndSaveImage() {
+    if (!currentCropper) {
+        alert('No image to crop');
+        return;
+    }
+
+    if (croppingExistingImage && existingImageIndex === null) {
+        alert('No existing image selected for cropping');
+        return;
+    }
+
+    if (!croppingExistingImage && !pendingImageFile) {
+        alert('No new image to crop');
+        return;
+    }
+
+    // Since we are uploading immediately, the main record MUST be saved first
+    // so we have a valid ID (globalRecordName) to attach the file to.
+    const isRecordSaved = globalRecordName && globalRecordName !== 'Unknown Document';
+
+    showStatus('Cropping image...', 'info');
+
+    try {
+        // Get cropped canvas
+        const canvas = currentCropper.getCroppedCanvas({
+            maxWidth: 1920,
+            maxHeight: 1080,
+            fillColor: '#fff',
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+        });
+
+        // Convert canvas to blob
+        canvas.toBlob(async function (blob) {
+            if (!blob) {
+                alert('Failed to crop image');
+                return;
+            }
+
+            try {
+                // 1. Get custom filename from input field
+                const filenameInput = document.getElementById('croppedFileName');
+                const customFilename = filenameInput.value.trim();
+
+                // 2. Figure out the original file details
+                let originalFile = croppingExistingImage ? currentFiles[existingImageIndex] : pendingImageFile;
+                let originalName = originalFile.name;
+                let fileType = originalFile.fileType || originalFile.type || 'image/jpeg';
+
+                // Extract extension properly
+                let fileExtension = originalName.split('.').pop();
+                if (!fileExtension || fileExtension === originalName) {
+                    fileExtension = fileType.includes('png') ? 'png' : 'jpg';
+                }
+
+                // 3. Determine the final filename
+                // If custom name provided, use it. Otherwise, append "_cropped" to original name.
+                let finalFilename;
+                if (customFilename) {
+                    // Ensure the user's custom name ends with the correct extension
+                    finalFilename = customFilename.toLowerCase().endsWith(`.${fileExtension.toLowerCase()}`)
+                        ? customFilename
+                        : `${customFilename}.${fileExtension}`;
+                } else {
+                    finalFilename = originalName.replace(`.${fileExtension}`, `_cropped.${fileExtension}`);
+                }
+
+                // 4. Create the new cropped File object
+                const croppedFile = new File([blob], finalFilename, { type: fileType });
+
+                // 5. Upload Strategy
+                if (isRecordSaved) {
+                    // IF THE RECORD EXISTS: Upload immediately to the backend
+                    showStatus('Uploading cropped image to server...', 'info');
+
+                    const methodUrl = FRAPPE_API_BASE.replace("/api/resource", "");
+
+                    // Upload the physical file
+                    const fileUrl = await uploadFile(croppedFile, API_KEY, API_SECRET, methodUrl);
+
+                    // Create the File document link in Frappe
+                    const fileDocPayload = {
+                        doctype: 'File',
+                        file_name: finalFilename,
+                        file_url: fileUrl,
+                        attached_to_doctype: DOCTYPE_NAME,
+                        attached_to_name: globalRecordName,
+                        is_private: 0
+                    };
+
+                    const fileDocResponse = await fetch(`${FRAPPE_API_BASE}/File`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `token ${API_KEY}:${API_SECRET}`
+                        },
+                        body: JSON.stringify(fileDocPayload)
+                    });
+
+                    if (!fileDocResponse.ok) {
+                        throw new Error('Failed to attach the cropped file to the record.');
+                    }
+
+                    showStatus('Cropped image uploaded successfully!', 'success');
+
+                    // Refresh the attachment list from the server so the new file shows up
+                    fetchAttachments();
+
+                } else {
+                    // IF THE RECORD IS NOT SAVED YET: We can't upload to the server because we have no Record ID.
+                    // Instead, we safely append it to the local queue so it uploads when they click Submit.
+                    showStatus('Record not saved yet. Cropped image added to local upload queue.', 'info');
+
+                    const fileObject = {
+                        type: 'local',
+                        name: finalFilename,
+                        fileType: croppedFile.type,
+                        raw: croppedFile
+                    };
+
+                    // Append the new file without removing the old one
+                    currentFiles.push(fileObject);
+                    updateAttachmentsDisplay(currentFiles);
+                }
+
+                // Finally, close the modal
+                closeCropperModal();
+
+            } catch (processError) {
+                console.error('Error processing/uploading cropped image:', processError);
+                showStatus('Error: ' + processError.message, 'error');
+            }
+
+        }, croppingExistingImage ? (currentFiles[existingImageIndex].fileType || 'image/jpeg') : pendingImageFile.type, 0.9);
+
+    } catch (error) {
+        console.error('Error cropping image:', error);
+        alert('Error cropping image: ' + error.message);
+    }
+}
+
+// Initialize attachments when page loads
+document.addEventListener('DOMContentLoaded', function () {
+    // Wait a bit for globalRecordName to be set
+    setTimeout(() => {
+        fetchAttachments();
+    }, 1000);
+
+    // Also fetch attachments when record name changes
+    const originalSetGlobalRecordName = window.setGlobalRecordName;
+    if (originalSetGlobalRecordName) {
+        window.setGlobalRecordName = function (name) {
+            originalSetGlobalRecordName(name);
+            setTimeout(fetchAttachments, 500);
+        };
+    }
+});
