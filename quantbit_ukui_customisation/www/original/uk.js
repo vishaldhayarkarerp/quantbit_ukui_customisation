@@ -468,7 +468,7 @@ document.getElementById('myCheckbox').addEventListener('change', function () {
 
 
 // API Configuration
-const FRAPPE_API_BASE = 'http://testctg.quantcloud.in/api/resource';
+const FRAPPE_API_BASE = window.location.origin + '/api/resource';
 const DOCTYPE_NAME = 'Medical Assessment';
 
 // Function to collect form data
@@ -1012,7 +1012,7 @@ async function saveToFrappe(formData) {
 
             // Fallback: fetch CSRF token from Frappe API
             try {
-                const response = await fetch('http://testctg.quantcloud.in/api/method/frappe.auth.get_csrf_token', {
+                const response = await fetch(`${window.location.origin}/api/method/frappe.auth.get_csrf_token`, {
                     method: 'GET',
                     credentials: 'include',
                     headers: {
@@ -1090,7 +1090,7 @@ async function saveToFrappe(formData) {
         // Optionally redirect to the saved document
         if (result.data && result.data.name) {
             setTimeout(() => {
-                window.location.href = `http://testctg.quantcloud.in/app/medical-assessment/${result.data.name}`;
+                window.location.href = `${window.location.origin}/app/medical-assessment/${result.data.name}`;
             }, 1500);
         }
 
