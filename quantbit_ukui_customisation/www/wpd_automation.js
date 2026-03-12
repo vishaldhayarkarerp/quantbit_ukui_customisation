@@ -128,6 +128,16 @@ function setupAutomation() {
     // Setup CSV interception
     interceptCSVDownloads();
 
+    // Override imageManager.load() to prevent manual loading when using automation
+    if (wpd.imageManager && wpd.imageManager.load) {
+        const originalLoad = wpd.imageManager.load;
+        wpd.imageManager.load = function() {
+            console.log('Manual image load intercepted - use parent window messages instead');
+            // Don't call originalLoad() to prevent the popup
+            return false;
+        };
+    }
+
     if (wpd.popup && typeof wpd.popup.show === 'function') {
         const originalPopupShow = wpd.popup.show;
         wpd.popup.show = function (dialogId) {
@@ -143,6 +153,15 @@ function setupAutomation() {
                                 wpd.calibrateAxesDialog.calibrate();
                             }
                         }, 100);
+                    }
+                }, 100);
+            }
+            // Auto-close the loadNewImage popup since image is already loaded programmatically
+            else if (dialogId === 'loadNewImage') {
+                console.log('Auto-closing loadNewImage popup - image loaded via automation');
+                setTimeout(() => {
+                    if (wpd.popup && wpd.popup.close) {
+                        wpd.popup.close('loadNewImage');
                     }
                 }, 100);
             }

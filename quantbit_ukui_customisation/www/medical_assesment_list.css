@@ -67,8 +67,9 @@ body {
 
 @media (min-width: 768px) {
     .filters-container {
-        grid-template-columns: 1fr 1fr auto;
+        grid-template-columns: 1fr 1fr auto auto;
         align-items: flex-end;
+        gap: 0.75rem;
     }
 }
 

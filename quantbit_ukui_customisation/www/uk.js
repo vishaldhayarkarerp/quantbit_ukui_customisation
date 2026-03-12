@@ -382,9 +382,7 @@ document.addEventListener('DOMContentLoaded', function () {
         medicalForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const formData = new FormData(medicalForm);
-            const data = Object.fromEntries(formData.entries());
-            console.log(JSON.stringify(data, null, 2));
-            alert("Form data has been logged to the browser console (Press F12 to view).");
+            const data = Object.fromEntries(formData.entries());           
         });
 
         if (multipleTypeSelect) multipleTypeSelect.addEventListener('change', handleMultipleTypeChange);
@@ -447,10 +445,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const getDataPointsBtn = document.getElementById('get-data-points-btn');
     const wpdIframe = document.getElementById('wpd-iframe');
+    const reopenWpdBtn = document.getElementById('reopen-wpd-btn');
+    const wpdOverlay = document.getElementById('wpd-overlay');
+
+    // Function to close iframe and show reopen button
+    function closeWpdIframe() {
+        wpdIframe.style.display = 'none';
+        wpdOverlay.style.display = 'none';
+        reopenWpdBtn.style.display = 'block';
+        console.log('WPD iframe closed, reopen button shown');
+    }
+
+    // Function to open iframe and hide reopen button
+    function openWpdIframe() {
+        wpdIframe.style.display = 'block';
+        wpdOverlay.style.display = 'block';
+        reopenWpdBtn.style.display = 'none';
+        console.log('WPD iframe opened, reopen button hidden');
+    }
+
+    // Click on overlay to close iframe
+    wpdOverlay.addEventListener('click', function() {
+        closeWpdIframe();
+    });
+
+    // Reopen button click handler
+    reopenWpdBtn.addEventListener('click', function() {
+        openWpdIframe();
+    });
+
+    // Add hover effect to reopen button
+    reopenWpdBtn.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.05)';
+        this.style.transition = 'transform 0.2s ease';
+    });
+
+    reopenWpdBtn.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+    });
+
+    // Keyboard support - close iframe on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && wpdIframe.style.display === 'block') {
+            closeWpdIframe();
+        }
+    });
 
     // Helper function to process file with WebPlotDigitizer
     function processFileWithWPD(file, wpdIframe) {
-        wpdIframe.style.display = 'block';
+        openWpdIframe();
         console.log('Showing iframe, loading file:', file.name);
         console.log('Iframe src:', wpdIframe.src);
 
@@ -578,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const fileToProcess = selectedFiles[index];
             console.log('Processing file', index + 1, 'of', selectedFiles.length, ':', fileToProcess);
 
-            wpdIframe.style.display = 'block';
+            openWpdIframe();
 
             // Load the ArrayBuffer
             let arrayBuffer;
@@ -1858,6 +1901,11 @@ async function saveToFrappe(formData) {
             throw new Error('API credentials are not properly configured. Please contact your administrator.');
         }
 
+        // Check if we're updating an existing record
+        const urlParams = new URLSearchParams(window.location.search);
+        const existingRecordName = urlParams.get('name');
+        const isUpdate = existingRecordName && existingRecordName.trim() !== '';
+
         // Extract attachments BEFORE JSON stringification (File objects can't be serialized)
         const attachments = formData.attachments || [];
         console.log('Extracted attachments before JSON conversion:', attachments.length, 'files');
@@ -1870,9 +1918,13 @@ async function saveToFrappe(formData) {
 
         // First, save the main record without attachments
         console.log('Authorization header:', `token ${API_KEY}:${API_SECRET}`);
+        console.log(isUpdate ? `Updating existing record: ${existingRecordName}` : 'Creating new record');
 
-        const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}`, {
-            method: 'POST',
+        const apiUrl = isUpdate ? `${FRAPPE_API_BASE}/${DOCTYPE_NAME}/${existingRecordName}` : `${FRAPPE_API_BASE}/${DOCTYPE_NAME}`;
+        const method = isUpdate ? 'PUT' : 'POST';
+
+        const response = await fetch(apiUrl, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -1902,7 +1954,7 @@ async function saveToFrappe(formData) {
             } else if (response.status === 401) {
                 errorMessage = 'Authentication failed. Please check your API credentials.';
             } else if (response.status === 403) {
-                errorMessage = 'Permission denied. You may not have permission to create records.';
+                errorMessage = 'Permission denied. You may not have permission to create or update records.';
             } else if (response.status === 404) {
                 errorMessage = 'Document type not found. Please check the DOCTYPE_NAME.';
             }
@@ -1911,7 +1963,7 @@ async function saveToFrappe(formData) {
         }
 
         const result = await response.json();
-        const recordName = result.data.name; // Get the name of the created record
+        const recordName = isUpdate ? existingRecordName : result.data.name; // Use existing name for update, new name for create
 
         console.log('Main record saved:', recordName);
 
@@ -1924,6 +1976,13 @@ async function saveToFrappe(formData) {
             globalRecordName = recordName;
             // Fetch attachments after record name is updated
             setTimeout(fetchAttachments, 500);
+        }
+
+        // Show appropriate success message
+        if (isUpdate) {
+            showStatus(`Record ${existingRecordName} updated successfully!`, 'success');
+        } else {
+            showStatus(`New record ${recordName} created successfully!`, 'success');
         }
 
         // Now handle file attachments if any - only process local files (not yet uploaded)
@@ -2277,36 +2336,6 @@ if (resetBtnUpdated) {
         }
     });
 }
-
-
-// // Add this function at the beginning of your JavaScript file, before the DOMContentLoaded event listener
-// function testApiCredentials() {
-//     try {
-//         // Access the API credentials from the template context
-//         const apiKey = "{{ api_key }}";
-//         const apiSecret = "{{ api_secret }}";
-
-//         // Log the credentials to console for testing
-//         console.log("API Key:", apiKey);
-//         console.log("API Secret:", apiSecret);
-
-//         // You can use these credentials for API calls
-//         // Example:
-//         // fetch('https://your-api-endpoint.com/data', {
-//         //     headers: {
-//         //         'Authorization': `token ${apiKey}:${apiSecret}`,
-//         //         'Accept': 'application/json',
-//         //         'Content-Type': 'application/json'
-//         //     }
-//         // })
-//         // .then(response => response.json())
-//         // .then(data => console.log('API Response:', data))
-//         // .catch(error => console.error('API Error:', error));
-
-//     } catch (error) {
-//         console.error("Error accessing API credentials:", error);
-//     }
-// }
 
 // Attachment Management Functions
 let currentAttachments = [];
