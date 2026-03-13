@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, get_datetime, generate_hash
+from bs4 import BeautifulSoup 
 
 @frappe.whitelist(allow_guest=False)
 def get_session_info():
