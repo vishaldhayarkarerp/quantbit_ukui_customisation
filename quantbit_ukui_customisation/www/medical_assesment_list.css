@@ -43,6 +43,11 @@ body {
     gap: 1rem;
 }
 
+.header-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
 .header-btn {
     background-color: white;
     color: var(--pink-primary);

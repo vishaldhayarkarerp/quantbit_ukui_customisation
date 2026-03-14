@@ -22,9 +22,14 @@
         <div class="header">
             <div class="header-content">
                 <h1>Medical Assessments</h1>
-                <button onclick="window.location.href='/app/user'" class="header-btn">                   
-                    User List
-                </button>
+                <div class="header-buttons">
+                    <button id="userListBtn" onclick="window.location.href='/app/user'" class="header-btn" style="display: none;">                   
+                        User List
+                    </button>
+                    <button onclick="logout()" class="header-btn">                   
+                        Logout
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -79,7 +84,30 @@
         let currentPage = 1;
         const pageSize = 10;
 
+        async function checkUserRole() {
+            try {
+                const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.get_user_role_profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.message && data.message.role_profile === "Doctor") {
+                        document.getElementById('userListBtn').style.display = 'block';
+                    }
+                } else {
+                    console.error('Failed to fetch user role');
+                }
+            } catch (error) {
+                console.error('Error checking user role:', error);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            checkUserRole();
             fetchAssessments();
 
             document.getElementById('applyFiltersBtn').addEventListener('click', () => {
@@ -186,6 +214,25 @@
             nextBtn.disabled = currentCount < pageSize;
 
             pageInfo.textContent = `Page ${currentPage}`;
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    console.error('Logout failed');
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+            }
         }
     </script>
 </body>

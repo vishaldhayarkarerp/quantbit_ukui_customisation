@@ -21,6 +21,24 @@ def get_session_info():
     }
 
 
+@frappe.whitelist(allow_guest=False)
+def get_user_role_profile():
+    try:
+        user = frappe.session.user
+        if user and user != "Guest":
+            user_doc = frappe.get_doc("User", user)
+            return {
+                "role_profile": user_doc.role_profile_name,
+                "user": user
+            }
+        return {
+            "role_profile": None,
+            "user": user
+        }
+    except Exception as e:
+        return exception_handel(e)
+
+
 from frappe.auth import LoginManager
 
 
@@ -36,6 +54,15 @@ def login(usr, pwd):
         gen_response(200, frappe.response["message"])
     except frappe.AuthenticationError:
         gen_response(500, frappe.response["message"])
+    except Exception as e:
+        return exception_handel(e)
+
+
+@frappe.whitelist(allow_guest=False)
+def logout():
+    try:
+        frappe.local.login_manager.logout()
+        gen_response(200, "Logged Out")
     except Exception as e:
         return exception_handel(e)
 
