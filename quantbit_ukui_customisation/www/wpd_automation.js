@@ -6,11 +6,60 @@ console.log('WebPlotDigitizer automation script loaded');
 // Store record name received from parent
 let recordName = 'Unknown Document';
 
+// Store current image name when loaded
+let currentImageName = 'image';
+
 // Listen for messages from parent window
 window.addEventListener('message', function (event) {
     if (event.data && event.data.action === 'setRecordName') {
         recordName = event.data.recordName;
         console.log('Record name received from parent:', recordName);
+    }
+});
+
+// Message listener to handle image loading from parent window
+window.addEventListener('message', function (event) {
+    if (!event.data) return;
+
+    if (event.data.action === 'loadImage') {
+        const fileData = event.data;
+        console.log('Loading image:', fileData.name);
+        
+        // Store the image name for later use
+        currentImageName = fileData.name ? fileData.name.replace(/\.[^/.]+$/, "") : 'image';
+        console.log('Stored current image name:', currentImageName);
+
+        if (typeof wpd === 'undefined' || !wpd.imageManager) {
+            console.error('WebPlotDigitizer not fully initialized');
+            return;
+        }
+
+        try {
+            const blob = new Blob([fileData.arrayBuffer], { type: fileData.type });
+            const file = new File([blob], fileData.name, { type: fileData.type });
+
+            // wpd.imageManager.loadFromFile expects a File object
+            // Some versions might require initialization
+            if (wpd.imageManager.initializeFileManager) {
+                wpd.imageManager.initializeFileManager([file], true);
+            }
+
+            wpd.imageManager.loadFromFile(file).then(() => {
+                console.log('Image loaded successfully');
+                if (wpd.busyNote) wpd.busyNote.close();
+
+                // Auto-open calibration dialog if not in Electron
+                if (wpd.browserInfo && !wpd.browserInfo.isElectronBrowser()) {
+                    setTimeout(() => {
+                        if (wpd.calibrateAxesDialog) wpd.calibrateAxesDialog.open();
+                    }, 500);
+                }
+            }).catch(error => {
+                console.error('Error parsing image:', error);
+            });
+        } catch (e) {
+            console.error('Error handling loadImage:', e);
+        }
     }
 });
 
@@ -79,10 +128,18 @@ function interceptCSVDownloads() {
 
 function sendCSVToParent(csvData) {
     console.log('Sending CSV data to parent, size:', csvData.length);
+    console.log('Using stored image name:', currentImageName);
+    
+    // Use the stored image name from when the image was loaded
+    const imageName = currentImageName || 'image';
+    
+    console.log('Final image name to send:', imageName);
+    
     window.parent.postMessage({
         action: 'csvDownload',
         csvData: csvData,
-        filename: 'plot_data.csv'
+        filename: 'plot_data.csv',
+        imageName: imageName
     }, '*');
 }
 
@@ -190,44 +247,3 @@ function initAutomation() {
     setTimeout(() => clearInterval(setupInterval), 15000);
 }
 
-// Message listener to handle image loading from parent window
-window.addEventListener('message', function (event) {
-    if (!event.data) return;
-
-    if (event.data.action === 'loadImage') {
-        const fileData = event.data;
-        console.log('Loading image:', fileData.name);
-
-        if (typeof wpd === 'undefined' || !wpd.imageManager) {
-            console.error('WebPlotDigitizer not fully initialized');
-            return;
-        }
-
-        try {
-            const blob = new Blob([fileData.arrayBuffer], { type: fileData.type });
-            const file = new File([blob], fileData.name, { type: fileData.type });
-
-            // wpd.imageManager.loadFromFile expects a File object
-            // Some versions might require initialization
-            if (wpd.imageManager.initializeFileManager) {
-                wpd.imageManager.initializeFileManager([file], true);
-            }
-
-            wpd.imageManager.loadFromFile(file).then(() => {
-                console.log('Image loaded successfully');
-                if (wpd.busyNote) wpd.busyNote.close();
-
-                // Auto-open calibration dialog if not in Electron
-                if (wpd.browserInfo && !wpd.browserInfo.isElectronBrowser()) {
-                    setTimeout(() => {
-                        if (wpd.calibrateAxesDialog) wpd.calibrateAxesDialog.open();
-                    }, 500);
-                }
-            }).catch(error => {
-                console.error('Error parsing image:', error);
-            });
-        } catch (e) {
-            console.error('Error handling loadImage:', e);
-        }
-    }
-});

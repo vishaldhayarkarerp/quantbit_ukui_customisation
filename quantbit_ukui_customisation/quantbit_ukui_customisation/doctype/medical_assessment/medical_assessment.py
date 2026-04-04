@@ -8,39 +8,65 @@ from frappe.model.document import Document
 
 class MedicalAssessment(Document):
 
-    def before_save(self):
-        if not self.attachments or len(self.attachments) < 2:
-            return
+    def before_save(self):           
+        try:
+           
+            attachments = self.get("attachments", [])
+            if not attachments:
+                return                  
+            fhr_files = []
+            uc_files = []
             
-        attachment_fhr, attachment_uc = self.attachments[0], self.attachments[1]
-        
-        if not attachment_fhr.get('attachment') or not attachment_uc.get('attachment'):
-            return
+            for attachment in attachments:
+                filename = attachment.get("name_of_document", "")
+                if filename.upper().startswith("FHR"):
+                    fhr_files.append(attachment)
+                elif filename.upper().startswith("UC"):
+                    uc_files.append(attachment)
             
-        try:                
-            file_fhr = frappe.get_doc("File", {"file_url": attachment_fhr.get('attachment')})
-            file_uc = frappe.get_doc("File", {"file_url": attachment_uc.get('attachment')})
-
-            csv_fhr, csv_uc = file_fhr.get_full_path(), file_uc.get_full_path()
+            if not fhr_files or not uc_files:
+                return
             
-            if not os.path.exists(csv_fhr) or not os.path.exists(csv_uc):
-                frappe.throw("FHR or UC file not found")
+            merged_data = []
+            
+            for fhr_file in fhr_files:
+                fhr_path = os.path.join(frappe.get_site_path(), "public", fhr_file.get("attachment", "").lstrip("/"))
+                if not os.path.exists(fhr_path):
+                    continue
+                    
+                df_fhr = pd.read_csv(fhr_path, header=None, names=["x", "FHR"])
                 
-            df_fhr = pd.read_csv(csv_fhr, header=None, names=["x", "fhr"])
-            df_uc = pd.read_csv(csv_uc, header=None, names=["x", "uc"])
+                for uc_file in uc_files:
+                    uc_path = os.path.join(frappe.get_site_path(), "public", uc_file.get("attachment", "").lstrip("/"))
+                    if not os.path.exists(uc_path):
+                        continue
+                        
+                    df_uc = pd.read_csv(uc_path, header=None, names=["x", "UC"])
+                    
+                    merged = pd.merge(df_fhr, df_uc, on="x", how="outer").fillna(0).sort_values("x")
+                    merged_data.append(merged)
             
-            merged = pd.merge(df_fhr, df_uc, on="x", how="outer").fillna(0).sort_values("x")
+            if not merged_data:
+                frappe.throw("No valid files found for merging")
+            
+            final_merged = pd.concat(merged_data).drop_duplicates(subset=["x"]).sort_values("x")
+            
+            # Delete existing files starting with final_ctg_signal.csv
+            files_dir = os.path.join(frappe.get_site_path(), "public", "files")
+            for filename in os.listdir(files_dir):
+                if filename.startswith("final") and filename.endswith(".csv"):
+                    try:
+                        os.remove(os.path.join(files_dir, filename))
+                    except:
+                        pass
             
             merged_filename = "final_ctg_signal.csv"
             merged_filepath = os.path.join(frappe.get_site_path(), "public", "files", merged_filename)
-            merged.to_csv(merged_filepath, index=False)
+            final_merged.to_csv(merged_filepath, index=False)
             
-            self.append("attachments", {
-                "name_of_document": merged_filename,
-                "attachment": "/files/" + merged_filename,
-            })
-            frappe.msgprint("FHR & UC merged successfully")
-
+            self.final_ctg_data = "/files/" + merged_filename
+            frappe.msgprint("FHR & UC files merged successfully")
+            
         except Exception as e:
             frappe.log_error(str(e), "CTG Processing Error")
-            frappe.throw(f"CTG processing failed: {str(e)}")
+            frappe.throw(f"Error merging files: {str(e)}")

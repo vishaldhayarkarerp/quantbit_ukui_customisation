@@ -522,7 +522,8 @@
   "foetalv",
   "attachments_tab",
   "section_break_xyyt",
-  "attachments"
+  "attachments",
+  "final_ctg_data"
  ],
  "fields": [
   {
@@ -3383,12 +3384,17 @@
    "fieldname": "patient_name",
    "fieldtype": "Data",
    "label": "Patient Name"
+  },
+  {
+   "fieldname": "final_ctg_data",
+   "fieldtype": "Attach",
+   "label": "Final CTG data"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-19 12:48:25.299427",
+ "modified": "2026-03-17 14:59:42.051605",
  "modified_by": "vishal.dhayarkar@erpdata.in",
  "module": "quantbit_ukui_customisation",
  "name": "Medical Assessment",

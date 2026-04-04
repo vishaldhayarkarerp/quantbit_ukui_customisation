@@ -394,6 +394,12 @@ document.addEventListener('DOMContentLoaded', function () {
         tab.classList.add('active');
         sections.forEach(s => s.classList.remove('active'));
         document.getElementById(tab.id.replace('Tab', 'Section')).classList.add('active');
+        
+        // Fetch final CTG data when the Final CTG tab is clicked
+        if (tab.id === 'finalCtgTab') {
+            fetchFinalCtgData();
+        }
+        
         updateNavigationButtons();
     }
 
@@ -599,7 +605,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (getDataPointsBtn && wpdIframe) {
         getDataPointsBtn.addEventListener('click', function () {
             console.log('WebPlotDigitizer button clicked');
-            console.log('Selected files:', selectedFiles);
+          
+            selectedFiles.forEach((file, index) => {
+                console.log(`  ${index + 1}. ${file.name} (type: ${file.type})`);
+            });
             console.log('Current files:', currentFiles);
 
             if (selectedFiles.length === 0) {
@@ -614,12 +623,12 @@ document.addEventListener('DOMContentLoaded', function () {
         // Function to process files sequentially
         window.processNextFile = async function (index) {
             if (index >= selectedFiles.length) {
-                alert('All selected files have been processed!');
+                alert(`All ${selectedFiles.length} selected files have been processed!`);
                 return;
             }
 
             const fileToProcess = selectedFiles[index];
-            console.log('Processing file', index + 1, 'of', selectedFiles.length, ':', fileToProcess);
+            console.log(`Processing file ${index + 1} of ${selectedFiles.length}:`, fileToProcess.name, '(Index:', index, ')');
 
             openWpdIframe();
 
@@ -688,12 +697,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }, '*');
         }
 
-        // Listen for CSV data from WebPlotDigitizer iframe
-        window.addEventListener('message', function (event) {
-            if (event.data && event.data.action === 'csvDownload') {
-                handleCSVDownload(event.data.csvData, event.data.filename);
-            }
-        });
+        // Listen for CSV data from WebPlotDigitizer iframe - DISABLED to avoid conflicts with uk.html handler
+        // window.addEventListener('message', function (event) {
+        //     if (event.data && event.data.action === 'csvDownload') {
+        //         handleCSVDownload(event.data.csvData, event.data.filename);
+        //     }
+        // });
 
         async function handleCSVDownload(csvData, filename) {
             const wpdIframe = document.getElementById('wpd-iframe');
@@ -1368,8 +1377,7 @@ function collectFormData() {
 
         antenatal_problems: document.querySelector('textarea[name="antenatal_problems"]')?.value || '',
         smoking_in_pregnancy: document.querySelector('input[name="smoking_in_pregnancy"]')?.value || '',
-        maternal_autoimmune_disorder: document.querySelector('input[name="maternal_autoimmune_disorder"]')?.value || '',
-
+        
         // Respiratory Problems
         respiratory_problems: document.querySelector('input[name="respiratory"]')?.value || '',
         asthma: document.querySelector('input[name="respiratory_problems"][value="Asthma"]')?.checked ? 1 : 0,
@@ -1475,7 +1483,7 @@ function collectFormData() {
         oth_hep_prd: document.querySelector('input[name="hepatic_problems_list"][value="Other-hepatic-problem"]')?.checked ? 1 : 0,
         hepc: document.querySelector('input[name="hepatic_problems_list"][value="Hepatitis-C"]')?.checked ? 1 : 0,
 
-        // Foetal Movements
+        // Fetal  Movements
         foetal_movements: document.querySelector('input[name="foetal_movements"]')?.value || '',
         episodes: document.querySelector('input[name="episodes"]')?.value || '',
 
@@ -1760,7 +1768,7 @@ function collectFormData() {
         pre_ecla: document.querySelector('input[name="preeclampsia"]')?.value || '',
         plac_abnor: document.querySelector('select[name="placental_abnormality"]')?.value || '',
 
-        // Foetal Variables
+        // Fetal  Variables
         iugr: document.querySelector('input[name="current_iugr"]')?.value || '',
         abnor_drop: document.querySelector('input[name="abnormal_dopplers"]')?.value || '',
 
@@ -1974,6 +1982,8 @@ async function saveToFrappe(formData) {
         // Update global record name in HTML context
         if (typeof globalRecordName !== 'undefined') {
             globalRecordName = recordName;
+            // Clear cache when record changes
+            cachedFinalCtgData = null;
             // Fetch attachments after record name is updated
             setTimeout(fetchAttachments, 500);
         }
@@ -2345,6 +2355,7 @@ let currentCropper = null;
 let pendingImageFile = null;
 let croppingExistingImage = false;
 let existingImageIndex = null;
+let cachedFinalCtgData = null;
 
 async function fetchAttachments() {
     try {
@@ -2391,6 +2402,94 @@ async function fetchAttachments() {
         updateAttachmentsDisplay([]);
         document.getElementById('attachmentsList').innerHTML = '<div class="text-red-500 italic">Error loading attachments.</div>';
     }
+}
+
+// Fetch Final CTG Data from the final_ctg_data field
+async function fetchFinalCtgData() {
+    const display = document.getElementById('finalCtgDataDisplay');
+    
+    try {
+        if (!globalRecordName || globalRecordName === 'Unknown Document') {
+            console.log('No valid record name available for fetching final CTG data');
+            updateFinalCtgDataDisplay(null);
+            return;
+        }
+
+        // Return cached data if available
+        if (cachedFinalCtgData !== null) {
+            updateFinalCtgDataDisplay(cachedFinalCtgData);
+            return;
+        }
+
+        // Show loading state
+        display.innerHTML = '<div class="text-gray-400 italic">Loading final CTG data...</div>';
+
+        const fields = JSON.stringify(["name", "final_ctg_data"]);
+        const url = `${FRAPPE_API_BASE}/Medical Assessment/${globalRecordName}?fields=${fields}`;
+
+        const response = await fetch(url, {
+            headers: { 'Authorization': `token ${API_KEY}:${API_SECRET}` }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Final CTG data result:', result);
+
+        const finalCtgFile = result.data?.final_ctg_data || null;
+        cachedFinalCtgData = finalCtgFile; // Cache the result
+        updateFinalCtgDataDisplay(finalCtgFile);
+
+    } catch (error) {
+        console.error('Error fetching final CTG data:', error);
+        cachedFinalCtgData = null; // Clear cache on error
+        display.innerHTML = `
+            <div class="text-red-400 italic">
+                ⚠️ Error loading final CTG data: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Update Final CTG Data Display
+function updateFinalCtgDataDisplay(finalCtgFileUrl) {
+    const display = document.getElementById('finalCtgDataDisplay');
+    
+    if (!finalCtgFileUrl || finalCtgFileUrl === '') {
+        display.innerHTML = '<div class="text-gray-500 italic">No final CTG data file available.</div>';
+        return;
+    }
+
+    // Extract filename from URL and clean it up
+    const filename = finalCtgFileUrl.split('/').pop() || 'final_ctg_data.csv';
+    const cleanFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    
+    // Check if it's a CSV file for special handling
+    const isCsv = filename.toLowerCase().endsWith('.csv');
+    
+    display.innerHTML = `
+        <div class="flex justify-between items-center p-3 border border-gray-700 bg-gray-800 rounded hover:bg-gray-750 transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="text-lg">${isCsv ? '📊' : '📄'}</span>
+                <div>
+                    <span class="text-sm font-medium">${cleanFilename}</span>
+                    ${isCsv ? '<span class="text-xs text-gray-400 ml-2">(CSV Data)</span>' : ''}
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <a href="${finalCtgFileUrl}" target="_blank" 
+                   class="px-2 py-1 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded transition-colors">
+                    🔍 View
+                </a>
+                <a href="${finalCtgFileUrl}" download="${cleanFilename}" 
+                   class="px-2 py-1 text-xs text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded transition-colors">
+                    ⬇️ Download
+                </a>
+            </div>
+        </div>
+    `;
 }
 
 function updateAttachmentsDisplay(attachments) {
@@ -2837,8 +2936,34 @@ async function cropAndSaveImage() {
     }
 }
 
+// User role check function
+async function checkUserRole() {
+    try {
+        const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.get_user_role_profile`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.message && data.message.role_profile === "Doctor") {
+                document.getElementById('get-data-points-btn').style.display = 'block';
+            }
+        } else {
+            console.error('Failed to fetch user role');
+        }
+    } catch (error) {
+        console.error('Error checking user role:', error);
+    }
+}
+
 // Initialize attachments when page loads
 document.addEventListener('DOMContentLoaded', function () {
+    // Check user role when page loads
+    checkUserRole();
+    
     // Wait a bit for globalRecordName to be set
     setTimeout(() => {
         fetchAttachments();
@@ -2849,6 +2974,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (originalSetGlobalRecordName) {
         window.setGlobalRecordName = function (name) {
             originalSetGlobalRecordName(name);
+            // Clear cache when record name changes
+            cachedFinalCtgData = null;
             setTimeout(fetchAttachments, 500);
         };
     }

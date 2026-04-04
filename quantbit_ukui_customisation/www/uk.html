@@ -46,7 +46,9 @@
             <button id="cordBloodTab" class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white">Cord
                 Blood</button>
             <button id="webplotTab"
-                class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white rounded-tr-lg">Attachment</button>
+                class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white">Attachment</button>
+            <button id="finalCtgTab"
+                class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white rounded-tr-lg">Final CTG data</button>
         </div>
 
         <div class="bg-gray-800 p-6 md:p-8 rounded-b-xl shadow-lg">
@@ -192,19 +194,9 @@
                             <input type="hidden" name="smoking_in_pregnancy" value="No">
                         </div>
 
+                        
                         <div class="form-group">
-                            <label class="form-label">16. Maternal autoimmune disorder?</label>
-                            <div class="yes-no-group">
-                                <button type="button" class="yes-btn" data-target="maternal_autoimmune_disorder"
-                                    data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="maternal_autoimmune_disorder"
-                                    data-value="No">NO</button>
-                            </div>
-                            <input type="hidden" name="maternal_autoimmune_disorder" value="No">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">17. Have You Had Any Respiratory Problems?</label>
+                            <label class="form-label">17. Any history of Any Respiratory Problems?</label>
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="respiratory" data-value="Yes"
                                     data-modal-id="respiratoryModal">YES</button>
@@ -228,7 +220,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">19. Have you had any cardiac problems?</label>
+                            <label class="form-label">19. Any history of any cardiac problems?</label>
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="cardiac_problems" data-value="Yes"
                                     data-modal-id="cardiacModal">YES</button>
@@ -252,7 +244,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">21. Have you had anaemia or other haematological problems?</label>
+                            <label class="form-label">21. Any history of anaemia or other haematological problems?</label>
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="haematological_problems"
                                     data-value="Yes" data-modal-id="haematologicalModal">YES</button>
@@ -277,7 +269,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">23. Have you had jaundice or liver problems?</label>
+                            <label class="form-label">23. Any history of jaundice or liver problems?</label>
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="hepatic_problems" data-value="Yes"
                                     data-modal-id="hepaticModal">YES</button>
@@ -303,7 +295,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">25. Have you had any gastrointestinal problems?</label>
+                            <label class="form-label">25. Any history of any gastrointestinal problems?</label>
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="gastrointestinal_problems"
                                     data-value="Yes" data-modal-id="gastrointestinalModal">YES</button>
@@ -315,7 +307,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">26. Have you had any endocrine problems?</label>
+                            <label class="form-label">26. Any history of any endocrine problems?</label>
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="endocrine_problems" data-value="Yes"
                                     data-modal-id="endocrineModal">YES</button>
@@ -327,7 +319,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">27. Have you had fits, epilepsy or neurological problems?</label>
+                            <label class="form-label">27. Any history of fits, epilepsy or neurological problems?</label>
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="neurological_problems"
                                     data-value="Yes" data-modal-id="neurologicalModal">YES</button>
@@ -351,7 +343,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">29. Have you had any of the following infections?</label>
+                            <label class="form-label">29. Any history of any of the following infections?</label>
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="infections" data-value="Yes"
                                     data-modal-id="infectionsModal">YES</button>
@@ -959,7 +951,7 @@
                                         placeholder="mEq/L">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label-small">Lafctate</label>
+                                    <label class="form-label-small">Lactate</label>
                                     <input type="number" step="0.1" name="arterial_lactate" class="form-input"
                                         placeholder="mmol/L">
                                 </div>
@@ -1041,7 +1033,7 @@
                             </label>
                             <input id="file-upload" type="file" name="file" accept="*/*" multiple style="display:none;">
 
-                            <button id="get-data-points-btn" class="btn-primary" type="button">
+                            <button id="get-data-points-btn" class="btn-primary" type="button" style="display:none;">
                                 <span>Get Data Points</span>
                             </button>
 
@@ -1060,6 +1052,19 @@
                         
                         <!-- Overlay for click-outside detection -->
                         <div id="wpd-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1099;background:transparent;"></div>
+                    </div>
+                </div>
+
+                <!-- Final CTG Data Section -->
+                <div id="finalCtgSection" class="section space-y-6">
+                    <h2 class="text-2xl font-semibold text-pink-300">Final CTG Data</h2>
+                    <div class="bg-gray-700 p-6 rounded-lg">
+                        <p class="text-gray-300 mb-6">Final merged CTG data file from FHR and UC analysis.</p>
+                        
+                        <!-- Final CTG Data Display -->
+                        <div id="finalCtgDataDisplay" class="w-full">
+                            <div class="text-gray-500 italic">Loading final CTG data...</div>
+                        </div>
                     </div>
                 </div>
         </div>
@@ -3129,24 +3134,37 @@
         window.addEventListener('message', function (event) {
             if (event.data && event.data.action === 'csvDownload') {
                 console.log('CSV download intercepted:', event.data);
-                handleCSVDownload(event.data.csvData, event.data.filename);
+                // Use the same logic as uk.js to maintain consistency
+                const wpdIframe = document.getElementById('wpd-iframe');
+                const currentIndex = parseInt(wpdIframe.getAttribute('data-current-index') || '0');
+                console.log('Current index from iframe:', currentIndex);
+                console.log('Image name from message:', event.data.imageName);
+                handleCSVDownload(event.data.csvData, event.data.filename, currentIndex, event.data.imageName);
             }
         });
 
         // Handle CSV download and upload to Frappe
-        function handleCSVDownload(csvData, filename) {
+        function handleCSVDownload(csvData, filename, currentIndex, imageName) {
             console.log('Handling CSV download:', filename);
             console.log('CSV data length:', csvData.length);
-
-            // Create a Blob from the CSV data
-            const blob = new Blob([csvData], { type: 'text/csv' });
+            console.log('Using currentIndex:', currentIndex);
+            console.log('Received image name:', imageName);
 
             // Get the current record name
             const recordName = getCurrentRecordName();
 
-            // Format filename as record_name_csv.csv
-            const csvFilename = recordName + '_csv.csv';
+            // Use the image name from the message, or fallback to selectedFiles, or default
+            const finalImageName = imageName || 
+                (window.selectedFiles && window.selectedFiles[currentIndex] 
+                    ? window.selectedFiles[currentIndex].name.replace(/\.[^/.]+$/, "")
+                    : `image_${currentIndex}`);
+            
+            // Format filename as imagename_digitized.csv
+            const csvFilename = `${finalImageName}_digitized.csv`;
+            console.log('Generated CSV filename:', csvFilename, 'from image:', finalImageName);
 
+            // Create a Blob from the CSV data
+            const blob = new Blob([csvData], { type: 'text/csv' });
             const file = new File([blob], csvFilename, { type: 'text/csv' });
 
             // Get API credentials
@@ -3162,35 +3180,43 @@
                     console.log('CSV uploaded successfully:', fileUrl);
 
                     // Attach file to the current record
-                    return attachFileToRecord(recordName, fileUrl, csvFilename, API_KEY, API_SECRET);
+                    return attachFileToRecord(recordName, fileUrl, csvFilename, API_KEY, API_SECRET, currentIndex);
                 })
                 .then(() => {
                     console.log('CSV attached to record successfully');
 
-                    // Show custom confirm dialog with automatic popup trigger
-                    const userConfirmed = confirm('CSV data has been downloaded and attached to the record!\n\nClick OK to automatically open the image loader for the next image, or Cancel to close.');
-
-                    if (userConfirmed) {
-                        // Trigger WebPlotDigitizer popup for loading new image
-                        console.log('User confirmed, triggering WebPlotDigitizer popup');
+                    // Move to next file automatically (like uk.js handler was doing)
+                    if (window.processNextFile) {
+                        console.log('Moving to next file:', currentIndex + 1);
+                        console.log(`Successfully processed file ${currentIndex + 1} and attached as ${csvFilename}`);
                         setTimeout(() => {
-                            // Try to trigger the popup using wpd object
-                            try {
-                                const wpdIframe = document.getElementById('wpd-iframe');
-                                if (wpdIframe && wpdIframe.contentWindow && wpdIframe.contentWindow.wpd) {
-                                    // Show the load new image popup
-                                    wpdIframe.contentWindow.wpd.popup.show('loadNewImage');
-                                    console.log('WebPlotDigitizer popup triggered successfully');
+                            window.processNextFile(currentIndex + 1);
+                        }, 1000);
+                    } else {
+                        // Fallback: Show custom confirm dialog with manual popup trigger
+                        const userConfirmed = confirm('CSV data has been downloaded and attached to the record!\n\nClick OK to manually open the image loader for the next image, or Cancel to close.');
 
-                                    // Wait for popup to load and then automatically upload second image
-                                    setTimeout(() => {
-                                        const fileUploadMgr = window._fileUploadManager || new FileUploadManager();
-                                        const files = fileUploadMgr.files;
-                                        console.log('Available files:', files);
+                        if (userConfirmed) {
+                            // Trigger WebPlotDigitizer popup for loading new image
+                            console.log('User confirmed, triggering WebPlotDigitizer popup');
+                            setTimeout(() => {
+                                // Try to trigger the popup using wpd object
+                                try {
+                                    const wpdIframe = document.getElementById('wpd-iframe');
+                                    if (wpdIframe && wpdIframe.contentWindow && wpdIframe.contentWindow.wpd) {
+                                        // Show the load new image popup
+                                        wpdIframe.contentWindow.wpd.popup.show('loadNewImage');
+                                        console.log('WebPlotDigitizer popup triggered successfully');
 
-                                        if (files && files.length >= 2) {
-                                            const secondImage = files[1]; // Get the second uploaded image
-                                            console.log('Auto-uploading second image:', secondImage.name);
+                                        // Wait for popup to load and then automatically upload second image
+                                        setTimeout(() => {
+                                            const fileUploadMgr = window._fileUploadManager || new FileUploadManager();
+                                            const files = fileUploadMgr.files;
+                                            console.log('Available files:', files);
+
+                                            if (files && files.length >= 2) {
+                                                const secondImage = files[1]; // Get the second uploaded image
+                                                console.log('Auto-uploading second image:', secondImage.name);
 
                                             // Find the file input in the iframe and set the file
                                             const iframeDoc = wpdIframe.contentWindow.document;
@@ -3254,9 +3280,8 @@
                                 alert('Please click the "Get Data Points" button again to load the next image.');
                             }
                         }, 500);
-                    } else {
-                        console.log('User cancelled automatic popup');
                     }
+                }
                 })
                 .catch(error => {
                     console.error('Error handling CSV download:', error);
@@ -3290,10 +3315,10 @@
             });
         }
 
-        function attachFileToRecord(recordName, fileUrl, filename, apiKey, apiSecret) {
+        function attachFileToRecord(recordName, fileUrl, filename, apiKey, apiSecret, currentIndex) {
             return new Promise((resolve, reject) => {
-                const wpdIframe = document.getElementById('wpd-iframe');
-                const currentIndex = parseInt(wpdIframe.getAttribute('data-current-index') || '0');
+                // Use the currentIndex parameter instead of getting from iframe
+                console.log('attachFileToRecord called with currentIndex:', currentIndex);
 
                 // Fetch the current record
                 fetch(`/api/resource/Medical Assessment/${recordName}`, {
@@ -3307,25 +3332,30 @@
                     .then(data => {
                         if (data.data) {
                             let existingAttachments = data.data.attachments || [];
-                            let updatedAttachments = [];
+                            let updatedAttachments = [...existingAttachments];
+                            // Find if this CSV already exists (to avoid duplicates)
+                            const existingIndex = updatedAttachments.findIndex(att => 
+                                att.name_of_document === filename
+                            );
 
-                            // 1. CLEAR: If length > 2, we only keep the first two rows (or empty placeholders)
-                            // This ensures Frappe deletes any rows from index 2 onwards.
-                            for (let i = 0; i < 2; i++) {
-                                if (existingAttachments[i]) {
-                                    updatedAttachments.push(existingAttachments[i]);
-                                } else {
-                                    updatedAttachments.push({}); // Placeholder for missing row
+                            if (existingIndex >= 0) {
+                                // Update existing attachment
+                                updatedAttachments[existingIndex].name_of_document = filename;
+                                updatedAttachments[existingIndex].attachment = fileUrl;
+                                console.log(`Updated existing CSV at index ${existingIndex}: ${filename}`);
+                            } else {
+                                // Append new attachment at the correct position based on currentIndex
+                                // Ensure we have enough slots in the array
+                                while (updatedAttachments.length <= currentIndex) {
+                                    updatedAttachments.push({});
                                 }
-                            }
-
-                            // 2. UPDATE: Apply your new file data to the correct slot (0 or 1)
-                            let targetRow = updatedAttachments[currentIndex];
-                            targetRow.name_of_document = filename;
-                            targetRow.attachment = fileUrl;
-                            updatedAttachments[currentIndex] = targetRow;
-
-                            console.log(`Table cleared to 2 rows. Updating index ${currentIndex} for ${filename}`);
+                                
+                                updatedAttachments[currentIndex] = {
+                                    name_of_document: filename,
+                                    attachment: fileUrl
+                                };
+                                console.log(`Added new CSV at index ${currentIndex}: ${filename}`);
+                            }    
 
                             // 3. PUT: Send the truncated array back to Frappe
                             return fetch(`/api/resource/Medical Assessment/${recordName}`, {
