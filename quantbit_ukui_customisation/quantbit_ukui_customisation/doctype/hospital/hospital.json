@@ -1,0 +1,53 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:hospital_name",
+ "creation": "2026-04-10 10:58:39.224919",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "hospital_name",
+  "hospital_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "hospital_name",
+   "fieldtype": "Data",
+   "label": "Hospital Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "hospital_id",
+   "fieldtype": "Data",
+   "label": "Hospital ID"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-10 11:25:11.069071",
+ "modified_by": "vishal.dhayarkar@erpdata.in",
+ "module": "quantbit_ukui_customisation",
+ "name": "Hospital",
+ "naming_rule": "By fieldname",
+ "owner": "vishal.dhayarkar@erpdata.in",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

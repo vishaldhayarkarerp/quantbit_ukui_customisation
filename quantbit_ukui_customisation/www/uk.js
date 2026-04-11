@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // --- Global Variables ---
+    window.globalRecordName = 'Unknown Document';
+
     // --- Test API Credentials Access ---
     debugCredentials(); // Debug credentials on page load
 
@@ -39,10 +42,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const lmpModal = document.getElementById('lmpModal');
     const modalOpeners = document.querySelectorAll('[data-modal-id]');
 
+    // Hospital related elements
+    const hospitalInput = document.getElementById('hospitalInput');
+    const hospitalLookupBtn = document.getElementById('hospitalLookupBtn');
+    const hospitalModal = document.getElementById('hospitalModal');
+    const hospitalSearchInput = document.getElementById('hospitalSearchInput');
+    const hospitalOptions = document.getElementById('hospitalOptions');
+    const hospitalSelectBtn = document.getElementById('hospitalSelectBtn');
+    const hospitalHidden = document.getElementById('hospital_hidden');
+
     // --- Modal Open/Close Handlers with SCROLL LOCK ---
     function openModal(modal) {
         if (!modal) return;
-        if (modal.id !== 'specifyTextModal' && modal.id !== 'previousPregnanciesModal') {
+        if (modal.id !== 'specifyTextModal' && modal.id !== 'previousPregnanciesModal' && modal.id !== 'hospitalModal') {
             loadCheckboxModalState(modal);
         }
         modal.classList.remove('hidden');
@@ -176,6 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (modal.id === 'specifyTextModal') saveSpecifyTextState();
         else if (modal.id === 'raceModal') saveRaceModalState();
         else if (modal.id === 'multiplePregnancyModal') saveMultiplePregnancyModalState();
+        else if (modal.id === 'hospitalModal') saveHospitalModalState();
         else if (modal.id !== 'previousPregnanciesModal') saveCheckboxModalState(modal);
         closeModal(modal);
     }
@@ -217,6 +230,22 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('multiple_pregnancy_zygosity_hidden').value = document.getElementById('zygosity_select_modal').value;
         const triggerBtn = document.querySelector('.yes-btn[data-modal-id="multiplePregnancyModal"]');
         if (triggerBtn) triggerBtn.innerHTML = multipleTypeSelect.value ? 'Show' : 'YES';
+    }
+
+    function saveHospitalModalState() {
+        const selectedOption = hospitalOptions.querySelector('.hospital-option.selected');
+        if (selectedOption) {
+            const hospitalValue = selectedOption.dataset.value;
+            const hospitalName = selectedOption.textContent.trim();
+            
+            hospitalInput.value = hospitalValue; // Save the actual hospital value to the main field
+            hospitalHidden.value = hospitalValue; // Also save to hidden field for reference
+            
+            if (hospitalLookupBtn) {
+                hospitalLookupBtn.textContent = hospitalName;
+                hospitalLookupBtn.classList.add('active');
+            }
+        }
     }
 
     function handleYesNoClick(button) {
@@ -332,6 +361,127 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Hospital API functions
+    async function searchHospitals(query = '') {
+        try {
+            const response = await fetch('/api/method/frappe.desk.search.search_link', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    doctype: 'Hospital',
+                    txt: query
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to search hospitals');
+            }
+
+            const data = await response.json();
+            return data.message || [];
+        } catch (error) {
+            console.error('Error searching hospitals:', error);
+            return [];
+        }
+    }
+
+    async function validateHospital(hospitalName) {
+        try {
+            const response = await fetch('http://103.219.1.138:4426/api/method/frappe.client.validate_link', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    doctype: 'Hospital',
+                    docname: hospitalName,
+                    value: hospitalName
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to validate hospital');
+            }
+
+            const data = await response.json();
+            return data.message;
+        } catch (error) {
+            console.error('Error validating hospital:', error);
+            return null;
+        }
+    }
+
+    function displayHospitalOptions(hospitals) {
+        if (!hospitalOptions) return;
+
+        if (hospitals.length === 0) {
+            hospitalOptions.innerHTML = '<div class="text-gray-500 p-4">No hospitals found</div>';
+            return;
+        }
+
+        hospitalOptions.innerHTML = hospitals.map(hospital => `
+            <div class="hospital-option p-3 hover:bg-gray-600 cursor-pointer border-b border-gray-600" 
+                 data-value="${hospital.value}">
+                <div class="font-medium">${hospital.value}</div>
+                ${hospital.description ? `<div class="text-sm text-gray-400">${hospital.description}</div>` : ''}
+            </div>
+        `).join('');
+
+        // Add click handlers to options
+        hospitalOptions.querySelectorAll('.hospital-option').forEach(option => {
+            option.addEventListener('click', async () => {
+                // Remove previous selection
+                hospitalOptions.querySelectorAll('.hospital-option').forEach(opt => {
+                    opt.classList.remove('selected', 'bg-gray-600');
+                });
+                
+                // Add selection to clicked option
+                option.classList.add('selected', 'bg-gray-600');
+                
+                // Get hospital name and validate immediately
+                const hospitalName = option.dataset.value;
+                
+                // Validate the selected hospital
+                const validation = await validateHospital(hospitalName);
+                if (validation && validation.name) {
+                    // Save the selection and close modal
+                    saveHospitalModalState();
+                    closeModal(hospitalModal);
+                } else {
+                    alert('Invalid hospital selection. Please try again.');
+                }
+            });
+        });
+    }
+
+    async function setupHospitalModal() {
+        if (!hospitalModal || !hospitalSearchInput) return;
+
+        // Setup search functionality
+        let searchTimeout;
+        hospitalSearchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                const query = e.target.value.trim();
+                const hospitals = await searchHospitals(query);
+                displayHospitalOptions(hospitals);
+            }, 300);
+        });
+
+        // Setup modal open handler to load hospitals
+        hospitalLookupBtn?.addEventListener('click', async () => {
+            // Clear search and load initial hospitals
+            hospitalSearchInput.value = '';
+            const hospitals = await searchHospitals();
+            displayHospitalOptions(hospitals);
+            
+            // Focus search input
+            hospitalSearchInput.focus();
+        });
+    }
+
     function setupEventListeners() {
         tabs.forEach(tab => tab.addEventListener('click', () => handleTabClick(tab)));
         yesNoGroups.forEach(group => group.addEventListener('click', (e) => {
@@ -379,6 +529,7 @@ document.addEventListener('DOMContentLoaded', function () {
         prevBtn?.addEventListener('click', () => navigateTabs(false));
         nextBtn?.addEventListener('click', () => navigateTabs(true));
         resetBtn?.addEventListener('click', handleFormReset);
+        
         medicalForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const formData = new FormData(medicalForm);
@@ -398,6 +549,11 @@ document.addEventListener('DOMContentLoaded', function () {
         // Fetch final CTG data when the Final CTG tab is clicked
         if (tab.id === 'finalCtgTab') {
             fetchFinalCtgData();
+        }
+        
+        // Fetch attachments when the Attachment tab is clicked
+        if (tab.id === 'webplotTab') {
+            fetchAttachments();
         }
         
         updateNavigationButtons();
@@ -424,6 +580,10 @@ document.addEventListener('DOMContentLoaded', function () {
             raceLookupBtn.textContent = 'Select Race...';
             raceLookupBtn.classList.remove('active');
         }
+        if (hospitalLookupBtn) {
+            hospitalLookupBtn.textContent = 'Select';
+            hospitalLookupBtn.classList.remove('active');
+        }
         document.querySelectorAll('.btn-specify').forEach(btn => {
             btn.textContent = 'Specify...'; // UPDATED TEXT
             btn.classList.remove('active');
@@ -448,6 +608,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setupPreviousPregnancies();
     setupLmpLogic();
     setupDatePickers();
+    setupHospitalModal();
 
     const getDataPointsBtn = document.getElementById('get-data-points-btn');
     const wpdIframe = document.getElementById('wpd-iframe');
@@ -1234,6 +1395,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const docName = urlParams.get('name');
     if (docName) {
+        // Set global record name immediately
+        window.globalRecordName = docName;
+        console.log('Set globalRecordName from URL:', docName);
+        
         // Wait a small bit to ensure all setup is complete
         setTimeout(() => loadDocumentData(docName), 500);
     }
@@ -1814,7 +1979,10 @@ function collectFormData() {
         foetalv: document.querySelector('input[name="venous_hb"]')?.value || '',
         po2v: document.querySelector('input[name="venous_po2"]')?.value || '',
         pco2v: document.querySelector('input[name="venous_pco2"]')?.value || '',
-        hco3v: document.querySelector('input[name="venous_hco3"]')?.value || ''
+        hco3v: document.querySelector('input[name="venous_hco3"]')?.value || '',
+
+        // Hospital Information
+        hospital: document.querySelector('input[name="hospital"]')?.value || ''
     };
 
     // Collect Previous Pregnancies Table Data
@@ -1980,8 +2148,8 @@ async function saveToFrappe(formData) {
         console.log('Record name stored for CSV attachment:', window.currentRecordName);
 
         // Update global record name in HTML context
-        if (typeof globalRecordName !== 'undefined') {
-            globalRecordName = recordName;
+        if (typeof window.globalRecordName !== 'undefined') {
+            window.globalRecordName = recordName;
             // Clear cache when record changes
             cachedFinalCtgData = null;
             // Fetch attachments after record name is updated
@@ -2163,7 +2331,7 @@ class FileUploadManager {
             this.files.push(...validFiles);
 
             // Check if a record already exists
-            const hasExistingRecord = (typeof globalRecordName !== 'undefined' && globalRecordName && globalRecordName !== 'Unknown Document') ||
+            const hasExistingRecord = (typeof window.globalRecordName !== 'undefined' && window.globalRecordName && window.globalRecordName !== 'Unknown Document') ||
                 (typeof window.currentRecordName !== 'undefined' && window.currentRecordName);
 
             if (hasExistingRecord) {
@@ -2358,8 +2526,9 @@ let existingImageIndex = null;
 let cachedFinalCtgData = null;
 
 async function fetchAttachments() {
+    console.log('fetchAttachments() called - globalRecordName:', window.globalRecordName);
     try {
-        if (!globalRecordName || globalRecordName === 'Unknown Document') {
+        if (!window.globalRecordName || window.globalRecordName === 'Unknown Document') {
             console.log('No valid record name available for fetching attachments');
             updateAttachmentsDisplay([]);
             return;
@@ -2367,7 +2536,7 @@ async function fetchAttachments() {
 
         const filters = JSON.stringify([
             ["attached_to_doctype", "=", DOCTYPE_NAME],
-            ["attached_to_name", "=", globalRecordName]
+            ["attached_to_name", "=", window.globalRecordName]
         ]);
         const fields = JSON.stringify(["name", "file_name", "file_url", "is_private", "creation"]);
         const url = `${FRAPPE_API_BASE}/File?filters=${filters}&fields=${fields}`;
@@ -2381,21 +2550,47 @@ async function fetchAttachments() {
         }
 
         const result = await response.json();
+        console.log('API Response:', result);
+        console.log('Result data:', result.data);
+        console.log('Result data length:', result.data ? result.data.length : 'undefined');
 
         if (result.data && result.data.length > 0) {
-            const serverFiles = result.data.map(f => ({
-                type: 'server',
-                fid: f.name,
-                name: f.file_name,
-                url: f.file_url,
-                creation: f.creation,
-                fileType: f.file_name.endsWith('.csv') ? 'text/csv' : 'image/png'
-            }));
+            console.log('Processing attachments...');
+            const serverFiles = result.data.map(f => {
+                console.log('Processing file:', f);
+                // Properly detect file type based on file extension
+                const extension = f.file_name.split('.').pop().toLowerCase();
+                let fileType = 'application/octet-stream'; // default
+                
+                if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension)) {
+                    fileType = `image/${extension === 'jpg' ? 'jpeg' : extension}`;
+                } else if (extension === 'csv') {
+                    fileType = 'text/csv';
+                } else if (extension === 'txt') {
+                    fileType = 'text/plain';
+                } else if (extension === 'pdf') {
+                    fileType = 'application/pdf';
+                }
+                
+                return {
+                    type: 'server',
+                    fid: f.name,
+                    name: f.file_name,
+                    url: f.file_url,
+                    creation: f.creation,
+                    fileType: fileType
+                };
+            });
             currentFiles = [...serverFiles, ...currentFiles.filter(f => f.type === 'local')];
+            console.log('Updated currentFiles:', currentFiles);
+        } else {
+            console.log('No attachments found, keeping local files');
+            // No attachments found, but keep local files
+            currentFiles = [...currentFiles.filter(f => f.type === 'local')];
         }
 
         updateAttachmentsDisplay(currentFiles);
-        console.log('Attachments fetched:', currentFiles);
+        console.log('Final attachments to display:', currentFiles);
 
     } catch (error) {
         console.error('Error fetching attachments:', error);
@@ -2409,7 +2604,7 @@ async function fetchFinalCtgData() {
     const display = document.getElementById('finalCtgDataDisplay');
     
     try {
-        if (!globalRecordName || globalRecordName === 'Unknown Document') {
+        if (!window.globalRecordName || window.globalRecordName === 'Unknown Document') {
             console.log('No valid record name available for fetching final CTG data');
             updateFinalCtgDataDisplay(null);
             return;
@@ -2425,7 +2620,7 @@ async function fetchFinalCtgData() {
         display.innerHTML = '<div class="text-gray-400 italic">Loading final CTG data...</div>';
 
         const fields = JSON.stringify(["name", "final_ctg_data"]);
-        const url = `${FRAPPE_API_BASE}/Medical Assessment/${globalRecordName}?fields=${fields}`;
+        const url = `${FRAPPE_API_BASE}/Medical Assessment/${window.globalRecordName}?fields=${fields}`;
 
         const response = await fetch(url, {
             headers: { 'Authorization': `token ${API_KEY}:${API_SECRET}` }
@@ -2497,8 +2692,11 @@ function updateAttachmentsDisplay(attachments) {
     const btn = document.getElementById('get-data-points-btn');
     list.innerHTML = '';
 
-    if (currentFiles.length === 0) {
-        list.innerHTML = '<div class="text-gray-500 italic">No files currently attached.</div>';
+    // Always filter to show only image files
+    const filteredAttachments = attachments.filter(f => isImageFile(f));
+
+    if (filteredAttachments.length === 0) {
+        list.innerHTML = '<div class="text-gray-500 italic">No image files currently attached.</div>';
         btn.textContent = 'Get Data Points';
         return;
     }
@@ -2508,7 +2706,13 @@ function updateAttachmentsDisplay(attachments) {
         ? `Get Data Points (${selectedFiles.length})`
         : 'Get Data Points';
 
-    list.innerHTML = currentFiles.map((f, i) => {
+    list.innerHTML = filteredAttachments.map((f, filteredIndex) => {
+        // Find the original index in the full attachments array
+        const originalIndex = attachments.findIndex(att => 
+            (f.type === 'server' && f.url === att.url) ||
+            (f.type === 'local' && f.name === att.name)
+        );
+
         const isSelected = selectedFiles.some(sf =>
             (f.type === 'server' && f.url === sf.url) ||
             (f.type === 'local' && f.name === sf.name)
@@ -2519,15 +2723,15 @@ function updateAttachmentsDisplay(attachments) {
             : "border-gray-700 bg-gray-800 hover:bg-gray-700";
 
         return `
-            <div onclick="selectFile(${i})" class="flex justify-between items-center p-3 border rounded mt-2 cursor-pointer transition ${cardClass}">
+            <div onclick="selectFile(${originalIndex})" class="flex justify-between items-center p-3 border rounded mt-2 cursor-pointer transition ${cardClass}">
                 <div class="flex items-center gap-3">
-                    <input type="checkbox" ${isSelected ? 'checked' : ''} class="w-4 h-4 accent-pink-600" onclick="event.stopPropagation(); selectFile(${i})">
+                    <input type="checkbox" ${isSelected ? 'checked' : ''} class="w-4 h-4 accent-pink-600" onclick="event.stopPropagation(); selectFile(${originalIndex})">
                     <span class="text-sm">${f.type === 'server' ? '✅' : '⏳'} ${f.name}</span>
                 </div>
                 <div class="flex gap-4">
-                    ${isImageFile(f) ? `<button onclick="event.stopPropagation(); cropExistingImage(${i})" class="text-xs text-green-400 hover:text-green-300 hover:underline">Crop</button>` : ''}
+                    ${isImageFile(f) ? `<button onclick="event.stopPropagation(); cropExistingImage(${originalIndex})" class="text-xs text-green-400 hover:text-green-300 hover:underline">Crop</button>` : ''}
                     ${f.url ? `<a href="${f.url}" target="_blank" class="text-xs text-blue-400 hover:underline" onclick="event.stopPropagation()">View</a>` : ''}
-                    ${f.type === 'server' ? `<button onclick="event.stopPropagation(); deleteServerFile(${i})" class="text-xs text-red-500 hover:text-red-400 hover:underline">Delete</button>` : ''}
+                    ${f.type === 'server' ? `<button onclick="event.stopPropagation(); deleteServerFile(${originalIndex})" class="text-xs text-red-500 hover:text-red-400 hover:underline">Delete</button>` : ''}
                 </div>
             </div>
         `;
@@ -2813,7 +3017,7 @@ async function cropAndSaveImage() {
 
     // Since we are uploading immediately, the main record MUST be saved first
     // so we have a valid ID (globalRecordName) to attach the file to.
-    const isRecordSaved = globalRecordName && globalRecordName !== 'Unknown Document';
+    const isRecordSaved = window.globalRecordName && window.globalRecordName !== 'Unknown Document';
 
     showStatus('Cropping image...', 'info');
 

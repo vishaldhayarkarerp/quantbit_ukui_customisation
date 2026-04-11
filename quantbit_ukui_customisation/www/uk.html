@@ -47,6 +47,8 @@
                 Blood</button>
             <button id="webplotTab"
                 class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white">Attachment</button>
+            <button id="hospitalInfoTab"
+                class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white">Hospital Info</button>
             <button id="finalCtgTab"
                 class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white rounded-tr-lg">Final CTG data</button>
         </div>
@@ -1033,6 +1035,7 @@
                             </label>
                             <input id="file-upload" type="file" name="file" accept="*/*" multiple style="display:none;">
 
+                            
                             <button id="get-data-points-btn" class="btn-primary" type="button" style="display:none;">
                                 <span>Get Data Points</span>
                             </button>
@@ -1067,8 +1070,47 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Hospital Info Section -->
+                <div id="hospitalInfoSection" class="section space-y-6">
+                    <h2 class="text-2xl font-semibold text-pink-300">Hospital Information</h2>
+                    <div class="bg-gray-700 p-6 rounded-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                <label class="form-label">Hospital</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="text" id="hospitalInput" name="hospital" class="form-input flex-1"
+                                        placeholder="Select Hospital..." readonly>
+                                    <button type="button" id="hospitalLookupBtn" class="btn-lookup" 
+                                        data-modal-id="hospitalModal">Select</button>
+                                </div>
+                                <input type="hidden" id="hospital_hidden" name="hospital_hidden" value="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
         </div>
         </form>
+    </div>
+
+    <div id="hospitalModal" class="modal hidden">
+        <div class="modal-container">
+            <div class="modal-content">
+                <button type="button" class="modal-close-btn">&times;</button>
+                <h3 class="modal-title">Select Hospital</h3>
+                <div class="mb-4">
+                    <input type="text" id="hospitalSearchInput" class="form-input" placeholder="Search hospitals...">
+                </div>
+                <div id="hospitalOptions" class="scroll-container max-h-60 overflow-y-auto">
+                    <div class="text-gray-500">Loading hospitals...</div>
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button type="button" class="btn-secondary modal-close-btn">Cancel</button>
+                    <button type="button" id="hospitalSelectBtn" class="btn-primary">Select</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="raceModal" class="modal hidden">
@@ -3342,7 +3384,7 @@
                                 // Update existing attachment
                                 updatedAttachments[existingIndex].name_of_document = filename;
                                 updatedAttachments[existingIndex].attachment = fileUrl;
-                                console.log(`Updated existing CSV at index ${existingIndex}: ${filename}`);
+                                console.log(`Updated existing CSV at index ${existingIndex}: ${fi   lename}`);
                             } else {
                                 // Append new attachment at the correct position based on currentIndex
                                 // Ensure we have enough slots in the array
@@ -3355,10 +3397,10 @@
                                     attachment: fileUrl
                                 };
                                 console.log(`Added new CSV at index ${currentIndex}: ${filename}`);
-                            }    
+                            }      
 
                             // 3. PUT: Send the truncated array back to Frappe
-                            return fetch(`/api/resource/Medical Assessment/${recordName}`, {
+                            return fetch(`/api/resource/Medical Assessment/${window.globalRecordName}`, {
                                 method: 'PUT',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -3386,4 +3428,5 @@
     </script>
 </body>
 
-</html>
+</html>     
+

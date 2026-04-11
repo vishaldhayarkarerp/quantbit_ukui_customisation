@@ -253,7 +253,6 @@ body {
 }
 
 .modal-close-btn:hover {
-    transform: rotate(90deg);
     color: white;
 }
 

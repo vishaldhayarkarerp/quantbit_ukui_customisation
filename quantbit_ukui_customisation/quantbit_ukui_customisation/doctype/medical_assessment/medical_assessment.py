@@ -18,10 +18,26 @@ class MedicalAssessment(Document):
             uc_files = []
             
             for attachment in attachments:
-                filename = attachment.get("name_of_document", "")
-                if filename.upper().startswith("FHR"):
+                # Get filename with multiple fallbacks to ensure it's never None
+                filename = attachment.get("name_of_document")
+                if filename is None:
+                    filename = attachment.get("name_of_document", "")
+                if filename is None:
+                    filename = ""
+                
+                # Convert to string if it's not already
+                if not isinstance(filename, str):
+                    try:
+                        filename = str(filename)
+                    except:
+                        filename = ""
+                
+                # Strip whitespace and check if it's a valid string
+                filename = str(filename).strip() if filename else ""
+                
+                if filename and filename.upper().startswith("FHR"):
                     fhr_files.append(attachment)
-                elif filename.upper().startswith("UC"):
+                elif filename and filename.upper().startswith("UC"):
                     uc_files.append(attachment)
             
             if not fhr_files or not uc_files:
@@ -33,7 +49,7 @@ class MedicalAssessment(Document):
                 fhr_path = os.path.join(frappe.get_site_path(), "public", fhr_file.get("attachment", "").lstrip("/"))
                 if not os.path.exists(fhr_path):
                     continue
-                    
+                        
                 df_fhr = pd.read_csv(fhr_path, header=None, names=["x", "FHR"])
                 
                 for uc_file in uc_files:

@@ -523,7 +523,9 @@
   "attachments_tab",
   "section_break_xyyt",
   "attachments",
-  "final_ctg_data"
+  "final_ctg_data",
+  "tab_6_tab",
+  "hospital"
  ],
  "fields": [
   {
@@ -3389,12 +3391,23 @@
    "fieldname": "final_ctg_data",
    "fieldtype": "Attach",
    "label": "Final CTG data"
+  },
+  {
+   "fieldname": "tab_6_tab",
+   "fieldtype": "Tab Break",
+   "label": "Hospital Info"
+  },
+  {
+   "fieldname": "hospital",
+   "fieldtype": "Link",
+   "label": "Hospital",
+   "options": "Hospital"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-17 14:59:42.051605",
+ "modified": "2026-04-10 12:29:07.989783",
  "modified_by": "vishal.dhayarkar@erpdata.in",
  "module": "quantbit_ukui_customisation",
  "name": "Medical Assessment",

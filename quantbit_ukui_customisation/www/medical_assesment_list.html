@@ -40,9 +40,9 @@
                     <input type="text" id="assessmentIdFilter" class="filter-input" placeholder="Search by ID...">
                 </div>
                 <div class="filter-group">
-                    <label for="patientNameFilter" class="filter-label">Patient Name</label>
-                    <input type="text" id="patientNameFilter" class="filter-input"
-                        placeholder="Search by patient name...">
+                    <label for="hospitalNameFilter" class="filter-label">Hospital Name</label>
+                    <input type="text" id="hospitalNameFilter" class="filter-input"
+                        placeholder="Search by hospital name...">
                 </div>
                 <button id="applyFiltersBtn" class="btn-filter">Search</button>
                 <a href="/uk" class="btn-filter">Add new</a>
@@ -57,7 +57,8 @@
                     <thead>
                         <tr>
                             <th>Assessment ID</th>
-                            <th>Patient Name</th>
+                            <th>Hospital ID</th>
+                            <th>Hospital Name</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -139,70 +140,70 @@
         });
 
         async function fetchAssessments() {
-            const loader = document.getElementById('loader');
-            const listContainer = document.getElementById('listContainer');
-            const pagination = document.getElementById('pagination');
-            const errorMessage = document.getElementById('errorMessage');
-            const tableBody = document.getElementById('assessmentTableBody');
+    const loader = document.getElementById('loader');
+    const listContainer = document.getElementById('listContainer');
+    const pagination = document.getElementById('pagination');
+    const errorMessage = document.getElementById('errorMessage');
+    const tableBody = document.getElementById('assessmentTableBody');
 
-            const assessmentId = document.getElementById('assessmentIdFilter').value;
-            const patientName = document.getElementById('patientNameFilter').value;
+    const assessmentId = document.getElementById('assessmentIdFilter').value;
+    const hospitalName = document.getElementById('hospitalNameFilter').value;
 
-            // Show loader, hide others
-            loader.classList.remove('hidden');
-            listContainer.classList.add('hidden');
-            pagination.classList.add('hidden');
-            errorMessage.classList.add('hidden');
+    loader.classList.remove('hidden');
+    listContainer.classList.add('hidden');
+    pagination.classList.add('hidden');
+    errorMessage.classList.add('hidden');
 
-            try {
-                const start = (currentPage - 1) * pageSize;
-                let url = `${window.location.origin}/api/resource/Medical%20Assessment?order_by=modified%20desc&fields=["name","patient_name","modified"]&limit_start=${start}&limit_page_length=${pageSize}`;
+    try {
+        const start = (currentPage - 1) * pageSize;
 
-                let filters = [];
-                if (assessmentId) {
-                    filters.push(["name", "like", `%${assessmentId}%`]);
-                }
-                if (patientName) {
-                    filters.push(["patient_name", "like", `%${patientName}%`]);
-                }
+        const fields = JSON.stringify(["name", "hospital", "hospital.hospital_name", "hospital.hospital_id", "modified"]);
+        let url = `${window.location.origin}/api/resource/Medical%20Assessment?order_by=modified%20desc&fields=${encodeURIComponent(fields)}&limit_start=${start}&limit_page_length=${pageSize}`;
 
-                if (filters.length > 0) {
-                    url += `&filters=${JSON.stringify(filters)}`;
-                }
-
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const result = await response.json();
-                const assessments = result.data || [];
-
-                if (assessments.length === 0 && currentPage === 1) {
-                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400">No assessments found.</td></tr>';
-                    pagination.classList.add('hidden');
-                } else {
-                    tableBody.innerHTML = assessments.map(item => `
-                        <tr>
-                            <td class="assessment-name">${item.name}</td>
-                            <td>${item.patient_name || '--'}</td>
-                            <td>
-                                <a href="uk.html?name=${item.name}" class="btn-view">View Details</a>
-                            </td>
-                        </tr>
-                    `).join('');
-
-                    updatePaginationUI(assessments.length);
-                    pagination.classList.remove('hidden');
-                }
-
-                loader.classList.add('hidden');
-                listContainer.classList.remove('hidden');
-            } catch (error) {
-                console.error('Error fetching assessments:', error);
-                loader.classList.add('hidden');
-                errorMessage.classList.remove('hidden');
-            }
+        let filters = [];
+        if (assessmentId) {
+            filters.push(["name", "like", `%${assessmentId}%`]);
         }
+        if (hospitalName) {
+            filters.push(["hospital.hospital_name", "like", `%${hospitalName}%`]);
+        }
+        if (filters.length > 0) {
+            url += `&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const result = await response.json();
+        const assessments = result.data || [];
+
+        if (assessments.length === 0 && currentPage === 1) {
+            tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400">No assessments found.</td></tr>';
+            pagination.classList.add('hidden');
+        } else {
+            tableBody.innerHTML = assessments.map(item => `
+                <tr>
+                    <td class="assessment-name">${item.name}</td>
+                    <td>${item.hospital_id || '--'}</td>
+                    <td>${item.hospital_name || '--'}</td>
+                    <td>
+                        <a href="uk.html?name=${item.name}" class="btn-view">View Details</a>
+                    </td>
+                </tr>
+            `).join('');
+
+            updatePaginationUI(assessments.length);
+            pagination.classList.remove('hidden');
+        }
+
+        loader.classList.add('hidden');
+        listContainer.classList.remove('hidden');
+    } catch (error) {
+        console.error('Error fetching assessments:', error);
+        loader.classList.add('hidden');
+        errorMessage.classList.remove('hidden');
+    }
+}
 
         function updatePaginationUI(currentCount) {
             const prevBtn = document.getElementById('prevBtn');
@@ -210,7 +211,6 @@
             const pageInfo = document.getElementById('pageInfo');
 
             prevBtn.disabled = currentPage === 1;
-            // If we have fewer items than the page size, there's likely no next page
             nextBtn.disabled = currentCount < pageSize;
 
             pageInfo.textContent = `Page ${currentPage}`;
