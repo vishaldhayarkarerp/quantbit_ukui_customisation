@@ -136,4 +136,39 @@ def generate_key(user):
     else:
         api_secret = user_details.get_password("api_secret")
         api_key = user_details.get("api_key")
-    return {"api_secret": api_secret, "api_key": api_key}
+    return {"api_secret": api_secret, "api_key": api_key} 
+
+
+
+
+
+@frappe.whitelist()
+def create_hospital(hospital_id, hospital_name):
+    try:
+        # Check duplicate hospital_id
+        if frappe.db.exists("Hospital", {"hospital_id": hospital_id}):
+            return gen_response(400, f"Hospital ID '{hospital_id}' already exists")
+
+        # Check duplicate hospital_name
+        if frappe.db.exists("Hospital", {"hospital_name": hospital_name}):
+            return gen_response(400, f"Hospital Name '{hospital_name}' already exists")
+
+        hospital = frappe.new_doc("Hospital")
+        hospital.hospital_id = hospital_id
+        hospital.hospital_name = hospital_name
+
+        hospital.insert(ignore_permissions=True)
+        frappe.db.commit()
+
+        return gen_response(200, f"Hospital '{hospital_name}' created successfully", {
+            "hospital_id": hospital_id,
+            "hospital_name": hospital_name,
+            "name": hospital.name
+        })
+
+    except frappe.exceptions.ValidationError as ve:
+        return gen_response(400, str(ve))
+
+    except Exception as e:
+        frappe.log_error(title="Create Hospital Error", message=frappe.get_traceback())
+        return gen_response(500, f"Failed to create hospital: {str(e)}")

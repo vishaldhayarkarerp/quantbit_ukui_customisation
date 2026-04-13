@@ -50,6 +50,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const hospitalOptions = document.getElementById('hospitalOptions');
     const hospitalSelectBtn = document.getElementById('hospitalSelectBtn');
     const hospitalHidden = document.getElementById('hospital_hidden');
+    
+    // Add Hospital related elements
+    const toggleAddHospital = document.getElementById('toggleAddHospital');
+    const addHospitalForm = document.getElementById('addHospitalForm');
+    const newHospitalId = document.getElementById('newHospitalId');
+    const newHospitalName = document.getElementById('newHospitalName');
+    const cancelAddHospital = document.getElementById('cancelAddHospital');
+    const saveNewHospital = document.getElementById('saveNewHospital');
 
     // --- Modal Open/Close Handlers with SCROLL LOCK ---
     function openModal(modal) {
@@ -238,13 +246,74 @@ document.addEventListener('DOMContentLoaded', function () {
             const hospitalValue = selectedOption.dataset.value;
             const hospitalName = selectedOption.textContent.trim();
             
-            hospitalInput.value = hospitalValue; // Save the actual hospital value to the main field
-            hospitalHidden.value = hospitalValue; // Also save to hidden field for reference
+            hospitalInput.value = hospitalName; // Show hospital name in the main field
+            hospitalHidden.value = hospitalValue; // Save hospital ID to hidden field for reference
             
             if (hospitalLookupBtn) {
                 hospitalLookupBtn.textContent = hospitalName;
                 hospitalLookupBtn.classList.add('active');
             }
+        }
+    }
+
+    async function handleAddNewHospital() {
+        const hospitalId = newHospitalId.value.trim();
+        const hospitalName = newHospitalName.value.trim();
+        
+        if (!hospitalId || !hospitalName) {
+            alert('Please enter both Hospital ID and Hospital Name');
+            return;
+        }
+        
+        try {
+            // Create new hospital document
+            const response = await fetch('/api/method/quantbit_ukui_customisation.api.create_hospital', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    hospital_id: hospitalId,
+                    hospital_name: hospitalName,
+                    doctype: 'Hospital'
+                })
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                
+                // Add the new hospital to the options list
+                const newOption = document.createElement('div');
+                newOption.className = 'hospital-option p-3 hover:bg-gray-600 cursor-pointer border-b border-gray-600';
+                newOption.dataset.value = hospitalId;
+                newOption.textContent = `${hospitalName} (${hospitalId})`;
+                newOption.addEventListener('click', () => {
+                    document.querySelectorAll('.hospital-option').forEach(opt => opt.classList.remove('selected'));
+                    newOption.classList.add('selected');
+                });
+                
+                hospitalOptions.appendChild(newOption);
+                
+                // Clear form and hide
+                newHospitalId.value = '';
+                newHospitalName.value = '';
+                addHospitalForm.classList.add('hidden');
+                
+                // Auto-select the new hospital
+                document.querySelectorAll('.hospital-option').forEach(opt => opt.classList.remove('selected'));
+                newOption.classList.add('selected');
+                
+                alert('Hospital added successfully!');
+                
+                // Auto-select and close modal
+                saveHospitalModalState();
+                closeModal(hospitalModal);
+            } else {
+                throw new Error('Failed to create hospital');
+            }
+        } catch (error) {
+            console.error('Error adding hospital:', error);
+            alert('Failed to add hospital. Please try again.');
         }
     }
 
@@ -389,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function validateHospital(hospitalName) {
         try {
-            const response = await fetch('http://103.219.1.138:4426/api/method/frappe.client.validate_link', {
+            const response = await fetch('/api/method/frappe.client.validate_link', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -476,10 +545,38 @@ document.addEventListener('DOMContentLoaded', function () {
             hospitalSearchInput.value = '';
             const hospitals = await searchHospitals();
             displayHospitalOptions(hospitals);
-            
-            // Focus search input
-            hospitalSearchInput.focus();
+            openModal(hospitalModal);
         });
+        
+        // Also make hospital input field clickable to open modal
+        hospitalInput?.addEventListener('click', async () => {
+            // Clear search and load initial hospitals
+            hospitalSearchInput.value = '';
+            const hospitals = await searchHospitals();
+            displayHospitalOptions(hospitals);
+            openModal(hospitalModal);
+        });
+        
+        // Setup Add Hospital functionality
+        toggleAddHospital?.addEventListener('click', () => {
+            addHospitalForm.classList.toggle('hidden');
+            if (!addHospitalForm.classList.contains('hidden')) {
+                newHospitalId.focus();
+            }
+        });
+        
+        cancelAddHospital?.addEventListener('click', () => {
+            addHospitalForm.classList.add('hidden');
+            newHospitalId.value = '';
+            newHospitalName.value = '';
+        });
+        
+        saveNewHospital?.addEventListener('click', async () => {
+            await handleAddNewHospital();
+        });
+        
+        // Focus search input
+        hospitalSearchInput.focus();
     }
 
     function setupEventListeners() {
@@ -572,7 +669,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.yes-btn[data-modal-id]').forEach(btn => btn.innerHTML = 'YES');
         yesNoGroups.forEach(group => {
             group.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-            group.querySelector('.no-btn').classList.add('active');
         });
         handleTabClick(document.getElementById('maternalTab'));
 
@@ -3182,5 +3278,41 @@ document.addEventListener('DOMContentLoaded', function () {
             cachedFinalCtgData = null;
             setTimeout(fetchAttachments, 500);
         };
+    }
+});
+
+// BMI Calculation Function
+function calculateBMI() {
+    const heightInput = document.getElementById('myTextbox'); // Question 39 - height in meters
+    const weightInput = document.getElementById('weightInput'); // Question 40 - weight in kg
+    const bmiInput = document.querySelector('input[name="bmi"]'); // Question 41 - BMI
+    
+    if (heightInput && weightInput && bmiInput) {
+        const height = parseFloat(heightInput.value);
+        const weight = parseFloat(weightInput.value);
+        
+        if (!isNaN(height) && height > 0 && !isNaN(weight) && weight > 0) {
+            // BMI = weight (kg) / height (m)^2
+            const bmi = weight / (height * height);
+            bmiInput.value = bmi.toFixed(1); // Round to 1 decimal place
+        } else {
+            bmiInput.value = ''; // Clear BMI if inputs are invalid
+        }
+    }
+}
+
+// Add event listeners for height and weight inputs
+document.addEventListener('DOMContentLoaded', function() {
+    const heightInput = document.getElementById('myTextbox');
+    const weightInput = document.getElementById('weightInput');
+    
+    if (heightInput) {
+        heightInput.addEventListener('input', calculateBMI);
+        heightInput.addEventListener('change', calculateBMI);
+    }
+    
+    if (weightInput) {
+        weightInput.addEventListener('input', calculateBMI);
+        weightInput.addEventListener('change', calculateBMI);
     }
 });

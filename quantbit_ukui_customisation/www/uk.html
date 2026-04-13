@@ -94,7 +94,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="prev_iud_stillbirth"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="prev_iud_stillbirth"
+                                <button type="button" class="no-btn" data-target="prev_iud_stillbirth"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="prev_iud_stillbirth" value="No">
@@ -105,7 +105,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="prev_iugr_sga"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="prev_iugr_sga"
+                                <button type="button" class="no-btn" data-target="prev_iugr_sga"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="prev_iugr_sga" value="No">
@@ -116,7 +116,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="pregnancy_loss" data-value="Yes"
                                     data-modal-id="pregnancyLossModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="pregnancy_loss"
+                                <button type="button" class="no-btn" data-target="pregnancy_loss"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="pregnancy_loss" value="No">
@@ -127,7 +127,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="hypertension"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="hypertension"
+                                <button type="button" class="no-btn" data-target="hypertension"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="hypertension" value="No">
@@ -138,7 +138,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="diabetes"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="diabetes"
+                                <button type="button" class="no-btn" data-target="diabetes"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="diabetes" value="No">
@@ -149,7 +149,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="autoimmune"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="autoimmune"
+                                <button type="button" class="no-btn" data-target="autoimmune"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="autoimmune" value="No">
@@ -162,8 +162,15 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">12. BMI</label>
-                            <input type="number" step="0.1" name="bmi" class="form-input" placeholder="Enter BMI">
+                            <label class="form-label">12. What was the woman's blood pressure at booking?</label>
+                            <div class="flex flex-col space-y-2">
+                                <input type="text" id="bpInput" name="bp_at_booking" class="form-input"
+                                    placeholder="e.g. 120/80">
+                                <div class="form-checkbox-group flex items-center space-x-2">
+                                    <input type="checkbox" id="bpNotPerformed" class="form-checkbox">
+                                    <label for="bpNotPerformed" class="text-sm">Not performed</label>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -190,7 +197,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="smoking_in_pregnancy"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="smoking_in_pregnancy"
+                                <button type="button" class="no-btn" data-target="smoking_in_pregnancy"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="smoking_in_pregnancy" value="No">
@@ -202,7 +209,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="respiratory" data-value="Yes"
                                     data-modal-id="respiratoryModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="respiratory"
+                                <button type="button" class="no-btn" data-target="respiratory"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="respiratory" value="No">
@@ -214,7 +221,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="inherited_disorder" data-value="Yes"
                                     data-modal-id="inheritedDisorderModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="inherited_disorder"
+                                <button type="button" class="no-btn" data-target="inherited_disorder"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="inherited_disorder" value="No">
@@ -226,7 +233,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="cardiac_problems" data-value="Yes"
                                     data-modal-id="cardiacModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="cardiac_problems"
+                                <button type="button" class="no-btn" data-target="cardiac_problems"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="cardiac_problems" value="No">
@@ -238,7 +245,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="hypertension_history"
                                     data-value="Yes" data-modal-id="hypertensionHistoryModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="hypertension_history"
+                                <button type="button" class="no-btn" data-target="hypertension_history"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="hypertension_history" value="No">
@@ -250,7 +257,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="haematological_problems"
                                     data-value="Yes" data-modal-id="haematologicalModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="haematological_problems"
+                                <button type="button" class="no-btn" data-target="haematological_problems"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="haematological_problems" value="No">
@@ -263,7 +270,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="thromboembolic_disorder"
                                     data-value="Yes" data-modal-id="thromboembolicModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="thromboembolic_disorder"
+                                <button type="button" class="no-btn" data-target="thromboembolic_disorder"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="thromboembolic_disorder" value="No">
@@ -275,7 +282,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="hepatic_problems" data-value="Yes"
                                     data-modal-id="hepaticModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="hepatic_problems"
+                                <button type="button" class="no-btn" data-target="hepatic_problems"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="hepatic_problems" value="No">
@@ -287,7 +294,7 @@
                             <div class="yes-no-group">
                                 <button type="button" id="foetalMovementsYes" class="yes-btn"
                                     data-target="foetal_movements" data-value="Yes">YES</button>
-                                <button type="button" id="foetalMovementsNo" class="no-btn active"
+                                <button type="button" id="foetalMovementsNo" class="no-btn"
                                     data-target="foetal_movements" data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="foetal_movements" value="No">
@@ -301,7 +308,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="gastrointestinal_problems"
                                     data-value="Yes" data-modal-id="gastrointestinalModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="gastrointestinal_problems"
+                                <button type="button" class="no-btn" data-target="gastrointestinal_problems"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="gastrointestinal_problems" value="No">
@@ -313,7 +320,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="endocrine_problems" data-value="Yes"
                                     data-modal-id="endocrineModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="endocrine_problems"
+                                <button type="button" class="no-btn" data-target="endocrine_problems"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="endocrine_problems" value="No">
@@ -325,7 +332,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="neurological_problems"
                                     data-value="Yes" data-modal-id="neurologicalModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="neurological_problems"
+                                <button type="button" class="no-btn" data-target="neurological_problems"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="neurological_problems" value="No">
@@ -333,11 +340,11 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">28. Is there any history of autoimmune disease?</label>
+                            <label class="form-label">28. Is there any history of autoimmune disease in family?</label>
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="autoimmune_disease" data-value="Yes"
                                     data-modal-id="autoimmuneModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="autoimmune_disease"
+                                <button type="button" class="no-btn" data-target="autoimmune_disease"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="autoimmune_disease" value="No">
@@ -349,7 +356,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="infections" data-value="Yes"
                                     data-modal-id="infectionsModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="infections"
+                                <button type="button" class="no-btn" data-target="infections"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="infections" value="No">
@@ -361,7 +368,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="fertility_treatment" data-value="Yes"
                                     data-modal-id="fertilityModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="fertility_treatment"
+                                <button type="button" class="no-btn" data-target="fertility_treatment"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="fertility_treatment" value="No">
@@ -390,7 +397,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="bleeding_in_pregnancy"
                                     data-value="Yes" data-modal-id="bleedingModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="bleeding_in_pregnancy"
+                                <button type="button" class="no-btn" data-target="bleeding_in_pregnancy"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="bleeding_in_pregnancy" value="No">
@@ -398,11 +405,11 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">33. Any history of medication during this pregnancy?</label>
+                            <label class="form-label">33. Was any medication taken during this pregnancy?</label>
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="medication_in_pregnancy"
                                     data-value="Yes" data-modal-id="medicationModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="medication_in_pregnancy"
+                                <button type="button" class="no-btn" data-target="medication_in_pregnancy"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="medication_in_pregnancy" value="No">
@@ -414,7 +421,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="ever_smoked"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="ever_smoked"
+                                <button type="button" class="no-btn" data-target="ever_smoked"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="ever_smoked" value="No">
@@ -437,7 +444,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="smoker_in_household"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="smoker_in_household"
+                                <button type="button" class="no-btn" data-target="smoker_in_household"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="smoker_in_household" value="No">
@@ -460,7 +467,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="substance_use_before"
                                     data-value="Yes" data-modal-id="substanceModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="substance_use_before"
+                                <button type="button" class="no-btn" data-target="substance_use_before"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="substance_use_before" value="No">
@@ -492,15 +499,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">41. What was the woman's blood pressure at booking?</label>
-                            <div class="flex flex-col space-y-2">
-                                <input type="text" id="bpInput" name="bp_at_booking" class="form-input"
-                                    placeholder="e.g. 120/80">
-                                <div class="form-checkbox-group flex items-center space-x-2">
-                                    <input type="checkbox" id="bpNotPerformed" class="form-checkbox">
-                                    <label for="bpNotPerformed" class="text-sm">Not performed</label>
-                                </div>
-                            </div>
+                            <label class="form-label">41. BMI</label>
+                            <input type="number" step="0.1" name="bmi" class="form-input" placeholder="Enter BMI" readonly>
                         </div>
 
                         <div class="form-group">
@@ -508,7 +508,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="anomaly_scan_result" data-value="Yes"
                                     data-modal-id="anomalyScanModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="anomaly_scan_result"
+                                <button type="button" class="no-btn" data-target="anomaly_scan_result"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="anomaly_scan_result" value="No">
@@ -521,7 +521,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="fgr_risks" data-value="Yes"
                                     data-modal-id="fgrRisksModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="fgr_risks"
+                                <button type="button" class="no-btn" data-target="fgr_risks"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="fgr_risks" value="No">
@@ -546,7 +546,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="preterm_birth_risks" data-value="Yes"
                                     data-modal-id="pretermModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="preterm_birth_risks"
+                                <button type="button" class="no-btn" data-target="preterm_birth_risks"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="preterm_birth_risks" value="No">
@@ -588,7 +588,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="maternal_sepsis"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="maternal_sepsis"
+                                <button type="button" class="no-btn" data-target="maternal_sepsis"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="maternal_sepsis" value="No">
@@ -598,7 +598,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="induction_of_labor" data-value="Yes"
                                     data-modal-id="inductionModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="induction_of_labor"
+                                <button type="button" class="no-btn" data-target="induction_of_labor"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="induction_of_labor" value="No">
@@ -631,7 +631,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="slow_progress"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="slow_progress"
+                                <button type="button" class="no-btn" data-target="slow_progress"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="slow_progress" value="No">
@@ -641,7 +641,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="epidural"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="epidural"
+                                <button type="button" class="no-btn" data-target="epidural"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="epidural" value="No">
@@ -651,7 +651,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="oxytocin_augmentation"
                                     data-value="Yes" data-modal-id="oxytocinModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="oxytocin_augmentation"
+                                <button type="button" class="no-btn" data-target="oxytocin_augmentation"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="oxytocin_augmentation" value="No">
@@ -661,7 +661,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="ivf_details" data-value="Yes"
                                     data-modal-id="ivfDetailsModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="ivf_details"
+                                <button type="button" class="no-btn" data-target="ivf_details"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="ivf_details" value="No">
@@ -671,7 +671,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="maternal_fever"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="maternal_fever"
+                                <button type="button" class="no-btn" data-target="maternal_fever"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="maternal_fever" value="No">
@@ -727,7 +727,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="apla_syndrome"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="apla_syndrome"
+                                <button type="button" class="no-btn" data-target="apla_syndrome"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="apla_syndrome" value="No">
@@ -738,7 +738,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="preeclampsia"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="preeclampsia"
+                                <button type="button" class="no-btn" data-target="preeclampsia"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="preeclampsia" value="No">
@@ -767,7 +767,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="current_iugr"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="current_iugr"
+                                <button type="button" class="no-btn" data-target="current_iugr"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="current_iugr" value="No">
@@ -778,7 +778,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="abnormal_dopplers"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="abnormal_dopplers"
+                                <button type="button" class="no-btn" data-target="abnormal_dopplers"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="abnormal_dopplers" value="No">
@@ -789,7 +789,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="multiple_pregnancy" data-value="Yes"
                                     data-modal-id="multiplePregnancyModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="multiple_pregnancy"
+                                <button type="button" class="no-btn" data-target="multiple_pregnancy"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="multiple_pregnancy_toggle" value="No">
@@ -841,7 +841,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="oligohydramnios"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="oligohydramnios"
+                                <button type="button" class="no-btn" data-target="oligohydramnios"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="oligohydramnios" value="No">
@@ -862,7 +862,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="cord_around_neck"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="cord_around_neck"
+                                <button type="button" class="no-btn" data-target="cord_around_neck"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="cord_around_neck" value="No">
@@ -872,7 +872,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="placental_abruption"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="placental_abruption"
+                                <button type="button" class="no-btn" data-target="placental_abruption"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="placental_abruption" value="No">
@@ -887,7 +887,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="baby_cried"
                                     data-value="Yes">YES</button>
-                                <button type="button" class="no-btn active" data-target="baby_cried"
+                                <button type="button" class="no-btn" data-target="baby_cried"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="baby_cried" value="No">
@@ -897,7 +897,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="neonatal_resuscitation"
                                     data-value="Yes" data-modal-id="resuscitationModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="neonatal_resuscitation"
+                                <button type="button" class="no-btn" data-target="neonatal_resuscitation"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="neonatal_resuscitation" value="No">
@@ -907,7 +907,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="congenital_malformations"
                                     data-value="Yes" data-modal-id="malformationsModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="congenital_malformations"
+                                <button type="button" class="no-btn" data-target="congenital_malformations"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="congenital_malformations" value="No">
@@ -917,7 +917,7 @@
                             <div class="yes-no-group">
                                 <button type="button" class="yes-btn" data-target="nicu_admission" data-value="Yes"
                                     data-modal-id="nicuModal">YES</button>
-                                <button type="button" class="no-btn active" data-target="nicu_admission"
+                                <button type="button" class="no-btn" data-target="nicu_admission"
                                     data-value="No">NO</button>
                             </div>
                             <input type="hidden" name="nicu_admission" value="No">
@@ -1078,12 +1078,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="form-group">
                                 <label class="form-label">Hospital</label>
-                                <div class="flex items-center space-x-2">
-                                    <input type="text" id="hospitalInput" name="hospital" class="form-input flex-1"
-                                        placeholder="Select Hospital..." readonly>
-                                    <button type="button" id="hospitalLookupBtn" class="btn-lookup" 
-                                        data-modal-id="hospitalModal">Select</button>
-                                </div>
+                                <input type="text" id="hospitalInput" name="hospital" class="form-input"
+                                    placeholder="Select Hospital..." readonly>
                                 <input type="hidden" id="hospital_hidden" name="hospital_hidden" value="">
                             </div>
                         </div>
@@ -1097,7 +1093,7 @@
     <div id="hospitalModal" class="modal hidden">
         <div class="modal-container">
             <div class="modal-content">
-                <button type="button" class="modal-close-btn">&times;</button>
+                <button type="button" class="modal-close-btn">✕</button>
                 <h3 class="modal-title">Select Hospital</h3>
                 <div class="mb-4">
                     <input type="text" id="hospitalSearchInput" class="form-input" placeholder="Search hospitals...">
@@ -1105,10 +1101,35 @@
                 <div id="hospitalOptions" class="scroll-container max-h-60 overflow-y-auto">
                     <div class="text-gray-500">Loading hospitals...</div>
                 </div>
-                <div class="flex justify-end mt-6">
-                    <button type="button" class="btn-secondary modal-close-btn">Cancel</button>
-                    <button type="button" id="hospitalSelectBtn" class="btn-primary">Select</button>
+                
+                <!-- Add Hospital Section -->
+                <div class="border-t border-gray-600 pt-4 mt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-medium text-gray-300">Add New Hospital</h4>
+                        <button type="button" id="toggleAddHospital" class="text-xs text-pink-400 hover:text-pink-300 transition-colors">
+                            + Add Hospital
+                        </button>
+                    </div>
+                    <div id="addHospitalForm" class="hidden space-y-3">
+                        <div>
+                            <label class="form-label-small">Hospital ID</label>
+                            <input type="text" id="newHospitalId" class="form-input" placeholder="Enter hospital ID">
+                        </div>
+                        <div>
+                            <label class="form-label-small">Hospital Name</label>
+                            <input type="text" id="newHospitalName" class="form-input" placeholder="Enter hospital name">
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" id="cancelAddHospital" class="btn-secondary text-sm">✕</button>
+                            <button type="button" id="saveNewHospital" class="btn-primary text-sm">Save Hospital</button>
+                        </div>
+                    </div>
                 </div>
+                
+                <!-- <div class="flex justify-end mt-6">
+                    <button type="button" class="btn-secondary modal-close-btn">✕</button>
+                    <button type="button" id="hospitalSelectBtn" class="btn-primary">Select</button>
+                </div> -->
             </div>
         </div>
     </div>
@@ -2035,11 +2056,11 @@
                 <h3 class="modal-title">Select Infection(s)</h3>
                 <div class="scroll-container">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-checkbox-group">
+                        <!-- <div class="form-checkbox-group">
                             <input type="checkbox" id="infectionsNo" name="infections_list" value="No"
                                 class="form-checkbox">
                             <label for="infectionsNo">No</label>
-                        </div>
+                        </div> -->
                         <div class="form-checkbox-group">
                             <input type="checkbox" id="groupBStreptococcus" name="infections_list"
                                 value="Group-B-streptococcus" class="form-checkbox">
@@ -2170,11 +2191,11 @@
                 <h3 class="modal-title">Select Fertility Treatment</h3>
                 <div class="scroll-container">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-checkbox-group">
+                        <!-- <div class="form-checkbox-group">
                             <input type="checkbox" id="fertilityNoOption" name="fertility_treatment_list" value="No"
                                 class="form-checkbox">
                             <label for="fertilityNoOption">No</label>
-                        </div>
+                        </div> -->
                         <div class="form-checkbox-group">
                             <input type="checkbox" id="aiByDonor" name="fertility_treatment_list"
                                 value="Artificial-insemination-by-donor" class="form-checkbox">
@@ -2447,11 +2468,11 @@
                 <h3 class="modal-title">Select Substance(s)</h3>
                 <div class="scroll-container">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-checkbox-group">
+                        <!-- <div class="form-checkbox-group">
                             <input type="checkbox" id="substanceNeverUsed" name="substance_use_before_list"
                                 value="Never-used" class="form-checkbox">
                             <label for="substanceNeverUsed">Never used</label>
-                        </div>
+                        </div> -->
                         <div class="form-checkbox-group">
                             <input type="checkbox" id="crystalMeth" name="substance_use_before_list"
                                 value="Crystal-meth" class="form-checkbox">
@@ -2568,11 +2589,11 @@
                 <h3 class="modal-title">Select Abnormality Detected</h3>
                 <div class="scroll-container">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-checkbox-group">
+                        <!-- <div class="form-checkbox-group">
                             <input type="checkbox" id="anomalyNoDetected" name="anomaly_scan_result_list"
                                 value="No-abnormality-detected" class="form-checkbox">
                             <label for="anomalyNoDetected">No abnormality detected</label>
-                        </div>
+                        </div> -->
                         <div class="form-checkbox-group">
                             <input type="checkbox" id="anencephaly" name="anomaly_scan_result_list" value="Anencephaly"
                                 class="form-checkbox">
@@ -2649,11 +2670,11 @@
                 <h3 class="modal-title">Select FGR Risk Factors</h3>
                 <div class="scroll-container">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-checkbox-group">
+                        <!-- <div class="form-checkbox-group">
                             <input type="checkbox" id="fgrNoRisks" name="fgr_risks_list"
                                 value="No-risk-factors-identified" class="form-checkbox">
                             <label for="fgrNoRisks">No risk factors identified</label>
-                        </div>
+                        </div> -->
                         <div class="form-checkbox-group">
                             <input type="checkbox" id="maternalAge40" name="fgr_risks_list"
                                 value="Maternal-Age->40yrs-at-booking" class="form-checkbox">
@@ -2778,11 +2799,11 @@
                 <h3 class="modal-title">Select Pre-term Birth Risk Factors</h3>
                 <div class="scroll-container">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-checkbox-group">
+                        <!-- <div class="form-checkbox-group">
                             <input type="checkbox" id="pretermNoRisks" name="preterm_birth_risks_list"
                                 value="No-risks-identified" class="form-checkbox">
                             <label for="pretermNoRisks">No risks identified</label>
-                        </div>
+                        </div> -->
                         <div class="form-checkbox-group">
                             <input type="checkbox" id="lletzUnknownDepth" name="preterm_birth_risks_list"
                                 value="LLETZ-unknown-depth" class="form-checkbox">

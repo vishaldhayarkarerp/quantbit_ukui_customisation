@@ -246,10 +246,17 @@ body {
     right: 1.5rem;
     background: none;
     border: none;
-    font-size: 2rem;
+    font-size: 1.2rem;
     color: var(--text-color);
     cursor: pointer;
     transition: transform 0.2s ease;
+    padding: 0.25rem;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
 }
 
 .modal-close-btn:hover {
