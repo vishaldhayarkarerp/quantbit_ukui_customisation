@@ -708,6 +708,11 @@
 
         .pwd-alert svg { width: 14px; height: 14px; flex-shrink: 0; }
 
+        /* Smooth transitions for password steps */
+        .forgot-step {
+            transition: opacity 0.3s ease-in-out;
+        }
+
         /* ══════════════════════════════════════
            Animations
         ══════════════════════════════════════ */
@@ -1134,7 +1139,7 @@
             showAlert('error', 'Please enter both email and password.');
             return;
         }
-
+        
         btn.disabled = true;
         btn.classList.add('loading');
 
@@ -1399,20 +1404,9 @@
 
             const data = await response.json();
 
-            if (response.ok && data.http_status_code === 200) {
-                // Check if OTP is included in message (for testing)
-                let message = data.message || 'OTP sent to your email. Please check your inbox.';
-                
-                // Show success message
-                showForgotAlert('success', message);
-                
-                // If OTP is in message, extract and show it
-                if (message.includes('For testing:')) {
-                    const otp = message.split('For testing: ')[1];
-                    setTimeout(() => {
-                        showForgotAlert('info', `Testing OTP: ${otp}. Enter this OTP to continue.`);
-                    }, 2000);
-                }
+            if (response.ok && (data.http_status_code === 200 || response.status === 200)) {
+                // Show proper success message - OTP is sent to user's email
+                showForgotAlert('success', 'OTP has been sent to your email address. Please check your inbox.');
                 
                 // Show resend button and hide loading
                 const resendBtn = document.getElementById('resendOtpBtn');
@@ -1466,35 +1460,41 @@
 
             const data = await response.json();
 
-            if (response.ok && data.http_status_code === 200) {
+            // Check for successful OTP verification
+            const isSuccess = response.ok && (
+                data.http_status_code === 200 || 
+                (data.message && (
+                    data.message.toLowerCase().includes('success') ||
+                    data.message.toLowerCase().includes('verified') ||
+                    data.message.toLowerCase().includes('otp')
+                )) ||
+                response.status === 200
+            );
+            
+            if (isSuccess) {
                 showForgotAlert('success', data.message || 'OTP verified! Please set your new password.');
                 
-                console.log('OTP verified successfully, showing password fields');
+                // Remove any error styling
+                document.getElementById('otpInput').classList.remove('input-error');
                 
-                // Hide OTP field and show password fields immediately
+                // Get elements
                 const otpContainer = document.getElementById('otpFieldContainer');
                 const passwordStep = document.getElementById('step3Password');
                 const newPasswordInput = document.getElementById('resetNewPassword');
                 
-                console.log('OTP Container:', otpContainer);
-                console.log('Password Step:', passwordStep);
-                console.log('New Password Input:', newPasswordInput);
-                
                 if (otpContainer && passwordStep && newPasswordInput) {
-                    // Hide OTP field
+                    // Hide OTP field immediately
                     otpContainer.style.display = 'none';
                     
-                    // Show password fields
+                    // Show password fields immediately
                     passwordStep.style.display = 'block';
                     
                     // Focus on new password field
                     setTimeout(() => {
                         newPasswordInput.focus();
-                        console.log('Password fields shown and focused');
                     }, 100);
                     
                 } else {
-                    console.error('Missing elements for password field transition');
                     showForgotAlert('error', 'UI transition failed. Please refresh and try again.');
                 }
                 
@@ -1536,17 +1536,9 @@
 
             const data = await response.json();
 
-            if (response.ok && data.http_status_code === 200) {
-                let message = data.message || 'OTP resent successfully. Please check your email.';
-                showForgotAlert('success', message);
-                
-                // If OTP is in message, extract and show it
-                if (message.includes('For testing:')) {
-                    const otp = message.split('For testing: ')[1];
-                    setTimeout(() => {
-                        showForgotAlert('info', `New testing OTP: ${otp}. Enter this OTP to continue.`);
-                    }, 2000);
-                }
+            if (response.ok && (data.http_status_code === 200 || response.status === 200)) {
+                // Show proper success message - OTP is resent to user's email
+                showForgotAlert('success', 'OTP has been resent to your email address. Please check your inbox.');
                 
                 // Focus on OTP input
                 document.getElementById('otpInput').focus();
@@ -1559,31 +1551,6 @@
         } finally {
             resendBtn.disabled = false;
             resendBtn.classList.remove('loading');
-        }
-    }
-
-    // Manual test function - call from browser console: testPasswordFields()
-    function testPasswordFields() {
-        console.log('Testing password field visibility...');
-        
-        const otpContainer = document.getElementById('otpFieldContainer');
-        const passwordStep = document.getElementById('step3Password');
-        const newPasswordInput = document.getElementById('resetNewPassword');
-        
-        console.log('Elements found:', {
-            otpContainer: !!otpContainer,
-            passwordStep: !!passwordStep,
-            newPasswordInput: !!newPasswordInput
-        });
-        
-        if (otpContainer && passwordStep && newPasswordInput) {
-            console.log('Hiding OTP field and showing password fields...');
-            otpContainer.style.display = 'none';
-            passwordStep.style.display = 'block';
-            newPasswordInput.focus();
-            console.log('Test completed successfully!');
-        } else {
-            console.error('Missing elements for test');
         }
     }
 
@@ -1636,7 +1603,18 @@
 
             const data = await response.json();
 
-            if (response.ok && data.http_status_code === 200) {
+            // Check for successful password reset - more flexible conditions
+            const isSuccess = response.ok && (
+                data.http_status_code === 200 || 
+                (data.message && (
+                    data.message.toLowerCase().includes('success') ||
+                    data.message.toLowerCase().includes('reset') ||
+                    data.message.toLowerCase().includes('password')
+                )) ||
+                response.status === 200
+            );
+            
+            if (isSuccess) {
                 showForgotAlert('success', data.message || 'Password reset successfully! You can now login with your new password.');
                 // Close the panel and reset form after delay
                 setTimeout(() => {

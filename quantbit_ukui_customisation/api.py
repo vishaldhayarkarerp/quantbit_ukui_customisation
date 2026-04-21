@@ -179,27 +179,44 @@ def send_otp(email):
         otp_doc.save(ignore_permissions=True)
         frappe.db.commit()
         
-        # Send OTP email immediately with optimized settings
+        # Send OTP email immediately
         try:
             # Use faster email sending with multiple optimizations
             frappe.sendmail(
                 recipients=[email],
-                subject="Password Reset OTP",
+                subject="Password Reset OTP - AIM4SafeBaby",
                 message=f"""
-                <p>Your OTP for password reset is: <strong>{otp}</strong></p>
-                <p>This OTP will expire in 1 hour.</p>
-                <p>If you didn't request this, please ignore this email.</p>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #ec4899;">AIM4SafeBaby - Password Reset</h2>
+                    <p>Your One-Time Password (OTP) for password reset is:</p>
+                    <div style="background: #f3f4f6; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+                        <span style="font-size: 24px; font-weight: bold; color: #1f2937; letter-spacing: 3px;">{otp}</span>
+                    </div>
+                    <p><strong>Important:</strong></p>
+                    <ul>
+                        <li>This OTP will expire in 1 hour</li>
+                        <li>Never share this OTP with anyone</li>
+                        <li>If you didn't request this, please ignore this email</li>
+                    </ul>
+                    <p style="color: #6b7280; font-size: 12px; margin-top: 30px;">
+                        This is an automated message from AIM4SafeBaby Clinical Research Portal.
+                        Please do not reply to this email.
+                    </p>
+                </div>
                 """,
                 reference_doctype="Email OTP Verification",
                 reference_name=otp_doc.name,
-                queue='now',  # Send immediately, don't queue
                 now=True,     # Force immediate sending
-                retry=0       # No retries for faster delivery
+                header="Password Reset OTP"
             )
+            
+            # Log successful email sending
+            frappe.logger().info(f"OTP email sent successfully to {email}")
+            
         except Exception as e:
-            frappe.log_error(f"Failed to send OTP email: {str(e)}", "OTP Email Error")
-            # For development/testing, return OTP in response if email fails
-            return gen_response(200, f"OTP sent successfully. For testing: {otp}")
+            frappe.log_error(f"Failed to send OTP email to {email}: {str(e)}", "OTP Email Error")
+            # Don't fall back to testing mode - return proper error
+            return gen_response(500, f"Failed to send email. Please check your email configuration and try again.")
         
         return gen_response(200, "OTP sent successfully to your email")
         
