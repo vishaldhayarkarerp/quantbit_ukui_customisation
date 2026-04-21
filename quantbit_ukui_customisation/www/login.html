@@ -642,6 +642,45 @@
         .btn-save-pwd:active  { transform: translateY(0); }
         .btn-save-pwd:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+        /* OTP buttons row */
+        .otp-buttons-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.95rem;
+        }
+
+        .otp-buttons-row .btn-save-pwd {
+            flex: 1;
+        }
+
+        .btn-resend-otp {
+            flex: 1;
+            padding: 0.65rem;
+            background: transparent;
+            border: 1px solid rgba(107,114,128,0.4);
+            color: rgba(209,213,219,0.8);
+            border-radius: 0.45rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-resend-otp:hover {
+            background: rgba(107,114,128,0.14);
+            border-color: rgba(209,213,219,0.6);
+            color: rgba(209,213,219,0.9);
+            box-shadow: 0 0 14px rgba(107,114,128,0.18);
+            transform: translateY(-1px);
+        }
+
+        .btn-resend-otp:active { transform: translateY(0); }
+        .btn-resend-otp:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
         /* ── Alert inside change-pwd box ── */
         .pwd-alert {
             padding: 0.55rem 0.8rem;
@@ -808,22 +847,22 @@
             </div>
         </div>
 
-        <!-- ── Change Password Toggle ── -->
-        <button class="change-pwd-toggle" id="changePwdToggle" onclick="toggleChangePwd()">
+        <!-- Forgot Password Toggle -->
+        <button class="change-pwd-toggle" id="forgotPwdToggle" onclick="toggleForgotPwd()">
             <svg class="shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <polyline points="9 12 11 14 15 10"/>
+                <path d="M12 8v4l3 3"/>
             </svg>
-            Change Password
+            Forgot Password
             <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"/>
             </svg>
         </button>
 
-        <!-- ── Change Password Collapsible ── -->
-        <div class="change-pwd-box" id="changePwdBox">
+        <!-- Forgot Password Collapsible -->
+        <div class="change-pwd-box" id="forgotPwdBox">
             <div class="change-pwd-inner">
 
                 <div class="change-pwd-heading">
@@ -832,71 +871,121 @@
                         <rect x="3" y="11" width="18" height="11" rx="2"/>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
-                    Update Your Password
+                    Reset Your Password
                 </div>
 
-                <!-- Current Password -->
-                <div class="form-group">
-                    <label class="form-label" for="currentPassword">Current Password</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                 stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                        </span>
-                        <input type="password" id="currentPassword" class="form-input"
-                               placeholder="Enter your current password"
-                               autocomplete="current-password">
-                        <button type="button" class="toggle-password"
-                                onclick="togglePwd('currentPassword','eyeIconCurrent')">
-                            <svg id="eyeIconCurrent" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                        </button>
+                <!-- Step 1: Email Input -->
+                <div id="step1Email" class="forgot-step">
+                    <div class="form-group">
+                        <label class="form-label" for="resetEmail">Email Address</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                    <polyline points="22,6 12,13 2,6"/>
+                                </svg>
+                            </span>
+                            <input type="email" id="resetEmail" class="form-input"
+                                   placeholder="Enter your email address"
+                                   autocomplete="email">
+                        </div>
                     </div>
+                    
+                    <!-- OTP Field - Hidden initially -->
+                    <div id="otpFieldContainer" style="display:none;">
+                        <div class="form-group">
+                            <label class="form-label" for="otpInput">Enter OTP</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 11l3 3L22 4"/>
+                                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                                    </svg>
+                                </span>
+                                <input type="text" id="otpInput" class="form-input"
+                                       placeholder="Enter 6-digit OTP"
+                                       maxlength="6" pattern="[0-9]{6}">
+                            </div>
+                        </div>
+                        <div class="otp-buttons-row">
+                            <button class="btn-save-pwd" id="verifyOtpBtn" onclick="verifyOTP()">
+                                <span class="btn-text">Verify OTP</span>
+                                <div class="spinner"></div>
+                            </button>
+                            <button class="btn-resend-otp" id="resendOtpBtn" onclick="resendOTP()">
+                                <span class="btn-text">Resend OTP</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-save-pwd" id="sendOtpBtn" onclick="sendOTP()">
+                        <span class="btn-text">Send OTP</span>
+                        <div class="spinner"></div>
+                    </button>
                 </div>
 
-                <!-- New Password -->
-                <div class="form-group">
-                    <label class="form-label" for="newPassword">New Password</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                 stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                        </span>
-                        <input type="password" id="newPassword" class="form-input"
-                               placeholder="Enter new password (min 6 chars)"
-                               autocomplete="new-password">
-                        <button type="button" class="toggle-password"
-                                onclick="togglePwd('newPassword','eyeIconNew')">
-                            <svg id="eyeIconNew" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                        </button>
+                <!-- Step 3: New Password -->
+                <div id="step3Password" class="forgot-step" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label" for="resetNewPassword">New Password</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                            </span>
+                            <input type="password" id="resetNewPassword" class="form-input"
+                                   placeholder="Enter new password (min 6 chars)"
+                                   autocomplete="new-password">
+                            <button type="button" class="toggle-password"
+                                    onclick="togglePwd('resetNewPassword','eyeIconReset')">
+                                <svg id="eyeIconReset" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label" for="resetConfirmPassword">Confirm New Password</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                            </span>
+                            <input type="password" id="resetConfirmPassword" class="form-input"
+                                   placeholder="Confirm new password"
+                                   autocomplete="new-password">
+                            <button type="button" class="toggle-password"
+                                    onclick="togglePwd('resetConfirmPassword','eyeIconConfirm')">
+                                <svg id="eyeIconConfirm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn-save-pwd" id="resetPwdBtn" onclick="resetPassword()">
+                        <span class="btn-text">Reset Password</span>
+                        <div class="spinner"></div>
+                    </button>
                 </div>
 
                 <!-- Alert inside box -->
-                <div id="pwdAlertBox" class="pwd-alert"></div>
-
-                <!-- Save button -->
-                <button class="btn-save-pwd" id="savePwdBtn" onclick="handleChangePassword()">
-                    <span class="btn-text">Save New Password</span>
-                    <div class="spinner"></div>
-                </button>
+                <div id="forgotAlertBox" class="pwd-alert"></div>
 
             </div>
         </div>
-        <!-- /Change Password -->
+        <!-- /Forgot Password -->
 
         <!-- Login alert -->
         <div id="alertBox" class="alert" style="margin-top:1rem;"></div>
@@ -926,6 +1015,9 @@
 <script>
     const API_URL        = `${window.location.origin}/api/method/quantbit_ukui_customisation.api.login`;
     const CHANGE_PWD_URL = `${window.location.origin}/api/method/quantbit_ukui_customisation.api.change_password`;
+    const SEND_OTP_URL   = `${window.location.origin}/api/method/quantbit_ukui_customisation.api.send_otp`;
+    const VERIFY_OTP_URL = `${window.location.origin}/api/method/quantbit_ukui_customisation.api.verify_otp`;
+    const RESET_PWD_URL  = `${window.location.origin}/api/method/quantbit_ukui_customisation.api.reset_password_with_otp`;
 
     /* ══════════════════════════════════════
        HELPERS
@@ -984,6 +1076,19 @@
         box.className = 'pwd-alert';
     }
 
+    /* Forgot-password-section alert */
+    function showForgotAlert(type, message) {
+        const box = document.getElementById('forgotAlertBox');
+        box.className = 'pwd-alert ' + type;
+        box.innerHTML = alertIcon(type) + '<span>' + message + '</span>';
+        box.style.display = 'flex';
+    }
+    function hideForgotAlert() {
+        const box = document.getElementById('forgotAlertBox');
+        box.style.display = 'none';
+        box.className = 'pwd-alert';
+    }
+
     /* Red-shake highlight on a field */
     function markInputError(inputId) {
         const el = document.getElementById(inputId);
@@ -994,20 +1099,25 @@
     }
 
     /* ══════════════════════════════════════
-       TOGGLE CHANGE PASSWORD PANEL
+       TOGGLE FORGOT PASSWORD PANEL
     ══════════════════════════════════════ */
-    function toggleChangePwd() {
-        const box    = document.getElementById('changePwdBox');
-        const toggle = document.getElementById('changePwdToggle');
+    function toggleForgotPwd() {
+        const box    = document.getElementById('forgotPwdBox');
+        const toggle = document.getElementById('forgotPwdToggle');
         const isOpen = box.classList.contains('open');
         box.classList.toggle('open', !isOpen);
         toggle.classList.toggle('open', !isOpen);
         if (isOpen) {
             // clear on close
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value     = '';
-            hidePwdAlert();
+            resetForgotPasswordFlow();
+            hideForgotAlert();
         }
+    }
+
+    /* TOGGLE CHANGE PASSWORD PANEL (Legacy - kept for compatibility)
+    */
+    function toggleChangePwd() {
+        toggleForgotPwd(); // Redirect to forgot password
     }
 
     /* ══════════════════════════════════════
@@ -1228,6 +1338,352 @@
             setTimeout(() => { panel.style.transition = ''; }, 380);
         });
     })();
+
+    /* OTP FLOW FUNCTIONS
+    */
+    
+    // Reset forgot password flow to initial state
+    function resetForgotPasswordFlow() {
+        document.getElementById('step1Email').style.display = 'block';
+        document.getElementById('otpFieldContainer').style.display = 'none';
+        document.getElementById('step3Password').style.display = 'none';
+        document.getElementById('resetEmail').value = '';
+        document.getElementById('otpInput').value = '';
+        document.getElementById('resetNewPassword').value = '';
+        document.getElementById('resetConfirmPassword').value = '';
+        
+        // Show send OTP button and hide resend button
+        const sendBtn = document.getElementById('sendOtpBtn');
+        const resendBtn = document.getElementById('resendOtpBtn');
+        sendBtn.style.display = 'block';
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('loading');
+        resendBtn.style.display = 'none';
+    }
+
+    // Step 1: Send OTP
+    async function sendOTP() {
+        const email = document.getElementById('resetEmail').value.trim();
+        const btn = document.getElementById('sendOtpBtn');
+
+        hideForgotAlert();
+
+        if (!email) {
+            showForgotAlert('error', 'Please enter your email address.');
+            markInputError('resetEmail');
+            return;
+        }
+
+        // Basic email validation
+        if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            showForgotAlert('error', 'Please enter a valid email address.');
+            markInputError('resetEmail');
+            return;
+        }
+
+        // Show OTP field immediately
+        document.getElementById('otpFieldContainer').style.display = 'block';
+        document.getElementById('otpInput').focus();
+        
+        // Hide Send OTP button and show loading state
+        btn.disabled = true;
+        btn.classList.add('loading');
+        btn.style.display = 'none';
+
+        try {
+            const response = await fetch(SEND_OTP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.http_status_code === 200) {
+                // Check if OTP is included in message (for testing)
+                let message = data.message || 'OTP sent to your email. Please check your inbox.';
+                
+                // Show success message
+                showForgotAlert('success', message);
+                
+                // If OTP is in message, extract and show it
+                if (message.includes('For testing:')) {
+                    const otp = message.split('For testing: ')[1];
+                    setTimeout(() => {
+                        showForgotAlert('info', `Testing OTP: ${otp}. Enter this OTP to continue.`);
+                    }, 2000);
+                }
+                
+                // Show resend button and hide loading
+                const resendBtn = document.getElementById('resendOtpBtn');
+                resendBtn.disabled = false;
+                resendBtn.style.display = 'block';
+                
+            } else {
+                showForgotAlert('error', data.message || 'Failed to send OTP. Please try again.');
+                // Show send button again on error
+                btn.style.display = 'block';
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            }
+        } catch (err) {
+            showForgotAlert('error', 'Unable to reach the server. Please check your connection.');
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove('loading');
+        }
+    }
+
+    // Step 2: Verify OTP
+    async function verifyOTP() {
+        const email = document.getElementById('resetEmail').value.trim();
+        const otp = document.getElementById('otpInput').value.trim();
+        const btn = document.getElementById('verifyOtpBtn');
+
+        hideForgotAlert();
+
+        if (!otp) {
+            showForgotAlert('error', 'Please enter the OTP.');
+            markInputError('otpInput');
+            return;
+        }
+
+        if (!/^\d{6}$/.test(otp)) {
+            showForgotAlert('error', 'OTP must be 6 digits.');
+            markInputError('otpInput');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.classList.add('loading');
+
+        try {
+            const response = await fetch(VERIFY_OTP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, otp })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.http_status_code === 200) {
+                showForgotAlert('success', data.message || 'OTP verified! Please set your new password.');
+                
+                console.log('OTP verified successfully, showing password fields');
+                
+                // Hide OTP field and show password fields immediately
+                const otpContainer = document.getElementById('otpFieldContainer');
+                const passwordStep = document.getElementById('step3Password');
+                const newPasswordInput = document.getElementById('resetNewPassword');
+                
+                console.log('OTP Container:', otpContainer);
+                console.log('Password Step:', passwordStep);
+                console.log('New Password Input:', newPasswordInput);
+                
+                if (otpContainer && passwordStep && newPasswordInput) {
+                    // Hide OTP field
+                    otpContainer.style.display = 'none';
+                    
+                    // Show password fields
+                    passwordStep.style.display = 'block';
+                    
+                    // Focus on new password field
+                    setTimeout(() => {
+                        newPasswordInput.focus();
+                        console.log('Password fields shown and focused');
+                    }, 100);
+                    
+                } else {
+                    console.error('Missing elements for password field transition');
+                    showForgotAlert('error', 'UI transition failed. Please refresh and try again.');
+                }
+                
+            } else {
+                showForgotAlert('error', data.message || 'Invalid OTP. Please try again.');
+                markInputError('otpInput');
+            }
+        } catch (err) {
+            showForgotAlert('error', 'Unable to reach the server. Please check your connection.');
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove('loading');
+        }
+    }
+
+    // Resend OTP function
+    async function resendOTP() {
+        const email = document.getElementById('resetEmail').value.trim();
+        const resendBtn = document.getElementById('resendOtpBtn');
+        
+        hideForgotAlert();
+        
+        if (!email) {
+            showForgotAlert('error', 'Please enter your email address.');
+            return;
+        }
+        
+        // Clear OTP input and disable resend button
+        document.getElementById('otpInput').value = '';
+        resendBtn.disabled = true;
+        resendBtn.classList.add('loading');
+        
+        try {
+            const response = await fetch(SEND_OTP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.http_status_code === 200) {
+                let message = data.message || 'OTP resent successfully. Please check your email.';
+                showForgotAlert('success', message);
+                
+                // If OTP is in message, extract and show it
+                if (message.includes('For testing:')) {
+                    const otp = message.split('For testing: ')[1];
+                    setTimeout(() => {
+                        showForgotAlert('info', `New testing OTP: ${otp}. Enter this OTP to continue.`);
+                    }, 2000);
+                }
+                
+                // Focus on OTP input
+                document.getElementById('otpInput').focus();
+                
+            } else {
+                showForgotAlert('error', data.message || 'Failed to resend OTP. Please try again.');
+            }
+        } catch (err) {
+            showForgotAlert('error', 'Unable to reach the server. Please check your connection.');
+        } finally {
+            resendBtn.disabled = false;
+            resendBtn.classList.remove('loading');
+        }
+    }
+
+    // Manual test function - call from browser console: testPasswordFields()
+    function testPasswordFields() {
+        console.log('Testing password field visibility...');
+        
+        const otpContainer = document.getElementById('otpFieldContainer');
+        const passwordStep = document.getElementById('step3Password');
+        const newPasswordInput = document.getElementById('resetNewPassword');
+        
+        console.log('Elements found:', {
+            otpContainer: !!otpContainer,
+            passwordStep: !!passwordStep,
+            newPasswordInput: !!newPasswordInput
+        });
+        
+        if (otpContainer && passwordStep && newPasswordInput) {
+            console.log('Hiding OTP field and showing password fields...');
+            otpContainer.style.display = 'none';
+            passwordStep.style.display = 'block';
+            newPasswordInput.focus();
+            console.log('Test completed successfully!');
+        } else {
+            console.error('Missing elements for test');
+        }
+    }
+
+    // Step 3: Reset Password
+    async function resetPassword() {
+        const email = document.getElementById('resetEmail').value.trim();
+        const newPassword = document.getElementById('resetNewPassword').value;
+        const confirmPassword = document.getElementById('resetConfirmPassword').value;
+        const btn = document.getElementById('resetPwdBtn');
+
+        hideForgotAlert();
+
+        // Validation
+        if (!newPassword) {
+            showForgotAlert('error', 'Please enter a new password.');
+            markInputError('resetNewPassword');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            showForgotAlert('error', 'Password must be at least 6 characters.');
+            markInputError('resetNewPassword');
+            return;
+        }
+
+        if (!confirmPassword) {
+            showForgotAlert('error', 'Please confirm your new password.');
+            markInputError('resetConfirmPassword');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            showForgotAlert('error', 'Passwords do not match.');
+            markInputError('resetConfirmPassword');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.classList.add('loading');
+
+        try {
+            const response = await fetch(RESET_PWD_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    new_password: newPassword
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.http_status_code === 200) {
+                showForgotAlert('success', data.message || 'Password reset successfully! You can now login with your new password.');
+                // Close the panel and reset form after delay
+                setTimeout(() => {
+                    const box = document.getElementById('forgotPwdBox');
+                    const toggle = document.getElementById('forgotPwdToggle');
+                    box.classList.remove('open');
+                    toggle.classList.remove('open');
+                    resetForgotPasswordFlow();
+                }, 2500);
+            } else {
+                showForgotAlert('error', data.message || 'Failed to reset password. Please try again.');
+            }
+        } catch (err) {
+            showForgotAlert('error', 'Unable to reach the server. Please check your connection.');
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove('loading');
+        }
+    }
+
+    // Update Enter key handling for forgot password flow
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        
+        const active = document.activeElement;
+        const forgotPwdOpen = document.getElementById('forgotPwdBox').classList.contains('open');
+        
+        if (forgotPwdOpen) {
+            if (active.id === 'resetEmail') {
+                sendOTP();
+            } else if (active.id === 'otpInput') {
+                verifyOTP();
+            } else if (active.id === 'resetNewPassword' || active.id === 'resetConfirmPassword') {
+                resetPassword();
+            }
+        } else {
+            // Original login logic
+            const changePwdOpen = document.getElementById('changePwdBox').classList.contains('open');
+            if (changePwdOpen &&
+                (active.id === 'currentPassword' || active.id === 'newPassword')) {
+                handleChangePassword();
+            } else {
+                handleLogin();
+            }
+        }
+    });
+
 </script>
 </body>
 </html>

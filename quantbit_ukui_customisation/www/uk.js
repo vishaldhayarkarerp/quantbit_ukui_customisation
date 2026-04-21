@@ -1928,8 +1928,10 @@ function collectFormData() {
         // Physical Measurements
         wom_hg: document.querySelector('input[name="height_m"]')?.value || '',
         not_performed: document.querySelector('input[name="height_not_performed"]')?.checked ? 1 : 0,
+        height_unit: document.querySelector('#heightUnit')?.value || 'Meters',
         wom_wg: document.querySelector('input[name="weight_at_booking"]')?.value || '',
         not_weighed: document.querySelector('input[name="weight_not_weighed"]')?.checked ? 1 : 0,
+        weight_unit: document.querySelector('#weightUnit')?.value || 'Kilograms',
         wom_blod_pres: document.querySelector('input[name="bp_at_booking"]')?.value || '',
         no_perf: document.querySelector('input[name="bp_not_performed"]')?.checked ? 1 : 0,
 
@@ -3281,19 +3283,33 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// BMI Calculation Function
+// BMI Calculation Function with Unit Conversion
 function calculateBMI() {
-    const heightInput = document.getElementById('myTextbox'); // Question 39 - height in meters
-    const weightInput = document.getElementById('weightInput'); // Question 40 - weight in kg
+    const heightInput = document.getElementById('myTextbox'); // Question 39 - height input
+    const weightInput = document.getElementById('weightInput'); // Question 40 - weight input
+    const heightUnit = document.getElementById('heightUnit'); // Height unit selector
+    const weightUnit = document.getElementById('weightUnit'); // Weight unit selector
     const bmiInput = document.querySelector('input[name="bmi"]'); // Question 41 - BMI
     
-    if (heightInput && weightInput && bmiInput) {
-        const height = parseFloat(heightInput.value);
-        const weight = parseFloat(weightInput.value);
+    if (heightInput && weightInput && heightUnit && weightUnit && bmiInput) {
+        const heightValue = parseFloat(heightInput.value);
+        const weightValue = parseFloat(weightInput.value);
         
-        if (!isNaN(height) && height > 0 && !isNaN(weight) && weight > 0) {
+        if (!isNaN(heightValue) && heightValue > 0 && !isNaN(weightValue) && weightValue > 0) {
+            // Convert height to meters if needed
+            let heightInMeters = heightValue;
+            if (heightUnit.value === 'inches') {
+                heightInMeters = heightValue * 0.0254; // 1 inch = 0.0254 meters
+            }
+            
+            // Convert weight to kilograms if needed
+            let weightInKg = weightValue;
+            if (weightUnit.value === 'pounds') {
+                weightInKg = weightValue * 0.453592; // 1 pound = 0.453592 kilograms
+            }
+            
             // BMI = weight (kg) / height (m)^2
-            const bmi = weight / (height * height);
+            const bmi = weightInKg / (heightInMeters * heightInMeters);
             bmiInput.value = bmi.toFixed(1); // Round to 1 decimal place
         } else {
             bmiInput.value = ''; // Clear BMI if inputs are invalid
@@ -3301,10 +3317,36 @@ function calculateBMI() {
     }
 }
 
-// Add event listeners for height and weight inputs
+// Update placeholder text based on selected units
+function updatePlaceholders() {
+    const heightInput = document.getElementById('myTextbox');
+    const weightInput = document.getElementById('weightInput');
+    const heightUnit = document.getElementById('heightUnit');
+    const weightUnit = document.getElementById('weightUnit');
+    
+    if (heightInput && heightUnit) {
+        if (heightUnit.value === 'inches') {
+            heightInput.placeholder = 'Enter height in inches';
+        } else {
+            heightInput.placeholder = 'Enter height in meters';
+        }
+    }
+    
+    if (weightInput && weightUnit) {
+        if (weightUnit.value === 'pounds') {
+            weightInput.placeholder = 'Enter weight in pounds';
+        } else {
+            weightInput.placeholder = 'Enter weight in kilograms';
+        }
+    }
+}
+
+// Add event listeners for height and weight inputs and unit selectors
 document.addEventListener('DOMContentLoaded', function() {
     const heightInput = document.getElementById('myTextbox');
     const weightInput = document.getElementById('weightInput');
+    const heightUnit = document.getElementById('heightUnit');
+    const weightUnit = document.getElementById('weightUnit');
     
     if (heightInput) {
         heightInput.addEventListener('input', calculateBMI);
@@ -3315,4 +3357,21 @@ document.addEventListener('DOMContentLoaded', function() {
         weightInput.addEventListener('input', calculateBMI);
         weightInput.addEventListener('change', calculateBMI);
     }
+    
+    if (heightUnit) {
+        heightUnit.addEventListener('change', function() {
+            updatePlaceholders();
+            calculateBMI(); // Recalculate BMI when unit changes
+        });
+    }
+    
+    if (weightUnit) {
+        weightUnit.addEventListener('change', function() {
+            updatePlaceholders();
+            calculateBMI(); // Recalculate BMI when unit changes
+        });
+    }
+    
+    // Initialize placeholders on page load
+    updatePlaceholders();
 });

@@ -475,10 +475,16 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">39. What is the woman's height? (m)</label>
+                            <label class="form-label">39. What is the woman's height?</label>
                             <div class="flex flex-col space-y-2">
-                                <input type="number" step="0.01" id="myTextbox" name="height_m" class="form-input"
-                                    placeholder="Enter height in meters">
+                                <div class="flex space-x-2">
+                                    <input type="number" step="0.01" id="myTextbox" name="height_m" class="form-input flex-1"
+                                        placeholder="Enter height in meters">
+                                    <select id="heightUnit" class="form-select w-32">
+                                        <option value="meters">Meters</option>
+                                        <option value="inches">Inches</option>
+                                    </select>
+                                </div>
                                 <div class="form-checkbox-group flex items-center space-x-2">
                                     <input type="checkbox" id="myCheckbox" class="form-checkbox">
                                     <label for="myCheckbox" class="text-sm">Not performed</label>
@@ -487,10 +493,16 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">40. What was the woman's weight at booking? (kg)</label>
+                            <label class="form-label">40. What was the woman's weight?</label>
                             <div class="flex flex-col space-y-2">
-                                <input type="number" step="0.1" id="weightInput" name="weight_at_booking"
-                                    class="form-input" placeholder="Enter weight in kilograms">
+                                <div class="flex space-x-2">
+                                    <input type="number" step="0.1" id="weightInput" name="weight_at_booking"
+                                        class="form-input flex-1" placeholder="Enter weight in kilograms">
+                                    <select id="weightUnit" class="form-select w-32">
+                                        <option value="kg">Kilograms</option>
+                                        <option value="pounds">Pounds</option>
+                                    </select>
+                                </div>
                                 <div class="form-checkbox-group flex items-center space-x-2">
                                     <input type="checkbox" id="weightNotWeighed" class="form-checkbox">
                                     <label for="weightNotWeighed" class="text-sm">Not weighed</label>
@@ -2325,11 +2337,11 @@
                 <button type="button" class="modal-close-btn">&times;</button>
                 <h3 class="modal-title">Select Bleeding During Pregnancy</h3>
                 <div class="space-y-4">
-                    <div class="form-checkbox-group">
+                    <!-- <div class="form-checkbox-group">
                         <input type="checkbox" id="bleedingNoOption" name="bleeding_in_pregnancy_list" value="No"
                             class="form-checkbox">
                         <label for="bleedingNoOption">No</label>
-                    </div>
+                    </div> -->
                     <div class="form-checkbox-group">
                         <input type="checkbox" id="bleedingNotAdmitted" name="bleeding_in_pregnancy_list"
                             value="Bleeding-not-admitted" class="form-checkbox">
@@ -2360,11 +2372,11 @@
                 <h3 class="modal-title">Select Medication(s)</h3>
                 <div class="scroll-container">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-checkbox-group">
+                        <!-- <div class="form-checkbox-group">
                             <input type="checkbox" id="medicationNone" name="medication_in_pregnancy_list" value="None"
                                 class="form-checkbox">
                             <label for="medicationNone">None</label>
-                        </div>
+                        </div> -->
                         <div class="form-checkbox-group">
                             <input type="checkbox" id="asthmaDrugs" name="medication_in_pregnancy_list"
                                 value="Asthma-drugs" class="form-checkbox">

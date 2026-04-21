@@ -349,9 +349,11 @@
   "section_break_kjgw",
   "wom_hg",
   "not_performed",
+  "height_unit",
   "column_break_cgja",
   "wom_wg",
   "not_weighed",
+  "weight_unit",
   "column_break_fcmn",
   "wom_blod_pres",
   "no_perf",
@@ -2447,6 +2449,13 @@
    "label": "Not performed"
   },
   {
+   "fieldname": "height_unit",
+   "fieldtype": "Select",
+   "label": "Height Unit",
+   "options": "Meters\nInches",
+   "default": "Meters"
+  },
+  {
    "fieldname": "column_break_cgja",
    "fieldtype": "Column Break"
   },
@@ -2460,6 +2469,13 @@
    "fieldname": "not_weighed",
    "fieldtype": "Check",
    "label": "Not weighed"
+  },
+  {
+   "fieldname": "weight_unit",
+   "fieldtype": "Select",
+   "label": "Weight Unit",
+   "options": "Kilograms\nPounds",
+   "default": "Kilograms"
   },
   {
    "fieldname": "column_break_fcmn",

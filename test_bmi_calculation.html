@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculation Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-input { padding: 8px; margin-right: 10px; }
+        .form-select { padding: 8px; }
+        .result { margin-top: 20px; font-weight: bold; }
+        .test-case { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>BMI Calculation Unit Conversion Test</h1>
+    
+    <div class="test-case">
+        <h3>Test Case 1: Height in Meters, Weight in KG</h3>
+        <div class="form-group">
+            <label>Height: <input type="number" id="height1" step="0.01" value="1.70" class="form-input"> meters</label>
+        </div>
+        <div class="form-group">
+            <label>Weight: <input type="number" id="weight1" step="0.1" value="70" class="form-input"> kg</label>
+        </div>
+        <button onclick="calculateTestBMI(1)">Calculate BMI</button>
+        <div id="result1" class="result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 2: Height in Inches, Weight in Pounds</h3>
+        <div class="form-group">
+            <label>Height: <input type="number" id="height2" step="0.01" value="66.93" class="form-input"> inches (should equal 1.70m)</label>
+        </div>
+        <div class="form-group">
+            <label>Weight: <input type="number" id="weight2" step="0.1" value="154.32" class="form-input"> pounds (should equal 70kg)</label>
+        </div>
+        <button onclick="calculateTestBMI(2)">Calculate BMI</button>
+        <div id="result2" class="result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 3: Mixed Units</h3>
+        <div class="form-group">
+            <label>Height: <input type="number" id="height3" step="0.01" value="64" class="form-input"> inches</label>
+        </div>
+        <div class="form-group">
+            <label>Weight: <input type="number" id="weight3" step="0.1" value="65" class="form-input"> kg</label>
+        </div>
+        <button onclick="calculateTestBMI(3)">Calculate BMI</button>
+        <div id="result3" class="result"></div>
+    </div>
+
+    <script>
+        function calculateTestBMI(testCase) {
+            let heightValue, weightValue, heightUnit, weightUnit;
+            
+            switch(testCase) {
+                case 1:
+                    heightValue = parseFloat(document.getElementById('height1').value);
+                    weightValue = parseFloat(document.getElementById('weight1').value);
+                    heightUnit = 'meters';
+                    weightUnit = 'kg';
+                    break;
+                case 2:
+                    heightValue = parseFloat(document.getElementById('height2').value);
+                    weightValue = parseFloat(document.getElementById('weight2').value);
+                    heightUnit = 'inches';
+                    weightUnit = 'pounds';
+                    break;
+                case 3:
+                    heightValue = parseFloat(document.getElementById('height3').value);
+                    weightValue = parseFloat(document.getElementById('weight3').value);
+                    heightUnit = 'inches';
+                    weightUnit = 'kg';
+                    break;
+            }
+            
+            if (!isNaN(heightValue) && heightValue > 0 && !isNaN(weightValue) && weightValue > 0) {
+                // Convert height to meters if needed
+                let heightInMeters = heightValue;
+                if (heightUnit === 'inches') {
+                    heightInMeters = heightValue * 0.0254; // 1 inch = 0.0254 meters
+                }
+                
+                // Convert weight to kilograms if needed
+                let weightInKg = weightValue;
+                if (weightUnit === 'pounds') {
+                    weightInKg = weightValue * 0.453592; // 1 pound = 0.453592 kilograms
+                }
+                
+                // BMI = weight (kg) / height (m)^2
+                const bmi = weightInKg / (heightInMeters * heightInMeters);
+                
+                const resultDiv = document.getElementById('result' + testCase);
+                resultDiv.innerHTML = `
+                    BMI: ${bmi.toFixed(1)}<br>
+                    Height converted: ${heightValue} ${heightUnit} = ${heightInMeters.toFixed(3)} meters<br>
+                    Weight converted: ${weightValue} ${weightUnit} = ${weightInKg.toFixed(3)} kg<br>
+                    Calculation: ${weightInKg.toFixed(3)} / (${heightInMeters.toFixed(3)} × ${heightInMeters.toFixed(3)}) = ${bmi.toFixed(1)}
+                `;
+            } else {
+                document.getElementById('result' + testCase).innerHTML = 'Please enter valid height and weight values.';
+            }
+        }
+    </script>
+</body>
+</html>
