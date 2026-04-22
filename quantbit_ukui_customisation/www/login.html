@@ -681,6 +681,28 @@
         .btn-resend-otp:active { transform: translateY(0); }
         .btn-resend-otp:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+        /* Timer styles for resend OTP button */
+        .btn-resend-otp.timer-active {
+            background: rgba(107,114,128,0.08);
+            border-color: rgba(107,114,128,0.3);
+            color: rgba(209,213,219,0.6);
+            cursor: not-allowed;
+        }
+
+        .btn-resend-otp.timer-active:hover {
+            background: rgba(107,114,128,0.08);
+            border-color: rgba(107,114,128,0.3);
+            color: rgba(209,213,219,0.6);
+            box-shadow: none;
+            transform: none;
+        }
+
+        .countdown-text {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: rgba(209,213,219,0.9);
+        }
+
         /* ── Alert inside change-pwd box ── */
         .pwd-alert {
             padding: 0.55rem 0.8rem;
@@ -1024,6 +1046,10 @@
     const VERIFY_OTP_URL = `${window.location.origin}/api/method/quantbit_ukui_customisation.api.verify_otp`;
     const RESET_PWD_URL  = `${window.location.origin}/api/method/quantbit_ukui_customisation.api.reset_password_with_otp`;
 
+    // Timer variables for OTP resend
+    let otpTimerInterval = null;
+    let otpTimeRemaining = 0;
+
     /* ══════════════════════════════════════
        HELPERS
     ══════════════════════════════════════ */
@@ -1347,8 +1373,63 @@
     /* OTP FLOW FUNCTIONS
     */
     
+    // Timer functions for OTP resend
+    function startOtpTimer() {
+        // Clear any existing timer
+        if (otpTimerInterval) {
+            clearInterval(otpTimerInterval);
+        }
+        
+        otpTimeRemaining = 60; // 1 minute in seconds
+        const resendBtn = document.getElementById('resendOtpBtn');
+        
+        // Disable button and add timer class
+        resendBtn.disabled = true;
+        resendBtn.classList.add('timer-active');
+        
+        // Update button text immediately
+        updateResendButton();
+        
+        // Start countdown
+        otpTimerInterval = setInterval(() => {
+            otpTimeRemaining--;
+            updateResendButton();
+            
+            if (otpTimeRemaining <= 0) {
+                stopOtpTimer();
+            }
+        }, 1000);
+    }
+    
+    function stopOtpTimer() {
+        if (otpTimerInterval) {
+            clearInterval(otpTimerInterval);
+            otpTimerInterval = null;
+        }
+        
+        const resendBtn = document.getElementById('resendOtpBtn');
+        resendBtn.disabled = false;
+        resendBtn.classList.remove('timer-active');
+        resendBtn.innerHTML = '<span class="btn-text">Resend OTP</span>';
+    }
+    
+    function updateResendButton() {
+        const resendBtn = document.getElementById('resendOtpBtn');
+        if (otpTimeRemaining > 0) {
+            const minutes = Math.floor(otpTimeRemaining / 60);
+            const seconds = otpTimeRemaining % 60;
+            const timeString = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `${seconds}s`;
+            resendBtn.innerHTML = `<span class="btn-text countdown-text">Resend in ${timeString}</span>`;
+        } else {
+            resendBtn.innerHTML = '<span class="btn-text">Resend OTP</span>';
+        }
+    }
+    
     // Reset forgot password flow to initial state
     function resetForgotPasswordFlow() {
+        // Clear any running timer
+        stopOtpTimer();
+        
         document.getElementById('step1Email').style.display = 'block';
         document.getElementById('otpFieldContainer').style.display = 'none';
         document.getElementById('step3Password').style.display = 'none';
@@ -1408,9 +1489,11 @@
                 // Show proper success message - OTP is sent to user's email
                 showForgotAlert('success', 'OTP has been sent to your email address. Please check your inbox.');
                 
+                // Start the 1-minute timer for resend
+                startOtpTimer();
+                
                 // Show resend button and hide loading
                 const resendBtn = document.getElementById('resendOtpBtn');
-                resendBtn.disabled = false;
                 resendBtn.style.display = 'block';
                 
             } else {
@@ -1522,6 +1605,12 @@
             return;
         }
         
+        // Check if timer is active
+        if (otpTimeRemaining > 0) {
+            showForgotAlert('error', `Please wait ${otpTimeRemaining} seconds before requesting another OTP.`);
+            return;
+        }
+        
         // Clear OTP input and disable resend button
         document.getElementById('otpInput').value = '';
         resendBtn.disabled = true;
@@ -1540,6 +1629,9 @@
                 // Show proper success message - OTP is resent to user's email
                 showForgotAlert('success', 'OTP has been resent to your email address. Please check your inbox.');
                 
+                // Start the timer again for next resend
+                startOtpTimer();
+                
                 // Focus on OTP input
                 document.getElementById('otpInput').focus();
                 
@@ -1549,7 +1641,7 @@
         } catch (err) {
             showForgotAlert('error', 'Unable to reach the server. Please check your connection.');
         } finally {
-            resendBtn.disabled = false;
+            // Remove loading state but keep timer control
             resendBtn.classList.remove('loading');
         }
     }
