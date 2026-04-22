@@ -38,8 +38,10 @@
         </div>
 
         <div class="bg-gray-700 flex flex-wrap justify-center border-b border-gray-600">
+            <button id="hospitalInfoTab"
+                class="tab-btn active px-4 py-3 text-gray-300 font-medium hover:text-white rounded-tl-lg">Hospital Info</button>
             <button id="maternalTab"
-                class="tab-btn active px-4 py-3 text-gray-300 font-medium hover:text-white rounded-tl-lg">Maternal</button>
+                class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white">Maternal</button>
             <button id="placentalTab"
                 class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white">Placental</button>
             <button id="foetalTab" class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white">Fetal</button>
@@ -47,8 +49,6 @@
                 Blood</button>
             <button id="webplotTab"
                 class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white">Attachment</button>
-            <button id="hospitalInfoTab"
-                class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white">Hospital Info</button>
             <button id="finalCtgTab"
                 class="tab-btn px-4 py-3 text-gray-300 font-medium hover:text-white rounded-tr-lg">Final CTG data</button>
         </div>
@@ -56,7 +56,7 @@
         <div class="bg-gray-800 p-6 md:p-8 rounded-b-xl shadow-lg">
             <form id="medicalForm" class="space-y-6">
 
-                <div id="maternalSection" class="section active space-y-6">
+                <div id="maternalSection" class="section space-y-6">
                     <h2 class="text-2xl font-semibold text-pink-300">Maternal Variables</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div class="form-group">
@@ -481,8 +481,8 @@
                                     <input type="number" step="0.01" id="myTextbox" name="height_m" class="form-input flex-1"
                                         placeholder="Enter height in meters">
                                     <select id="heightUnit" class="form-select w-32">
-                                        <option value="meters">Meters</option>
-                                        <option value="inches">Inches</option>
+                                        <option value="Meters">Meters</option>
+                                        <option value="Inches">Inches</option>
                                     </select>
                                 </div>
                                 <div class="form-checkbox-group flex items-center space-x-2">
@@ -499,8 +499,8 @@
                                     <input type="number" step="0.1" id="weightInput" name="weight_at_booking"
                                         class="form-input flex-1" placeholder="Enter weight in kilograms">
                                     <select id="weightUnit" class="form-select w-32">
-                                        <option value="kg">Kilograms</option>
-                                        <option value="pounds">Pounds</option>
+                                        <option value="Kilograms">Kilograms</option>
+                                        <option value="Pounds">Pounds</option>
                                     </select>
                                 </div>
                                 <div class="form-checkbox-group flex items-center space-x-2">
@@ -1084,7 +1084,7 @@
                 </div>
 
                 <!-- Hospital Info Section -->
-                <div id="hospitalInfoSection" class="section space-y-6">
+                <div id="hospitalInfoSection" class="section active space-y-6">
                     <h2 class="text-2xl font-semibold text-pink-300">Hospital Information</h2>
                     <div class="bg-gray-700 p-6 rounded-lg">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1093,6 +1093,11 @@
                                 <input type="text" id="hospitalInput" name="hospital" class="form-input"
                                     placeholder="Select Hospital..." readonly>
                                 <input type="hidden" id="hospital_hidden" name="hospital_hidden" value="">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Patient ID</label>
+                                <input type="text" id="patientIdInput" name="patient_id" class="form-input"
+                                    placeholder="Enter Patient ID...">
                             </div>
                         </div>
                     </div>
@@ -3417,7 +3422,7 @@
                                 // Update existing attachment
                                 updatedAttachments[existingIndex].name_of_document = filename;
                                 updatedAttachments[existingIndex].attachment = fileUrl;
-                                console.log(`Updated existing CSV at index ${existingIndex}: ${fi   lename}`);
+                                console.log(`Updated existing CSV at index ${existingIndex}: ${filename}`);
                             } else {
                                 // Append new attachment at the correct position based on currentIndex
                                 // Ensure we have enough slots in the array

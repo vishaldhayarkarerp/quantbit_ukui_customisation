@@ -527,7 +527,9 @@
   "attachments",
   "final_ctg_data",
   "tab_6_tab",
-  "hospital"
+  "hospital",
+  "column_break_klci",
+  "patient_id"
  ],
  "fields": [
   {
@@ -2449,11 +2451,11 @@
    "label": "Not performed"
   },
   {
+   "default": "Meters",
    "fieldname": "height_unit",
    "fieldtype": "Select",
    "label": "Height Unit",
-   "options": "Meters\nInches",
-   "default": "Meters"
+   "options": "Meters\nInches"
   },
   {
    "fieldname": "column_break_cgja",
@@ -2471,11 +2473,11 @@
    "label": "Not weighed"
   },
   {
+   "default": "Kilograms",
    "fieldname": "weight_unit",
    "fieldtype": "Select",
    "label": "Weight Unit",
-   "options": "Kilograms\nPounds",
-   "default": "Kilograms"
+   "options": "Kilograms\nPounds"
   },
   {
    "fieldname": "column_break_fcmn",
@@ -3418,13 +3420,23 @@
    "fieldtype": "Link",
    "label": "Hospital",
    "options": "Hospital"
+  },
+  {
+   "fieldname": "column_break_klci",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "patient_id",
+   "fieldtype": "Data",
+   "label": " Patient ID",
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-13 16:03:44.384831",
- "modified_by": "Administrator",
+ "modified": "2026-04-22 16:08:59.897988",
+ "modified_by": "b13776941@gmail.com",
  "module": "quantbit_ukui_customisation",
  "name": "Medical Assessment",
  "naming_rule": "By \"Naming Series\" field",

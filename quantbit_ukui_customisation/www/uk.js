@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const hospitalOptions = document.getElementById('hospitalOptions');
     const hospitalSelectBtn = document.getElementById('hospitalSelectBtn');
     const hospitalHidden = document.getElementById('hospital_hidden');
+    const patientIdInput = document.getElementById('patientIdInput');
     
     // Add Hospital related elements
     const toggleAddHospital = document.getElementById('toggleAddHospital');
@@ -620,6 +621,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.key === 'Escape') {
                 const activeModal = document.querySelector('.modal:not(.hidden)');
                 closeModal(activeModal);
+            }
+            
+            // Ctrl+S shortcut to submit form
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault(); // Prevent browser's default save behavior
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) {
+                    submitBtn.click();
+                }
             }
         });
 
@@ -2080,7 +2090,8 @@ function collectFormData() {
         hco3v: document.querySelector('input[name="venous_hco3"]')?.value || '',
 
         // Hospital Information
-        hospital: document.querySelector('input[name="hospital"]')?.value || ''
+        hospital: document.querySelector('input[name="hospital"]')?.value || '',
+        patient_id: document.querySelector('input[name="patient_id"]')?.value || ''
     };
 
     // Collect Previous Pregnancies Table Data
@@ -2166,6 +2177,91 @@ async function uploadFile(file, apiKey, apiSecret, methodUrl) {
     }
 }
 
+// Function to check if Patient ID already exists
+async function checkPatientIdExists(patientId) {
+    if (!patientId || patientId.trim() === '') {
+        return null;
+    }
+    
+    try {
+        const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}?filters=[["patient_id","=","${patientId}"]]&fields=["name"]`);
+        if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.length > 0) {
+                return result.data[0].name; // Return the document name
+            }
+        }
+    } catch (error) {
+        console.error('Error checking Patient ID:', error);
+    }
+    return null;
+}
+
+// Function to load existing patient data
+async function loadPatientData(patientId) {
+    if (!patientId || patientId.trim() === '') {
+        return null;
+    }
+    
+    try {
+        showStatus('Loading patient data...', 'info');
+        const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}?filters=[["patient_id","=","${patientId}"]]&fields=["*"]`);
+        if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.length > 0) {
+                return result.data[0]; // Return the full document data
+            }
+        }
+    } catch (error) {
+        console.error('Error loading patient data:', error);
+    }
+    return null;
+}
+
+// Function to populate form with existing data
+function populateFormWithData(data) {
+    if (!data) return;
+    
+    // Clear form first
+    medicalForm.reset();
+    
+    // Populate all form fields based on the data
+    Object.keys(data).forEach(key => {
+        const value = data[key];
+        if (value === null || value === undefined) return;
+        
+        // Handle different input types
+        const input = medicalForm.querySelector(`[name="${key}"]`);
+        if (input) {
+            if (input.type === 'checkbox') {
+                input.checked = value === 1 || value === true;
+            } else if (input.type === 'radio') {
+                const radio = medicalForm.querySelector(`[name="${key}"][value="${value}"]`);
+                if (radio) radio.checked = true;
+            } else {
+                input.value = value;
+            }
+        }
+        
+        // Handle select elements
+        const select = medicalForm.querySelector(`select[name="${key}"]`);
+        if (select) {
+            select.value = value;
+        }
+        
+        // Handle textarea
+        const textarea = medicalForm.querySelector(`textarea[name="${key}"]`);
+        if (textarea) {
+            textarea.value = value;
+        }
+    });
+    
+    // Update global record name
+    window.globalRecordName = data.name;
+    
+    showStatus('Patient data loaded successfully!', 'success');
+}
+
 async function saveToFrappe(formData) {
     try {
         showStatus('Saving data...', 'info');
@@ -2175,10 +2271,29 @@ async function saveToFrappe(formData) {
             throw new Error('API credentials are not properly configured. Please contact your administrator.');
         }
 
-        // Check if we're updating an existing record
-        const urlParams = new URLSearchParams(window.location.search);
-        const existingRecordName = urlParams.get('name');
-        const isUpdate = existingRecordName && existingRecordName.trim() !== '';
+        // First check if Patient ID exists (if patient_id is provided)
+        let existingRecordName = null;
+        let isUpdate = false;
+        
+        if (formData.patient_id && formData.patient_id.trim() !== '') {
+            showStatus('Checking Patient ID...', 'info');
+            existingRecordName = await checkPatientIdExists(formData.patient_id);
+            isUpdate = existingRecordName && existingRecordName.trim() !== '';
+            
+            if (isUpdate) {
+                // Ask for confirmation if updating existing record
+                const confirmUpdate = confirm(`Patient ID "${formData.patient_id}" already exists. Do you want to update this record?`);
+                if (!confirmUpdate) {
+                    showStatus('Save cancelled by user.', 'info');
+                    return;
+                }
+            }
+        } else {
+            // If no patient_id, check URL parameters for existing record
+            const urlParams = new URLSearchParams(window.location.search);
+            existingRecordName = urlParams.get('name');
+            isUpdate = existingRecordName && existingRecordName.trim() !== '';
+        }
 
         // Extract attachments BEFORE JSON stringification (File objects can't be serialized)
         const attachments = formData.attachments || [];
@@ -2256,9 +2371,17 @@ async function saveToFrappe(formData) {
 
         // Show appropriate success message
         if (isUpdate) {
-            showStatus(`Record ${existingRecordName} updated successfully!`, 'success');
+            if (formData.patient_id) {
+                showStatus(`Patient ID "${formData.patient_id}" record updated successfully!`, 'success');
+            } else {
+                showStatus(`Record ${existingRecordName} updated successfully!`, 'success');
+            }
         } else {
-            showStatus(`New record ${recordName} created successfully!`, 'success');
+            if (formData.patient_id) {
+                showStatus(`New record created for Patient ID "${formData.patient_id}"!`, 'success');
+            } else {
+                showStatus(`New record ${recordName} created successfully!`, 'success');
+            }
         }
 
         // Now handle file attachments if any - only process local files (not yet uploaded)
@@ -2609,6 +2732,53 @@ if (resetBtnUpdated) {
             showStatus('Form reset successfully', 'info');
             // Reset any custom states
             handleTabClick(document.getElementById('maternalTab'));
+        }
+    });
+}
+
+// Add Patient ID auto-load functionality
+const patientIdInput = document.getElementById('patientIdInput');
+if (patientIdInput) {
+    let loadTimeout;
+    
+    patientIdInput.addEventListener('input', (e) => {
+        clearTimeout(loadTimeout);
+        const patientId = e.target.value.trim();
+        
+        if (patientId.length >= 3) { // Start checking after 3 characters
+            loadTimeout = setTimeout(async () => {
+                try {
+                    const existingData = await loadPatientData(patientId);
+                    if (existingData) {
+                        const confirmLoad = confirm(`Existing data found for Patient ID "${patientId}". Do you want to load this data for editing?`);
+                        if (confirmLoad) {
+                            populateFormWithData(existingData);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking Patient ID:', error);
+                }
+            }, 1000); // Wait 1 second after user stops typing
+        }
+    });
+    
+    // Also load data on blur (when user leaves the field)
+    patientIdInput.addEventListener('blur', async (e) => {
+        clearTimeout(loadTimeout);
+        const patientId = e.target.value.trim();
+        
+        if (patientId.length >= 3) {
+            try {
+                const existingData = await loadPatientData(patientId);
+                if (existingData) {
+                    const confirmLoad = confirm(`Existing data found for Patient ID "${patientId}". Do you want to load this data for editing?`);
+                    if (confirmLoad) {
+                        populateFormWithData(existingData);
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking Patient ID:', error);
+            }
         }
     });
 }
@@ -3298,7 +3468,7 @@ function calculateBMI() {
         if (!isNaN(heightValue) && heightValue > 0 && !isNaN(weightValue) && weightValue > 0) {
             // Convert height to meters if needed
             let heightInMeters = heightValue;
-            if (heightUnit.value === 'inches') {
+            if (heightUnit.value === 'Inches') {
                 heightInMeters = heightValue * 0.0254; // 1 inch = 0.0254 meters
             }
             
@@ -3325,7 +3495,7 @@ function updatePlaceholders() {
     const weightUnit = document.getElementById('weightUnit');
     
     if (heightInput && heightUnit) {
-        if (heightUnit.value === 'inches') {
+        if (heightUnit.value === 'Inches') {
             heightInput.placeholder = 'Enter height in inches';
         } else {
             heightInput.placeholder = 'Enter height in meters';

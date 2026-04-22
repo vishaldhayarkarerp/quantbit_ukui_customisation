@@ -1,241 +1,249 @@
-{% if user == "Guest" %}
-<script>
-    window.location.href = "/login?redirect-to=/medical_assesment_list";
-</script>
-{% endif %}
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Assessment List</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="medical_assesment_list.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
-
-<body class="bg-gray-900 text-white min-h-screen font-inter px-4 pb-4 md:px-8 md:pb-8 pt-0 md:pt-0 ">
-    <div class="container mx-auto">
-        <div class="header">
-            <div class="header-content">
-                <h1>Medical Assessments</h1>
-                <div class="header-buttons">
-                    <button id="userListBtn" onclick="window.location.href='/app/user'" class="header-btn"
-                        style="display: none;">
-                        User List
-                    </button>
-                    <button onclick="logout()" class="header-btn">
-                        Logout
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-area">
-            <div class="filters-container mt-0">
-                <div class="filter-group">
-                    <label for="assessmentIdFilter" class="filter-label">Assessment ID</label>
-                    <input type="text" id="assessmentIdFilter" class="filter-input" placeholder="Search by ID...">
-                </div>
-                <div class="filter-group">
-                    <label for="hospitalNameFilter" class="filter-label">Hospital Name</label>
-                    <input type="text" id="hospitalNameFilter" class="filter-input"
-                        placeholder="Search by hospital name...">
-                </div>
-                <button id="applyFiltersBtn" class="btn-filter">Search</button>
-                <a href="/uk" class="btn-filter">Add new</a>
-            </div>
-
-            <div id="loader" class="loader">
-                <div class="spinner"></div>
-            </div>
-
-            <div id="listContainer" class="list-container hidden">
-                <table class="assessment-table">
-                    <thead>
-                        <tr>
-                            <th>Assessment ID</th>
-                            <th>Hospital ID</th>
-                            <th>Hospital Name</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assessmentTableBody">
-                        <!-- Data will be populated here -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="pagination" class="pagination-container hidden">
-                <button id="prevBtn" class="btn-pagination" disabled>Previous</button>
-                <span id="pageInfo" class="page-info">Page 1</span>
-                <button id="nextBtn" class="btn-pagination">Next</button>
-            </div>
-
-            <div id="errorMessage"
-                class="hidden p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 text-center">
-                Failed to load assessments. Please try again later.
-            </div>
-        </div>
-    </div>
-
+    {% if user == "Guest" %}
     <script>
-        let currentPage = 1;
-        const pageSize = 10;
+        window.location.href = "/login?redirect-to=/medical_assesment_list";
+    </script>
+    {% endif %}
+    <!DOCTYPE html>
+    <html lang="en">
 
-        async function checkUserRole() {
-            try {
-                const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.get_user_role_profile`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Medical Assessment List</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="medical_assesment_list.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    </head>
+
+    <body class="bg-gray-900 text-white min-h-screen font-inter px-4 pb-4 md:px-8 md:pb-8 pt-0 md:pt-0 ">
+        <div class="container mx-auto">
+            <div class="header">
+                <div class="header-content">
+                    <h1>Medical Assessments</h1>
+                    <div class="header-buttons">
+                        <button id="userListBtn" onclick="window.location.href='/app/user'" class="header-btn"
+                            style="display: none;">
+                            User List
+                        </button>
+                        <button onclick="logout()" class="header-btn">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="filters-container mt-0">
+                    <div class="filter-group">
+                        <label for="assessmentIdFilter" class="filter-label">Assessment ID</label>
+                        <input type="text" id="assessmentIdFilter" class="filter-input" placeholder="Search by ID...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="patientIdFilter" class="filter-label">Patient ID</label>
+                        <input type="text" id="patientIdFilter" class="filter-input" placeholder="Search by Patient ID...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="hospitalNameFilter" class="filter-label">Hospital Name</label>
+                        <input type="text" id="hospitalNameFilter" class="filter-input"
+                            placeholder="Search by hospital name...">
+                    </div>
+                    <button id="applyFiltersBtn" class="btn-filter">Search</button>
+                    <a href="/uk" class="btn-filter">Add new</a>
+                </div>
+
+                <div id="loader" class="loader">
+                    <div class="spinner"></div>
+                </div>
+
+                <div id="listContainer" class="list-container hidden">
+                    <table class="assessment-table">
+                        <thead>
+                            <tr>
+                                <th>Assessment ID</th>
+                                <th>Patient ID</th>
+                                <th>Hospital Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assessmentTableBody">
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="pagination" class="pagination-container hidden">
+                    <button id="prevBtn" class="btn-pagination" disabled>Previous</button>
+                    <span id="pageInfo" class="page-info">Page 1</span>
+                    <button id="nextBtn" class="btn-pagination">Next</button>
+                </div>
+
+                <div id="errorMessage"
+                    class="hidden p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 text-center">
+                    Failed to load assessments. Please try again later.
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let currentPage = 1;
+            const pageSize = 10;
+
+            async function checkUserRole() {
+                try {
+                    const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.get_user_role_profile`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.message && data.message.role_profile === "Doctor") {
+                            document.getElementById('userListBtn').style.display = 'block';
+                        }
+                    } else {
+                        console.error('Failed to fetch user role');
                     }
+                } catch (error) {
+                    console.error('Error checking user role:', error);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                checkUserRole();
+                fetchAssessments();
+
+                document.getElementById('applyFiltersBtn').addEventListener('click', () => {
+                    currentPage = 1;
+                    fetchAssessments();
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.message && data.message.role_profile === "Doctor") {
-                        document.getElementById('userListBtn').style.display = 'block';
-                    }
-                } else {
-                    console.error('Failed to fetch user role');
-                }
-            } catch (error) {
-                console.error('Error checking user role:', error);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            checkUserRole();
-            fetchAssessments();
-
-            document.getElementById('applyFiltersBtn').addEventListener('click', () => {
-                currentPage = 1;
-                fetchAssessments();
-            });
-
-            document.getElementById('prevBtn').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    fetchAssessments();
-                }
-            });
-
-            document.getElementById('nextBtn').addEventListener('click', () => {
-                currentPage++;
-                fetchAssessments();
-            });
-
-            // Allow enter key to trigger search
-            document.querySelectorAll('.filter-input').forEach(input => {
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        currentPage = 1;
+                document.getElementById('prevBtn').addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
                         fetchAssessments();
                     }
                 });
-            });
-        });
 
-        async function fetchAssessments() {
-            const loader = document.getElementById('loader');
-            const listContainer = document.getElementById('listContainer');
-            const pagination = document.getElementById('pagination');
-            const errorMessage = document.getElementById('errorMessage');
-            const tableBody = document.getElementById('assessmentTableBody');
-
-            const assessmentId = document.getElementById('assessmentIdFilter').value;
-            const hospitalName = document.getElementById('hospitalNameFilter').value;
-
-            loader.classList.remove('hidden');
-            listContainer.classList.add('hidden');
-            pagination.classList.add('hidden');
-            errorMessage.classList.add('hidden');
-
-            try {
-                const start = (currentPage - 1) * pageSize;
-
-                const fields = JSON.stringify(["name", "hospital", "hospital.hospital_name", "hospital.hospital_id", "modified"]);
-                let url = `${window.location.origin}/api/resource/Medical%20Assessment?order_by=modified%20desc&fields=${encodeURIComponent(fields)}&limit_start=${start}&limit_page_length=${pageSize}`;
-
-                let filters = [];
-                if (assessmentId) {
-                    filters.push(["name", "like", `%${assessmentId}%`]);
-                }
-                if (hospitalName) {
-                    filters.push(["hospital.hospital_name", "like", `%${hospitalName}%`]);
-                }
-                if (filters.length > 0) {
-                    url += `&filters=${encodeURIComponent(JSON.stringify(filters))}`;
-                }
-
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Network response was not ok');
-
-                const result = await response.json();
-                const assessments = result.data || [];
-
-                if (assessments.length === 0 && currentPage === 1) {
-                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400">No assessments found.</td></tr>';
-                    pagination.classList.add('hidden');
-                } else {
-                    tableBody.innerHTML = assessments.map(item => `
-                <tr>
-                    <td class="assessment-name">${item.name}</td>
-                    <td>${item.hospital_id || '--'}</td>
-                    <td>${item.hospital_name || '--'}</td>
-                    <td>
-                        <a href="uk.html?name=${item.name}" class="btn-view">View Details</a>
-                    </td>
-                </tr>
-            `).join('');
-
-                    updatePaginationUI(assessments.length);
-                    pagination.classList.remove('hidden');
-                }
-
-                loader.classList.add('hidden');
-                listContainer.classList.remove('hidden');
-            } catch (error) {
-                console.error('Error fetching assessments:', error);
-                loader.classList.add('hidden');
-                errorMessage.classList.remove('hidden');
-            }
-        }
-
-        function updatePaginationUI(currentCount) {
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const pageInfo = document.getElementById('pageInfo');
-
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentCount < pageSize;
-
-            pageInfo.textContent = `Page ${currentPage}`;
-        }
-
-        async function logout() {
-            try {
-                const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.logout`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
+                document.getElementById('nextBtn').addEventListener('click', () => {
+                    currentPage++;
+                    fetchAssessments();
                 });
 
-                if (response.ok) {
-                    window.location.href = '/login';
-                } else {
-                    console.error('Logout failed');
-                }
-            } catch (error) {
-                console.error('Error during logout:', error);
-            }
-        }
-    </script>
-</body>
+                // Allow enter key to trigger search
+                document.querySelectorAll('.filter-input').forEach(input => {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            currentPage = 1;
+                            fetchAssessments();
+                        }
+                    });
+                });
+            });
 
-</html>
+            async function fetchAssessments() {
+                const loader = document.getElementById('loader');
+                const listContainer = document.getElementById('listContainer');
+                const pagination = document.getElementById('pagination');
+                const errorMessage = document.getElementById('errorMessage');
+                const tableBody = document.getElementById('assessmentTableBody');
+
+                const assessmentId = document.getElementById('assessmentIdFilter').value;
+                const patientId = document.getElementById('patientIdFilter').value;
+                const hospitalName = document.getElementById('hospitalNameFilter').value;
+
+                loader.classList.remove('hidden');
+                listContainer.classList.add('hidden');
+                pagination.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+
+                try {
+                    const start = (currentPage - 1) * pageSize;
+
+                    const fields = JSON.stringify(["name", "patient_id", "hospital", "hospital.hospital_name", "hospital.hospital_id", "modified"]);
+                    let url = `${window.location.origin}/api/resource/Medical%20Assessment?order_by=modified%20desc&fields=${encodeURIComponent(fields)}&limit_start=${start}&limit_page_length=${pageSize}`;
+
+                    let filters = [];
+                    if (assessmentId) {
+                        filters.push(["name", "like", `%${assessmentId}%`]);
+                    }
+                    if (patientId) {
+                        filters.push(["patient_id", "like", `%${patientId}%`]);
+                    }
+                    if (hospitalName) {
+                        filters.push(["hospital", "like", `%${hospitalName}%`]);
+                    }
+                    if (filters.length > 0) {
+                        url += `&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+                    }
+
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const result = await response.json();
+                    const assessments = result.data || [];
+
+                    if (assessments.length === 0 && currentPage === 1) {
+                        tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400">No assessments found.</td></tr>';
+                        pagination.classList.add('hidden');
+                    } else {
+                        tableBody.innerHTML = assessments.map(item => `
+                    <tr>
+                        <td class="assessment-name">${item.name}</td>
+                        <td>${item.patient_id || '--'}</td>
+                        <td>${item.hospital_name || '--'}</td>
+                        <td>
+                            <a href="uk.html?name=${item.name}" class="btn-view">View Details</a>
+                        </td>
+                    </tr>
+                `).join('');
+
+                        updatePaginationUI(assessments.length);
+                        pagination.classList.remove('hidden');
+                    }
+
+                    loader.classList.add('hidden');
+                    listContainer.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Error fetching assessments:', error);
+                    loader.classList.add('hidden');
+                    errorMessage.classList.remove('hidden');
+                }
+            }
+
+            function updatePaginationUI(currentCount) {
+                const prevBtn = document.getElementById('prevBtn');
+                const nextBtn = document.getElementById('nextBtn');
+                const pageInfo = document.getElementById('pageInfo');
+
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentCount < pageSize;
+
+                pageInfo.textContent = `Page ${currentPage}`;
+            }
+
+            async function logout() {
+                try {
+                    const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        window.location.href = '/login';
+                    } else {
+                        console.error('Logout failed');
+                    }
+                } catch (error) {
+                    console.error('Error during logout:', error);
+                }
+            }
+        </script>
+    </body>
+
+    </html>
