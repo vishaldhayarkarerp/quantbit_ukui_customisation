@@ -1173,6 +1173,7 @@
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ usr, pwd })
             });
 
@@ -1248,6 +1249,7 @@
             const response = await fetch(CHANGE_PWD_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({
                     usr,
                     current_password: currentPwd,
@@ -1480,6 +1482,7 @@
             const response = await fetch(SEND_OTP_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ email })
             });
 
@@ -1538,6 +1541,7 @@
             const response = await fetch(VERIFY_OTP_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ email, otp })
             });
 
@@ -1620,6 +1624,7 @@
             const response = await fetch(SEND_OTP_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ email })
             });
 
@@ -1687,6 +1692,7 @@
             const response = await fetch(RESET_PWD_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({
                     email,
                     new_password: newPassword
