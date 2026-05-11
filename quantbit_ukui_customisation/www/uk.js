@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // --- Global Variables ---
     window.globalRecordName = 'Unknown Document';
+    window.isLoadingDocument = false; // Flag to prevent patient ID validation during document load
 
     // --- Test API Credentials Access ---
     debugCredentials(); // Debug credentials on page load
@@ -623,12 +624,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 closeModal(activeModal);
             }
             
-            // Ctrl+S shortcut to submit form
+            // Ctrl+S shortcut to save form
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault(); // Prevent browser's default save behavior
-                const submitBtn = document.getElementById('submitBtn');
-                if (submitBtn) {
-                    submitBtn.click();
+                const saveBtn = document.getElementById('saveBtn');
+                if (saveBtn) {
+                    saveBtn.click();
                 }
             }
         });
@@ -993,6 +994,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             console.log(`Attempting to load document: ${docname}`);
+            // Set flag to prevent patient ID validation during document load
+            window.isLoadingDocument = true;
+            
             const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}/${docname}`, {
                 method: 'GET',
                 headers: {
@@ -1014,487 +1018,672 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error loading document:', error);
             showStatus('Failed to load document data', 'error');
+        } finally {
+            // Reset flag after loading is complete
+            setTimeout(() => {
+                window.isLoadingDocument = false;
+            }, 100); // Small delay to ensure all field updates are complete
         }
     }
 
     function fillFormFields(data) {
         if (!data) return;
-
-        // 1. Direct field mappings (DB Key -> Form Input Name)
         const directMapping = {
-            select_trimester: "trimester",
-            number_of_loss: "loss_count",
-            ethnic_category: "race_category",
-            ethnic_subcategory: "race_subcategory",
-            respiratory_problems: "respiratory",
-            inherited_disorders: "inherited_disorder",
-            cardiac_prob: "cardiac_problems",
-            hypertension_ever: "hypertension_history",
-            anaemia_prb: "haematological_problems",
-            ther_disord: "thromboembolic_disorder",
-            liver_prd: "hepatic_problems",
-            gas_prb: "gastrointestinal_problems",
-            endo: "endocrine_problems",
-            neuro_prd: "neurological_problems",
-            auto_dis: "autoimmune_disease",
-            infection: "infections",
-            fert_tre: "fertility_treatment",
-            lmp: "lmp_date",
-            lmpopt: "lmp_option",
-            preg: "bleeding_in_pregnancy",
-            med_dur_preg: "medication_in_pregnancy",
-            specify_other_medication: "other_medication",
-            smoked: "ever_smoked",
-            co_ppm: "co_reading_ppm",
-            hou_smok: "smoker_in_household",
-            alco_wek: "alcohol_at_booking",
-            sub_preg: "substance_use_before",
-            wom_hg: "height_m",
-            wom_wg: "weight_at_booking",
-            wom_blod_pres: "bp_at_booking",
-            abnor_scn: "anomaly_scan_result",
-            gr_res_prb: "fgr_risks",
-            fdr: "fgr_risk_status",
-            pre_tr_birth: "preterm_birth_risks",
-            asssris: "aspirin_risk_assessment",
-            dvit: "vitamin_d_assessment",
-            sep: "maternal_sepsis",
-            method: "induction_method",
-            medication: "induction_medication",
-            total_dose: "induction_dose",
-            rupt_mem: "rom_datetime",
-            liq_col: "liquor_color",
-            sme_liq: "liquor_smell",
-            slw_prw: "slow_progress",
-            epid: "epidural",
-            oxytocin_hr: "oxytocin_duration",
-            ivf: "ivf_details",
-            donar_age: "donor_age",
-            fev_lab: "maternal_fever",
-            gyn_his: "gynaecological_history",
-            mat_cond: "maternal_condition",
-            mat_lb: "maternal_medication",
-            plac_path: "apla_syndrome",
-            pre_ecla: "preeclampsia",
-            plac_abnor: "placental_abnormality",
-            iugr: "current_iugr",
-            abnor_drop: "abnormal_dopplers",
-            type: "multiple_pregnancy_type",
-            chorionicity: "multiple_pregnancy_chorionicity",
-            zygosity: "multiple_pregnancy_zygosity",
-            birthweight: "birth_weight",
-            babys: "baby_sex",
-            min1: "apgar_1min",
-            min5: "apgar_5min",
-            min10: "apgar_10min",
-            oligohydra: "oligohydramnios",
-            please_select: "current_mode_of_delivery",
-            card_neck: "cord_around_neck",
-            plactal_abrupt: "placental_abruption",
-            timendate: "birth_datetime",
-            babycried: "baby_cried",
-            neon_resus: "resuscitation_reason",
-            neonatal_malfun: "congenital_malformations_details",
-            neonatal_icu: "nicu_reason",
-            birth_related: "birth_related",
-            ph: "arterial_ph",
-            base_excess: "arterial_base_excess",
-            lactate: "arterial_lactate",
-            foetal_hb: "arterial_hb",
-            po2: "arterial_po2",
-            pco2: "arterial_pco2",
-            hco3: "arterial_hco3",
-            phv: "venous_ph",
-            basev: "venous_base_excess",
-            lactatev: "venous_lactate",
-            foetalv: "venous_hb",
-            po2v: "venous_po2",
-            pco2v: "venous_pco2",
-            hco3v: "venous_hco3"
+            // Maternal – basic
+            maternal_age:           "maternal_age",
+            maternal_parity:        "maternal_parity",
+            previous_pregnancies:   "previous_pregnancies",
+            gestation_weeks:        "gestation_weeks",
+            papp_a_level:           "papp_a_level",
+            bmi:                    "bmi",
+            wom_blod_pres:          "bp_at_booking",
+            antenatal_problems:     "antenatal_problems",
+            gyn_his:                "gynaecological_history",
+            mat_cond:               "maternal_condition",
+            mat_lb:                 "maternal_medication",
+
+            // Yes/No selects 
+            prev_iud_stillbirth:    "prev_iud_stillbirth",
+            prev_iugr_sga:          "prev_iugr_sga",
+            pregnancy_loss:         "pregnancy_loss",
+            hypertension:           "hypertension",
+            diabetes:               "diabetes",
+            autoimmune:             "autoimmune",
+            smoking_in_pregnancy:   "smoking_in_pregnancy",
+            respiratory_problems:   "respiratory",
+            inherited_disorders:    "inherited_disorder",
+            cardiac_prob:           "cardiac_problems",
+            hypertension_ever:      "hypertension_history",
+            anaemia_prb:            "haematological_problems",
+            ther_disord:            "thromboembolic_disorder",
+            liver_prd:              "hepatic_problems",
+            foetal_movements:       "foetal_movements",
+            gas_prb:                "gastrointestinal_problems",
+            endo:                   "endocrine_problems",
+            neuro_prd:              "neurological_problems",
+            auto_dis:               "autoimmune_disease",
+            infection:              "infections",
+            fert_tre:               "fertility_treatment",
+            smoked:                 "ever_smoked",
+            hou_smok:               "smoker_in_household",
+            sub_preg:               "substance_use_before",
+            sep:                    "maternal_sepsis",
+            slw_prw:                "slow_progress",
+            epid:                   "epidural",
+            ivf:                    "ivf_details",
+            fev_lab:                "maternal_fever",
+            plac_path:              "apla_syndrome",
+            pre_ecla:               "preeclampsia",
+            iugr:                   "current_iugr",
+            abnor_drop:             "abnormal_dopplers",
+            oligohydra:             "oligohydramnios",
+            card_neck:              "cord_around_neck",
+            plactal_abrupt:         "placental_abruption",
+            babycried:              "baby_cried",
+            gr_res_prb:             "fgr_risks",
+            pre_tr_birth:           "preterm_birth_risks",
+            abnor_scn:              "anomaly_scan_result",
+
+            // Race / ethnicity
+            ethnic_category:        "race_category",
+            ethnic_subcategory:     "race_subcategory",
+
+            // LMP option (checkbox list value)
+            lmpopt:                 "lmp_option",
+
+            // Measurements
+            wom_hg:                 "height_m",
+            wom_wg:                 "weight_at_booking",
+
+            // Selects
+            plac_abnor:             "placental_abnormality",
+            fdr:                    "fgr_risk_status",
+            asssris:                "aspirin_risk_assessment",
+            dvit:                   "vitamin_d_assessment",
+            liq_col:                "liquor_color",
+            sme_liq:                "liquor_smell",
+            "4_presentation":       "presentation",
+            type:                   "multiple_pregnancy_type",
+            chorionicity:           "multiple_pregnancy_chorionicity",
+            zygosity:               "multiple_pregnancy_zygosity",
+
+            // Numeric / data fields
+            alco_wek:               "alcohol_at_booking",  
+            co_ppm:                 "co_reading_ppm",
+            oxytocin_hr:            "oxytocin_duration",
+            donar_age:              "donor_age",
+            episodes:               "episodes",
+
+            // Induction
+            method:                 "induction_method",
+            medication:             "induction_medication",
+            total_dose:             "induction_dose",
+
+            // Birth / fetal
+            birthweight:            "birth_weight",
+            babys:                  "baby_sex",
+            please_select:          "current_mode_of_delivery",
+            indication:             "delivery_indication", 
+            birth_related:          "birth_related",
+            neon_resus:             "resuscitation_reason",
+            neonatal_malfun:        "congenital_malformations_details",
+            neonatal_icu:           "nicu_reason",
+
+            // Cord blood – arterial
+            ph:                     "arterial_ph",
+            base_excess:            "arterial_base_excess",
+            lactate:                "arterial_lactate",
+            foetal_hb:              "arterial_hb",
+            po2:                    "arterial_po2",
+            pco2:                   "arterial_pco2",
+            hco3:                   "arterial_hco3",
+
+            // Cord blood – venous
+            phv:                    "venous_ph",
+            basev:                  "venous_base_excess",
+            lactatev:               "venous_lactate",
+            foetalv:                "venous_hb",
+            po2v:                   "venous_po2",
+            pco2v:                  "venous_pco2",
+            hco3v:                  "venous_hco3",
+
+            // APGAR
+            min1:                   "apgar_1min",
+            min5:                   "apgar_5min",
+            min10:                  "apgar_10min",
+
+            // Hospital
+            hospital:               "hospital",
+            patient_id:             "patient_id",
+
+            // Pregnancy-loss details
+            select_trimester:       "trimester",
+            number_of_loss:         "loss_count",
         };
 
-        // 2. Fill All fields
-        Object.keys(data).forEach(key => {
-            const value = data[key];
-            const formName = directMapping[key] || key;
-
-            // Try to set by name
-            const inputs = document.querySelectorAll(`[name="${formName}"]`);
-            inputs.forEach(input => {
-                if (input.type === 'checkbox') {
-                    input.checked = (value === 1 || value === true || value === 'Yes');
-                } else if (input.tagName === 'SELECT' || input.tagName === 'INPUT' || input.tagName === 'TEXTAREA') {
-                    input.value = value || '';
-                }
-
-                // Trigger events
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-            });
-
-            // Handle Yes/No Groups
-            const yesNoBtns = document.querySelectorAll(`.yes-no-group button[data-target="${formName}"]`);
-            if (yesNoBtns.length > 0) {
-                const normalizedValue = (value === 1 || value === true || value === 'Yes') ? 'Yes' : 'No';
-                const targetBtn = Array.from(yesNoBtns).find(btn => btn.dataset.value === normalizedValue);
-                if (targetBtn) {
-                    handleYesNoClick(targetBtn);
-                }
+        function setFlatpickrValue(inputName, value) {
+            if (!value) return;
+            const el = document.querySelector(`input[name="${inputName}"]`);
+            if (!el) return;
+            if (el._flatpickr) {
+                el._flatpickr.setDate(value, true);
+            } else {
+                el.value = value;
             }
-        });
-
-        // 3. Special handling for Race modal buttons
-        if (data.ethnic_category || data.ethnic_subcategory) {
-            const catHidden = document.getElementById('race_category_hidden');
-            const subHidden = document.getElementById('race_subcategory_hidden');
-            if (catHidden) catHidden.value = data.ethnic_category || '';
-            if (subHidden) subHidden.value = data.ethnic_subcategory || '';
-
-            if (raceCategorySelect) {
-                raceCategorySelect.value = data.ethnic_category || '';
-                handleRaceCategoryChange();
-                if (raceSubCategorySelect) {
-                    raceSubCategorySelect.value = data.ethnic_subcategory || '';
-                }
-            }
-            saveRaceModalState();
         }
 
-        // 4. Special handling for Specify buttons
-        document.querySelectorAll('.btn-specify').forEach(btn => {
+        function setField(htmlName, value) {
+            if (value === null || value === undefined || value === "") return;
+            const inputs = document.querySelectorAll(
+                `input[name="${htmlName}"], select[name="${htmlName}"], textarea[name="${htmlName}"]`
+            );
+            inputs.forEach(el => {
+                if (el.type === "checkbox") {
+                    el.checked = (value === 1 || value === true || value === "Yes");
+                } else {
+                    el.value = value;
+                }
+                el.dispatchEvent(new Event("change", { bubbles: true }));
+                el.dispatchEvent(new Event("input",  { bubbles: true }));
+            });
+        }
+
+        function clickYesNo(targetName, yesOrNo) {
+            const btn = document.querySelector(
+                `.yes-no-group button[data-target="${targetName}"][data-value="${yesOrNo}"]`
+            );
+            if (btn) {
+                // Use the existing handler so modals / sub-sections stay in sync
+                if (typeof handleYesNoClick === "function") {
+                    handleYesNoClick(btn);
+                } else {
+                    btn.click();
+                }
+            }
+        }
+
+        Object.keys(directMapping).forEach(dbKey => {
+            const value = data[dbKey];
+            if (value === null || value === undefined || value === "") return;
+            const htmlName = directMapping[dbKey];
+            setField(htmlName, value);
+        });
+
+        const yesNoMappings = {
+            // DB key              : HTML data-target
+            prev_iud_stillbirth:   "prev_iud_stillbirth",
+            prev_iugr_sga:         "prev_iugr_sga",
+            pregnancy_loss:        "pregnancy_loss",
+            hypertension:          "hypertension",
+            diabetes:              "diabetes",
+            autoimmune:            "autoimmune",
+            smoking_in_pregnancy:  "smoking_in_pregnancy",
+            respiratory_problems:  "respiratory",
+            inherited_disorders:   "inherited_disorder",
+            cardiac_prob:          "cardiac_problems",
+            hypertension_ever:     "hypertension_history",
+            anaemia_prb:           "haematological_problems",
+            ther_disord:           "thromboembolic_disorder",
+            liver_prd:             "hepatic_problems",
+            foetal_movements:      "foetal_movements",
+            gas_prb:               "gastrointestinal_problems",
+            endo:                  "endocrine_problems",
+            neuro_prd:             "neurological_problems",
+            auto_dis:              "autoimmune_disease",
+            infection:             "infections",
+            fert_tre:              "fertility_treatment",
+            smoked:                "ever_smoked",
+            hou_smok:              "smoker_in_household",
+            sub_preg:              "substance_use_before",
+            sep:                   "maternal_sepsis",
+            slw_prw:               "slow_progress",
+            epid:                  "epidural",
+            ivf:                   "ivf_details",
+            fev_lab:               "maternal_fever",
+            plac_path:             "apla_syndrome",
+            pre_ecla:              "preeclampsia",
+            iugr:                  "current_iugr",
+            abnor_drop:            "abnormal_dopplers",
+            oligohydra:            "oligohydramnios",
+            card_neck:             "cord_around_neck",
+            plactal_abrupt:        "placental_abruption",
+            babycried:             "baby_cried",
+            gr_res_prb:            "fgr_risks",
+            pre_tr_birth:          "preterm_birth_risks",
+            abnor_scn:             "anomaly_scan_result",
+
+        };
+
+        Object.keys(yesNoMappings).forEach(dbKey => {
+            const value = data[dbKey];
+            if (!value) return;
+            const normalised = (value === 1 || value === true || value === "Yes") ? "Yes" : "No";
+            clickYesNo(yesNoMappings[dbKey], normalised);
+        });
+        if (data.lmp) {
+            setFlatpickrValue("lmp_date", data.lmp);
+        }
+        if (data.alco_wek !== undefined && data.alco_wek !== null && data.alco_wek !== "") {
+            const noneChk = document.getElementById("alcoholNone");
+            if (noneChk) noneChk.checked = false;
+            const alcoholInput = document.querySelector('input[name="alcohol_at_booking"]');
+            if (alcoholInput) {
+                alcoholInput.disabled = false;
+                alcoholInput.value = data.alco_wek;
+            }
+        }
+
+        if (data.rupt_mem) {
+            setFlatpickrValue("rom_datetime", data.rupt_mem);
+        }
+        const hasInduction = data.method || data.medication || data.total_dose;
+        if (hasInduction) {
+            clickYesNo("induction_of_labor", "Yes");
+            // Give the modal a tick to appear, then set its fields
+            setTimeout(() => {
+                setField("induction_method",   data.method      || "");
+                setField("induction_medication", data.medication || "");
+                setField("induction_dose",     data.total_dose  || "");
+            }, 100);
+        }
+
+        if (data.timendate) {
+            setFlatpickrValue("birth_datetime", data.timendate);
+        }
+
+        if (data.type) {
+            // Activate YES button
+            clickYesNo("multiple_pregnancy", "Yes");
+
+            setTimeout(() => {
+                // Set hidden inputs
+                const typeHidden  = document.getElementById("multiple_pregnancy_type_hidden");
+                const chorHidden  = document.getElementById("multiple_pregnancy_chorionicity_hidden");
+                const zygoHidden  = document.getElementById("multiple_pregnancy_zygosity_hidden");
+                if (typeHidden)  typeHidden.value  = data.type        || "";
+                if (chorHidden)  chorHidden.value  = data.chorionicity || "";
+                if (zygoHidden)  zygoHidden.value  = data.zygosity    || "";
+
+                // Set modal selects (they drive the hidden inputs)
+                const typeSelect = document.getElementById("multiple_type_modal");
+                const chorSelect = document.getElementById("chorionicity_select_modal");
+                const zygoSelect = document.getElementById("zygosity_select_modal");
+                if (typeSelect)  typeSelect.value  = data.type        || "";
+                if (chorSelect)  chorSelect.value  = data.chorionicity || "";
+                if (zygoSelect)  zygoSelect.value  = data.zygosity    || "";
+
+                // Show/hide the chorionicity + zygosity sub-divs
+                const chorDiv = document.getElementById("chorionicityDiv");
+                const zygoDiv = document.getElementById("zygosityDiv");
+                if (chorDiv) chorDiv.classList.toggle("hidden", !data.type);
+                if (zygoDiv) zygoDiv.classList.toggle("hidden", !data.type);
+            }, 150);
+        }
+        function fillModalTextarea(formName, value, yesBtnTarget) {
+            if (!value) return;
+            const ta = document.querySelector(`textarea[name="${formName}"]`);
+            if (ta) ta.value = value;
+            // Activate the YES button so the modal state is consistent
+            clickYesNo(yesBtnTarget, "Yes");
+        }
+        fillModalTextarea("resuscitation_reason",           data.neon_resus,      "neonatal_resuscitation");
+        fillModalTextarea("congenital_malformations_details", data.neonatal_malfun, "congenital_malformations");
+        fillModalTextarea("nicu_reason",                    data.neonatal_icu,    "nicu_admission");
+
+        if (data.ethnic_category || data.ethnic_subcategory) {
+            const catHidden = document.getElementById("race_category_hidden");
+            const subHidden = document.getElementById("race_subcategory_hidden");
+            if (catHidden) catHidden.value = data.ethnic_category    || "";
+            if (subHidden) subHidden.value = data.ethnic_subcategory || "";
+
+            const raceCategorySelect    = document.getElementById("raceCategory");
+            const raceSubCategorySelect = document.getElementById("raceSubCategory");
+            const raceLookupBtn         = document.getElementById("raceLookupBtn");
+
+            if (raceCategorySelect) {
+                raceCategorySelect.value = data.ethnic_category || "";
+                // Rebuild sub-options
+                if (typeof handleRaceCategoryChange === "function") handleRaceCategoryChange();
+                if (raceSubCategorySelect) raceSubCategorySelect.value = data.ethnic_subcategory || "";
+            }
+            if (typeof saveRaceModalState === "function") saveRaceModalState();
+        }
+
+        document.querySelectorAll(".btn-specify").forEach(btn => {
             const targetId = btn.dataset.targetId;
-            const targetTextarea = document.getElementById(targetId);
-            if (targetTextarea && targetTextarea.value.trim() !== '') {
-                btn.textContent = 'View/Edit...';
-                btn.classList.add('active');
+            const targetTextarea = targetId ? document.getElementById(targetId) : null;
+            if (targetTextarea && targetTextarea.value.trim() !== "") {
+                btn.textContent = "View/Edit...";
+                btn.classList.add("active");
             } else {
-                btn.textContent = 'Specify...';
-                btn.classList.remove('active');
+                btn.textContent = "Specify...";
+                btn.classList.remove("active");
             }
         });
 
-        // 5. Handle Previous Pregnancies table
+        const checkboxMappings = {
+            asthma:                   ["respiratory_problems", "Asthma"],
+            asthma_spe:               ["respiratory_problems", "Asthma-Specialist-Consultant-Care"],
+            asthma_pre:               ["respiratory_problems", "Asthma-Previous-Admission-In-Last-12-Months"],
+            chronic_bronchitis:       ["respiratory_problems", "Chronic-Bronchitis"],
+            chronic_obstr:            ["respiratory_problems", "Chronic-Obstructive-Airway-Disease"],
+            pulmonary_fibrosis:       ["respiratory_problems", "Pulmonary-Fibrosis"],
+            sarcoidosis:              ["respiratory_problems", "Sarcoidosis"],
+            tuber_current_treat:      ["respiratory_problems", "Tuberculosis-Current-Treatment"],
+            tuber_past:               ["respiratory_problems", "Tuberculosis-Past-Treatment"],
+
+            aperts_syndrome:          ["inherited_disorders", "Aperts-Syndrome"],
+            cong_adren_hyper:         ["inherited_disorders", "Congenital-Adrenal-Hyperplasia"],
+            conge_hip_dys:            ["inherited_disorders", "Congenital-Hip-Dysplasia"],
+            cystic_fibrosis:          ["inherited_disorders", "Cystic-Fibrosis"],
+            down_synd:                ["inherited_disorders", "Downs-Syndrome"],
+            haemochromatosis:         ["inherited_disorders", "Haemochromatosis"],
+            marf_synd:                ["inherited_disorders", "Marfans-Syndrome"],
+            mcadd:                    ["inherited_disorders", "MCADD"],
+            muscul_dyst:              ["inherited_disorders", "Muscular-Dystrophy"],
+            neurofibromatosis:        ["inherited_disorders", "Neurofibromatosis"],
+            phenylk:                  ["inherited_disorders", "Phenylketonuria"],
+            inher_other:              ["inherited_disorders", "Other"],
+
+            arrhythmia:               ["cardiac_problems_list", "Arrhythmia"],
+            car_care:                 ["cardiac_problems_list", "Cardiac-disease"],
+            cardiac_mur:              ["cardiac_problems_list", "Cardiac-Murmur"],
+            cardiac_surgery:          ["cardiac_problems_list", "Cardiac-Surgery"],
+            cardiac_transplante:      ["cardiac_problems_list", "Cardiac-Transplant"],
+            card_anom:                ["cardiac_problems_list", "Congenital-Cardiac-Anomaly"],
+            isc_heart:                ["cardiac_problems_list", "Ischemic-Heart-Disease"],
+            peri_card:                ["cardiac_problems_list", "Peripartum-Cardiomyopathy"],
+            rheumatic_fever:          ["cardiac_problems_list", "Rheumatic-Fever"],
+            valve_lesion:             ["cardiac_problems_list", "Valve-Lesion"],
+            card_other:               ["cardiac_problems_list", "Other"],
+
+            pul_hyper:                ["hypertension_history_list", "Pulmonary-Hypertension"],
+            curr_med:                 ["hypertension_history_list", "Currently-Medicated"],
+            no_medica:                ["hypertension_history_list", "Currently-No-Medication"],
+            dur_pre_med:              ["hypertension_history_list", "During-Pregnancy-Medicated"],
+            preg_not_med:             ["hypertension_history_list", "During-Pregnancy-Not-Medicated"],
+            no_pre_med:               ["hypertension_history_list", "Non-Pregnant-Medicated"],
+            no_preg_med:              ["hypertension_history_list", "Non-Pregnant-No-Medication"],
+
+            anaemia:                  ["haematological_problems_list", "Anaemia"],
+            rh_isoim:                 ["haematological_problems_list", "Rhesus-isoimmunisation"],
+            antibody_sensitivity:     ["haematological_problems_list", "Antibody-sensitivity"],
+            seckel_dis:               ["haematological_problems_list", "Sickle-cell-disease"],
+            alpha_thalassaemia:       ["haematological_problems_list", "Alpha-Thalassaemia"],
+            cell_trait:               ["haematological_problems_list", "Sickle-cell-trait"],
+            beta_thalassaemia:        ["haematological_problems_list", "Beta-Thalassaemia"],
+            hae_other:                ["haematological_problems_list", "Other"],
+            thal_trait:               ["haematological_problems_list", "Beta-Thalassaemia-Trait"],
+            bon_mar:                  ["haematological_problems_list", "Bone-marrow-transplant"],
+
+            antipho:                  ["thromboembolic_disorder_list", "Antiphospholipid-syndrome"],
+            pcd:                      ["thromboembolic_disorder_list", "Protein-C-deficiency"],
+            antithrombin_deficiency:  ["thromboembolic_disorder_list", "Antithrombin-deficiency"],
+            psd:                      ["thromboembolic_disorder_list", "Protein-S-deficiency"],
+            haema_care:               ["thromboembolic_disorder_list", "Compound-heterozygosity-under-haematological-care"],
+            pmfh:                     ["thromboembolic_disorder_list", "Prothrombin-mutation"],
+            dvt:                      ["thromboembolic_disorder_list", "DVT-anticoagulated"],
+            pe:                       ["thromboembolic_disorder_list", "Pulmonary-embolus"],
+            dvt_not:                  ["thromboembolic_disorder_list", "DVT-not-anticoagulated"],
+            thrombocytopenia:         ["thromboembolic_disorder_list", "Thrombocytopenia"],
+            v_leid:                   ["thromboembolic_disorder_list", "Factor-V-Leiden-(homozygous)"],
+            thrombophilia:            ["thromboembolic_disorder_list", "Thrombophilia"],
+            haemophilia:              ["thromboembolic_disorder_list", "Haemophilia"],
+            vvwp:                     ["thromboembolic_disorder_list", "Varicose-veins-with-phlebits"],
+            itp:                      ["thromboembolic_disorder_list", "Idiopathic-Thrombocytopenic-Purpura-(ITP)"],
+            vvnp:                     ["thromboembolic_disorder_list", "Varicose-veins-no-phlebits"],
+            pat:                      ["thromboembolic_disorder_list", "Previous-arterial-thrombosis"],
+            vwd:                      ["thromboembolic_disorder_list", "Von-Willebrand-disease"],
+            pdvt:                     ["thromboembolic_disorder_list", "Previous-DVT"],
+            tharm_other:              ["thromboembolic_disorder_list", "Other"],
+
+            afl:                      ["hepatic_problems_list", "Acute-Fatty-Liver"],
+            hep_unk:                  ["hepatic_problems_list", "Hepatitis-type-unknown"],
+            aut_he:                   ["hepatic_problems_list", "Autoimmune-hepatitis"],
+            jnhs:                     ["hepatic_problems_list", "Jaundice-not-hepatitis-specific"],
+            help_synd:                ["hepatic_problems_list", "HELP-syndrome"],
+            liver_trans:              ["hepatic_problems_list", "Liver-transplant"],
+            hepa:                     ["hepatic_problems_list", "Hepatitis-A"],
+            obs_chl:                  ["hepatic_problems_list", "Obstetric-cholestasis"],
+            hepb:                     ["hepatic_problems_list", "Hepatitis-B"],
+            oth_hep_prd:              ["hepatic_problems_list", "Other-hepatic-problem"],
+            hepc:                     ["hepatic_problems_list", "Hepatitis-C"],
+
+            achalasia:                ["gastrointestinal_problems_list", "Achalasia"],
+            haemorrhoids_not_treated: ["gastrointestinal_problems_list", "Haemorrhoids-not-treated"],
+            cholecystitis:            ["gastrointestinal_problems_list", "Cholecystitis"],
+            hiatus_hernia:            ["gastrointestinal_problems_list", "Hiatus-hernia"],
+            coeliac_disease:          ["gastrointestinal_problems_list", "Coeliac-disease"],
+            irritable_bowel_syndrome: ["gastrointestinal_problems_list", "Irritable-bowel-syndrome"],
+            crohns_disease:           ["gastrointestinal_problems_list", "Crohns-disease"],
+            malabsorption_syndrome:   ["gastrointestinal_problems_list", "Malabsorption-syndrome"],
+            faecal_incontinence:      ["gastrointestinal_problems_list", "Faecal-incontinence"],
+            pancreatitis:             ["gastrointestinal_problems_list", "Pancreatitis"],
+            gastric_band:             ["gastrointestinal_problems_list", "Gastric-band"],
+            ulcerative_colitis:       ["gastrointestinal_problems_list", "Ulcerative-colitis"],
+            gastric_ulcer:            ["gastrointestinal_problems_list", "Gastric-ulcer"],
+            garothr:                  ["gastrointestinal_problems_list", "Other"],
+            haemorrhoids_treated:     ["gastrointestinal_problems_list", "Haemorrhoids-treated"],
+
+            addison_disease:          ["endocrine_problems_list", "Addisons-disease"],
+            hyperthyroidism_current:  ["endocrine_problems_list", "Hyperthyroidism-current"],
+            autoimmune_hypothyroidism:["endocrine_problems_list", "Autoimmune-hypothyroidism"],
+            hyperthyroidism:          ["endocrine_problems_list", "Hyperthyroidism-past"],
+            cushings_syndrome:        ["endocrine_problems_list", "Cushings-syndrome"],
+            hypothyroidism:           ["endocrine_problems_list", "Hypothyroidism"],
+            diabetes_type_1:          ["endocrine_problems_list", "Diabetes-type-1"],
+            pituitary_disorder:       ["endocrine_problems_list", "Pituitary-disorder"],
+            diabetes_type_2:          ["endocrine_problems_list", "Diabetes-type-2"],
+            posysn:                   ["endocrine_problems_list", "Polycystic-ovarian-syndrome"],
+            endocrine_disease:        ["endocrine_problems_list", "Endocrine-disease"],
+            endocothr:                ["endocrine_problems_list", "Other"],
+            gestational_diabetes:     ["endocrine_problems_list", "Gestational-diabetes"],
+
+            adhd__add:                ["neurological_problems_list", "ADHD/ADD"],
+            psh:                      ["neurological_problems_list", "Previous-subarachnoid-haemorrhage"],
+            asd:                      ["neurological_problems_list", "Autism-Spectrum-Disorder"],
+            stroke:                   ["neurological_problems_list", "Stroke"],
+            cerebral_palsy:           ["neurological_problems_list", "Cerebral-palsy"],
+            fne:                      ["neurological_problems_list", "Fits-not-epilepsy"],
+            cfs:                      ["neurological_problems_list", "Chronic-fatigue-syndrome"],
+            migraine:                 ["neurological_problems_list", "Migraine"],
+            enm:                      ["neurological_problems_list", "Epilepsy-no-medication"],
+            migrain_severe:           ["neurological_problems_list", "Migraine-severe"],
+            erm:                      ["neurological_problems_list", "Epilepsy-requires-medication"],
+            neuromuscular_disorder:   ["neurological_problems_list", "Neuromuscular-disorder"],
+            multiple_sclerosis:       ["neurological_problems_list", "Multiple-sclerosis"],
+            spina_bifida:             ["neurological_problems_list", "Spina-bifida"],
+            myotonic_dystrophy:       ["neurological_problems_list", "Myotonic-dystrophy"],
+            nuero_prb_othr:           ["neurological_problems_list", "Other"],
+            neuropathy:               ["neurological_problems_list", "Neuropathy"],
+
+            gestational_pemphigoid:   ["autoimmune_disease_list", "Gestational-pemphigoid"],
+            sclerosis:                ["autoimmune_disease_list", "Multiple-sclerosis"],
+            myasthenia_gravis:        ["autoimmune_disease_list", "Myasthenia-Gravis"],
+            pernicious_anaemia:       ["autoimmune_disease_list", "Pernicious-anaemia"],
+            psoriasis:                ["autoimmune_disease_list", "Psoriasis"],
+            psoriatic_arthropathy:    ["autoimmune_disease_list", "Psoriatic-arthropathy"],
+            rheumatoid_arthritis:     ["autoimmune_disease_list", "Rheumatoid-arthritis"],
+            syst_lup_eryth:           ["autoimmune_disease_list", "Systemic-lupus-erythematosus"],
+            systemic_sclerosis:       ["autoimmune_disease_list", "Systemic-sclerosis"],
+            vitiligo:                 ["autoimmune_disease_list", "Vitiligo"],
+            autodis_othe:             ["autoimmune_disease_list", "Other"],
+
+            groupb:                   ["infections_list", "Group-B-streptococcus"],
+            confidential_information: ["infections_list", "Confidential-information"],
+            hiv:                      ["infections_list", "Human-immunodeficiency-virus"],
+            candida:                  ["infections_list", "Candida"],
+            habite:                   ["infections_list", "Habite"],
+            c_difficile:              ["infections_list", "C-Difficile"],
+            meningitis:               ["infections_list", "Meningitis"],
+            chlamydia:                ["infections_list", "Chlamydia"],
+            mrsa:                     ["infections_list", "MRSA"],
+            cytomegalovirus:          ["infections_list", "Cytomegalovirus"],
+            parvovirus:               ["infections_list", "Parvovirus"],
+            genital_herpes:           ["infections_list", "Genital-herpes"],
+            polio:                    ["infections_list", "Polio"],
+            genital_warts:            ["infections_list", "Genital-warts"],
+            rubella:                  ["infections_list", "Rubella"],
+            glandular_fever:          ["infections_list", "Glandular-fever"],
+            syphilis:                 ["infections_list", "Syphilis"],
+            gonorrhoea:               ["infections_list", "Gonorrhea"],
+            toxoplasmosis:            ["infections_list", "Toxoplasmosis"],
+            covid19m6:                ["infections_list", "Covid-19-in-the-last-6-months"],
+            tropical_disease:         ["infections_list", "Tropical-disease"],
+            covid196m:                ["infections_list", "Covid-19-more-than-6-months-ago"],
+            infectothr:               ["infections_list", "Other"],
+
+            aibd:                     ["fertility_treatment_list", "Artificial-insemination-by-donor"],
+            artif_insemin:            ["fertility_treatment_list", "Artificial-insemination-by-partner"],
+            bpdi:                     ["fertility_treatment_list", "Became-pregnant-during-investigations"],
+            clomiphene:               ["fertility_treatment_list", "Clomiphene"],
+            gift:                     ["fertility_treatment_list", "GIFT"],
+            icsi_own_egg:             ["fertility_treatment_list", "ICSI-(own-egg)"],
+            icsi_donor_egg:           ["fertility_treatment_list", "ICSI-(donor-egg)"],
+            iui:                      ["fertility_treatment_list", "Intrauterine-insemination-(IUI)"],
+            ivf_own_egg:              ["fertility_treatment_list", "In-vitro-fertilization-(IVF)-(own-egg)"],
+            ivf_donar_egg:            ["fertility_treatment_list", "In-vitro-fertilization-(IVF)-(donor-egg)"],
+            hgc:                      ["fertility_treatment_list", "Human-chorionic-gonadotrophin-(HCG)"],
+            pergonal_or_metrodin:     ["fertility_treatment_list", "Pergonal-or-Metrodin"],
+            reversal_of_sterilisation:["fertility_treatment_list", "Reversal-of-sterilisation"],
+            surrogate_pregnancy:      ["fertility_treatment_list", "Surrogate-pregnancy"],
+            tubal_surgery:            ["fertility_treatment_list", "Tubal-surgery"],
+            yes_not_wish:             ["fertility_treatment_list", "Yes,-but-does-not-wish-to-discuss"],
+            fertiother:               ["fertility_treatment_list", "Other"],
+
+            medinone:                 ["medication_in_pregnancy_list", "None"],
+            asthma_drugs:             ["medication_in_pregnancy_list", "Asthma-drugs"],
+            analgesics:               ["medication_in_pregnancy_list", "Analgesics"],
+            aspirin:                  ["medication_in_pregnancy_list", "Aspirin"],
+            antacids:                 ["medication_in_pregnancy_list", "Antacids"],
+            insulin:                  ["medication_in_pregnancy_list", "Insulin"],
+            antibiotics:              ["medication_in_pregnancy_list", "Antibiotics"],
+            levothyroxine:            ["medication_in_pregnancy_list", "Levothyroxine"],
+            antid:                    ["medication_in_pregnancy_list", "Anti-D"],
+            lithium:                  ["medication_in_pregnancy_list", "Lithium"],
+            antidepressants:          ["medication_in_pregnancy_list", "Antidepressants"],
+            multivitamins:            ["medication_in_pregnancy_list", "Multivitamins"],
+            antihypertensives:        ["medication_in_pregnancy_list", "Antihypertensives"],
+            oral_hypoglycemics:       ["medication_in_pregnancy_list", "Oral-hypoglycemics"],
+            oncology_drugs:           ["medication_in_pregnancy_list", "Oncology-drugs"],
+            roaccutane:               ["medication_in_pregnancy_list", "Roaccutane"],
+            vitamind:                 ["medication_in_pregnancy_list", "Vitamin-D"],
+            med_opthrt:               ["medication_in_pregnancy_list", "Other"],
+
+            crystal_meth:             ["substance_use_before_list", "Crystal-meth"],
+            declined_to_answer:       ["substance_use_before_list", "Declined-to-answer"],
+            diazepam:                 ["substance_use_before_list", "Diazepam"],
+            acid:                     ["substance_use_before_list", "Acid"],
+            ecstasy:                  ["substance_use_before_list", "Ecstasy"],
+            amphetamines:             ["substance_use_before_list", "Amphetamines"],
+            glue:                     ["substance_use_before_list", "Glue"],
+            cannabis:                 ["substance_use_before_list", "Cannabis"],
+            heroin:                   ["substance_use_before_list", "Heroin"],
+            cocaine:                  ["substance_use_before_list", "Cocaine"],
+            ketamine:                 ["substance_use_before_list", "Ketamine"],
+            crack:                    ["substance_use_before_list", "Crack"],
+            khat:                     ["substance_use_before_list", "Khat"],
+            lighter_fuel:             ["substance_use_before_list", "Lighter-fuel"],
+            lsd:                      ["substance_use_before_list", "LSD"],
+            methadone:                ["substance_use_before_list", "Methadone"],
+            speed:                    ["substance_use_before_list", "Speed"],
+            subutex:                  ["substance_use_before_list", "Subutex"],
+            temazepam:                ["substance_use_before_list", "Temazepam"],
+            subothr:                  ["substance_use_before_list", "Other"],
+
+            no_abnor:                 ["anomaly_scan_result_list", "No-abnormality-detected"],
+            anencephaly:              ["anomaly_scan_result_list", "Anencephaly"],
+            bra:                      ["anomaly_scan_result_list", "Bilateral-renal-agenesis"],
+            cleft_lip:                ["anomaly_scan_result_list", "Cleft-lip"],
+            diaphragmatic_hernia:     ["anomaly_scan_result_list", "Diaphragmatic-hernia"],
+            exomphalos:               ["anomaly_scan_result_list", "Exomphalos"],
+            gastroschisis:            ["anomaly_scan_result_list", "Gastroschisis"],
+            lethal_sket_dys:          ["anomaly_scan_result_list", "Lethal-skeletal-dysplasia"],
+            osb:                      ["anomaly_scan_result_list", "Open-spina-bifida"],
+            sca:                      ["anomaly_scan_result_list", "Serious-cardiac-abnormality"],
+            trisomy_13:               ["anomaly_scan_result_list", "Trisomy-13"],
+            trisomy_18:               ["anomaly_scan_result_list", "Trisomy-18"],
+            admonr_other:             ["anomaly_scan_result_list", "Other"],
+
+            no_risk:                  ["fgr_risks_list", "No-risk-factors-identified"],
+            antiphospholipid:         ["fgr_risks_list", "Antiphospholipid"],
+            chronic_hypertension:     ["fgr_risks_list", "Chronic-Hypertension"],
+            chronic_rental:           ["fgr_risks_list", "Chronic-renal-failure"],
+            drug_misuse:              ["fgr_risks_list", "Drug-misuse"],
+            suasb:                    ["fgr_risks_list", "Significant-Uterine-Anomalies"],
+            smoking_at_booking:       ["fgr_risks_list", "Smoking-at-booking"],
+            ufsfim:                   ["fgr_risks_list", "Unsuitable-for-SFI-monitoring"],
+            pappa:                    ["fgr_risks_list", "Low-PAPP-A"],
+            frg_othr:                 ["fgr_risks_list", "Other"],
+
+            no_risk_pre:              ["preterm_birth_risks_list", "No-risks-identified"],
+            lletz_prev:               ["preterm_birth_risks_list", "LLETZ-unknown-depth"],
+            cbir:                     ["preterm_birth_risks_list", "Cone-Biopsy"],
+            hosceehr:                 ["preterm_birth_risks_list", "HO-significant-cervical-excisional-event"],
+            hotfcc:                   ["preterm_birth_risks_list", "HO-trachelectomy-for-cervical-cancer"],
+            intr_adhe_syndro:         ["preterm_birth_risks_list", "Intrauterine-adhesions"],
+            lletz:                    ["preterm_birth_risks_list", "LLETZ-gt-10mm-depth-removed"],
+            lletz_ir:                 ["preterm_birth_risks_list", "LLETZ-2-or-more-procedures"],
+            mul_preg:                 ["preterm_birth_risks_list", "Multiple-Pregnancy"],
+            prev_cerv_cercl:          ["preterm_birth_risks_list", "Prev-cervical-cerclage"],
+            prev_aila:                ["preterm_birth_risks_list", "Previous-c/s-at-full-dilatation"],
+            prev_pre_birth:           ["preterm_birth_risks_list", "Prev-preterm-birth-16-34wks"],
+            prev_preterm:             ["preterm_birth_risks_list", "Prev-preterm-prelabour-SROM"],
+            uterine_variant:          ["preterm_birth_risks_list", "Uterine-variant"],
+
+            own_fresh:                ["ivf_details_list", "Own-fresh-embryos"],
+            own_frozen:               ["ivf_details_list", "Own-frozen-embryos"],
+            donor_oocyte:             ["ivf_details_list", "Donor-oocyte"],
+            male_fact_indi:           ["ivf_details_list", "Male-factor"],
+            icsiimsi:                 ["ivf_details_list", "ICSI/IMSI"],
+        };
+
+        Object.keys(checkboxMappings).forEach(dbKey => {
+            if (data[dbKey] === 1 || data[dbKey] === true) {
+                const [inputName, value] = checkboxMappings[dbKey];
+                const checkbox = document.querySelector(
+                    `input[name="${inputName}"][value="${value}"]`
+                );
+                if (checkbox) {
+                    checkbox.checked = true;
+                    // Update the hidden comma-list input for that modal
+                    const modal = checkbox.closest(".modal");
+                    if (modal && typeof saveCheckboxModalState === "function") {
+                        saveCheckboxModalState(modal);
+                    }
+                }
+            }
+        });
+
         if (data.previous_pregnancies) {
-            const numVal = parseInt(data.previous_pregnancies) || 0;
+            const numVal  = parseInt(data.previous_pregnancies) || 0;
             const numInput = document.querySelector('input[name="previous_pregnancies"]');
             if (numInput) numInput.value = numVal;
 
-            const btn = document.getElementById('previousPregnanciesBtn');
+            const btn = document.getElementById("previousPregnanciesBtn");
             if (btn) {
-                btn.click(); // Trigger table generation
+                btn.click(); // regenerate table rows
 
                 if (data.table_vtci && Array.isArray(data.table_vtci)) {
                     data.table_vtci.forEach((row, i) => {
                         const idx = i + 1;
-                        const fieldsMap = {
+                        const map = {
                             problems: row.antenatal_problems,
-                            outcome: row.outcome,
-                            mode: row.mode_of_delivery,
-                            weight: row.birth_weight,
-                            ga: row.gestational_age
+                            outcome:  row.outcome,
+                            mode:     row.mode_of_delivery,
+                            weight:   row.birth_weight,
+                            ga:       row.gestational_age,
                         };
-                        Object.keys(fieldsMap).forEach(fKey => {
-                            const input = document.querySelector(`[name="prev_preg_${idx}_${fKey}"]`);
-                            if (input) input.value = fieldsMap[fKey] || '';
+                        Object.keys(map).forEach(fKey => {
+                            const el = document.querySelector(
+                                `[name="prev_preg_${idx}_${fKey}"]`
+                            );
+                            if (el) el.value = map[fKey] || "";
                         });
                     });
                 }
             }
         }
-
-        // 6. Handle individual boolean/checkbox fields (reversing the multi-select logic in collectFormData)
-        const checkboxMappings = {
-            // key in data : [input name, checkbox value]
-            "asthma": ["respiratory_problems", "Asthma"],
-            "asthma_spe": ["respiratory_problems", "Asthma-Specialist-Consultant-Care"],
-            "asthma_pre": ["respiratory_problems", "Asthma-Previous-Admission-In-Last-12-Months"],
-            "chronic_bronchitis": ["respiratory_problems", "Chronic-Bronchitis"],
-            "chronic_obstr": ["respiratory_problems", "Chronic-Obstructive-Airway-Disease"],
-            "pulmonary_fibrosis": ["respiratory_problems", "Pulmonary-Fibrosis"],
-            "sarcoidosis": ["respiratory_problems", "Sarcoidosis"],
-            "tuber_current_treat": ["respiratory_problems", "Tuberculosis-Current-Treatment"],
-            "tuber_past": ["respiratory_problems", "Tuberculosis-Past-Treatment"],
-
-            "aperts_syndrome": ["inherited_disorders", "Aperts-Syndrome"],
-            "cong_adren_hyper": ["inherited_disorders", "Congenital-Adrenal-Hyperplasia"],
-            "conge_hip_dys": ["inherited_disorders", "Congenital-Hip-Dysplasia"],
-            "cystic_fibrosis": ["inherited_disorders", "Cystic-Fibrosis"],
-            "down_synd": ["inherited_disorders", "DownsSyndrome"],
-            "haemochromatosis": ["inherited_disorders", "Haemochromatosi"],
-            "marf_synd": ["inherited_disorders", "Marfans-Syndromea"],
-            "mcadd": ["inherited_disorders", "MCADD"],
-            "muscul_dyst": ["inherited_disorders", "Muscular-Dystrophy"],
-            "neurofibromatosis": ["inherited_disorders", "Neurofibromatosis"],
-            "phenylk": ["inherited_disorders", "Phenylketonuria"],
-            "inher_other": ["inherited_disorders", "Other"],
-
-            "arrhythmia": ["cardiac_problems_list", "Arrhythmia"],
-            "car_care": ["cardiac_problems_list", "Cardiac-disease"],
-            "cardiac_mur": ["cardiac_problems_list", "Cardiac-Murmur"],
-            "cardiac_surgery": ["cardiac_problems_list", "Cardiac-Surgery"],
-            "cardiac_transplante": ["cardiac_problems_list", "Cardiac-Transplant"],
-            "card_anom": ["cardiac_problems_list", "Congenital-Cardiac-Anomaly"],
-            "isc_heart": ["cardiac_problems_list", "Ischemic-Heart-Disease"],
-            "peri_card": ["cardiac_problems_list", "Peripartum-Cardiomyopathy"],
-            "rheumatic_fever": ["cardiac_problems_list", "Rheumatic-Fever"],
-            "valve_lesion": ["cardiac_problems_list", "Valve-Lesion"],
-            "card_other": ["cardiac_problems_list", "Other"],
-
-            "pul_hyper": ["hypertension_history_list", "Pulmonary-Hypertension"],
-            "curr_med": ["hypertension_history_list", "Currently-Medicated"],
-            "no_medica": ["hypertension_history_list", "Currently-No-Medication"],
-            "dur_pre_med": ["hypertension_history_list", "During-Pregnancy-Medicated"],
-            "preg_not_med": ["hypertension_history_list", "During-Pregnancy-Not-Medicated"],
-            "no_pre_med": ["hypertension_history_list", "Non-Pregnant-Medicated"],
-            "no_preg_med": ["hypertension_history_list", "Non-Pregnant-No-Medication"],
-
-            "anaemia": ["haematological_problems_list", "Anaemia"],
-            "rh_isoim": ["haematological_problems_list", "Rhesus-isoimmunisation"],
-            "antibody_sensitivity": ["haematological_problems_list", "Antibody-sensitivity"],
-            "seckel_dis": ["haematological_problems_list", "Sickle-cell-disease"],
-            "alpha_thalassaemia": ["haematological_problems_list", "Alpha-Thalassaemia"],
-            "cell_trait": ["haematological_problems_list", "Sickle-cell-trait"],
-            "beta_thalassaemia": ["haematological_problems_list", "Beta-Thalassaemia"],
-            "hae_other": ["haematological_problems_list", "Other"],
-            "thal_trait": ["haematological_problems_list", "Beta-Thalassaemia-Trait"],
-            "bon_mar": ["haematological_problems_list", "Bone-marrow-transplant"],
-
-            "antipho": ["thromboembolic_disorder_list", "Antiphospholipid-syndrome"],
-            "pcd": ["thromboembolic_disorder_list", "Protein-C-deficiency"],
-            "antithrombin_deficiency": ["thromboembolic_disorder_list", "Antithrombin-deficiency"],
-            "psd": ["thromboembolic_disorder_list", "Protein-S-deficiency"],
-            "haema_care": ["thromboembolic_disorder_list", "Compound-heterozygosity-under-haematological-care"],
-            "pmfh": ["thromboembolic_disorder_list", "Prothrombin-mutation"],
-            "dvt": ["thromboembolic_disorder_list", "DVT-anticoagulated"],
-            "pe": ["thromboembolic_disorder_list", "Pulmonary-embolus"],
-            "dvt_not": ["thromboembolic_disorder_list", "DVT-not-anticoagulated"],
-            "thrombocytopenia": ["thromboembolic_disorder_list", "Thrombocytopenia"],
-            "v_leid": ["thromboembolic_disorder_list", "Factor-V-Leiden-(homozygous)"],
-            "thrombophilia": ["thromboembolic_disorder_list", "Thrombophilia"],
-            "haemophilia": ["thromboembolic_disorder_list", "Haemophilia"],
-            "vvwp": ["thromboembolic_disorder_list", "Varicose-veins-with-phlebits"],
-            "itp": ["thromboembolic_disorder_list", "Idiopathic-Thrombocytopenic-Purpura-(ITP)"],
-            "vvnp": ["thromboembolic_disorder_list", "Varicose-veins-no-phlebits"],
-            "pat": ["thromboembolic_disorder_list", "Previous-arterial-thrombosis"],
-            "vwd": ["thromboembolic_disorder_list", "Von-Willebrand-disease"],
-            "pdvt": ["thromboembolic_disorder_list", "Previous-DVT"],
-            "tharm_other": ["thromboembolic_disorder_list", "Other"],
-
-            "afl": ["hepatic_problems_list", "Acute-Fatty-Liver"],
-            "hep_unk": ["hepatic_problems_list", "Hepatitis-type-unknown"],
-            "aut_he": ["hepatic_problems_list", "Autoimmune-hepatitis"],
-            "jnhs": ["hepatic_problems_list", "Jaundice-not-hepatitis-specific"],
-            "help_synd": ["hepatic_problems_list", "HELP-syndrome"],
-            "liver_trans": ["hepatic_problems_list", "Liver-transplant"],
-            "hepa": ["hepatic_problems_list", "Hepatitis-A"],
-            "obs_chl": ["hepatic_problems_list", "Obstetric-cholestasis"],
-            "hepb": ["hepatic_problems_list", "Hepatitis-B"],
-            "oth_hep_prd": ["hepatic_problems_list", "Other-hepatic-problem"],
-            "hepc": ["hepatic_problems_list", "Hepatitis-C"],
-
-            "achalasia": ["gastrointestinal_problems_list", "Achalasia"],
-            "haemorrhoids_not_treated": ["gastrointestinal_problems_list", "Haemorrhoids-not-treated"],
-            "cholecystitis": ["gastrointestinal_problems_list", "Cholecystitis"],
-            "hiatus_hernia": ["gastrointestinal_problems_list", "Hiatus-hernia"],
-            "coeliac_disease": ["gastrointestinal_problems_list", "Coeliac-disease"],
-            "irritable_bowel_syndrome": ["gastrointestinal_problems_list", "Irritable-bowel-syndrome"],
-            "crohns_disease": ["gastrointestinal_problems_list", "Crohns-disease"],
-            "malabsorption_syndrome": ["gastrointestinal_problems_list", "Malabsorption-syndrome"],
-            "faecal_incontinence": ["gastrointestinal_problems_list", "Faecal-incontinence"],
-            "pancreatitis": ["gastrointestinal_problems_list", "Pancreatitis"],
-            "gastric_band": ["gastrointestinal_problems_list", "Gastric-band"],
-            "ulcerative_colitis": ["gastrointestinal_problems_list", "Ulcerative-colitis"],
-            "gastric_ulcer": ["gastrointestinal_problems_list", "Gastric-ulcer"],
-            "gerothr": ["gastrointestinal_problems_list", "Other"],
-            "haemorrhoids_treated": ["gastrointestinal_problems_list", "Haemorrhoids-treated"],
-
-            "addison_disease": ["endocrine_problems_list", "Addisons-disease"],
-            "hyperthyroidism_current": ["endocrine_problems_list", "Hyperthyroidism-current"],
-            "autoimmune_hypothyroidism": ["endocrine_problems_list", "Autoimmune-hypothyroidism"],
-            "hyperthyroidism": ["endocrine_problems_list", "Hyperthyroidism-past"],
-            "cushings_syndrome": ["endocrine_problems_list", "Cushings-syndrome"],
-            "hypothyroidism": ["endocrine_problems_list", "Hypothyroidism"],
-            "diabetes_type_1": ["endocrine_problems_list", "Diabetes-type-1"],
-            "pituitary_disorder": ["endocrine_problems_list", "Pituitary-disorder"],
-            "diabetes_type_2": ["endocrine_problems_list", "Diabetes-type-2"],
-            "posysn": ["endocrine_problems_list", "Polycystic-ovarian-syndrome"],
-            "endocrine_disease": ["endocrine_problems_list", "Endocrine-disease"],
-            "endocothr": ["endocrine_problems_list", "Other"],
-            "gestational_diabetes": ["endocrine_problems_list", "Gestational-diabetes"],
-
-            "adhd__add": ["neurological_problems_list", "ADHD/ADD"],
-            "psh": ["neurological_problems_list", "Previous-subarachnoid-haemorrhage"],
-            "asd": ["neurological_problems_list", "Autism-Spectrum-Disorder"],
-            "stroke": ["neurological_problems_list", "Stroke"],
-            "cerebral_palsy": ["neurological_problems_list", "Cerebral-palsy"],
-            "fne": ["neurological_problems_list", "Fits-not-epilepsy"],
-            "cfs": ["neurological_problems_list", "Chronic-fatigue-syndrome"],
-            "migraine": ["neurological_problems_list", "Migraine"],
-            "enm": ["neurological_problems_list", "Epilepsy-no-medication"],
-            "migrain_severe": ["neurological_problems_list", "Migraine-severe"],
-            "erm": ["neurological_problems_list", "Epilepsy-requires-medication"],
-            "neuromuscular_disorder": ["neurological_problems_list", "Neuromuscular-disorder"],
-            "multiple_sclerosis": ["neurological_problems_list", "Multiple-sclerosis"],
-            "spina_bifida": ["neurological_problems_list", "Spina-bifida"],
-            "myotonic_dystrophy": ["neurological_problems_list", "Myotonic-dystrophy"],
-            "nuero_prb_othr": ["neurological_problems_list", "Other"],
-            "neuropathy": ["neurological_problems_list", "Neuropathy"],
-
-            "gestational_pemphigoid": ["autoimmune_disease_list", "Gestational-pemphigoid"],
-            "sclerosis": ["autoimmune_disease_list", "Multiple-sclerosis"],
-            "myasthenia_gravis": ["autoimmune_disease_list", "Myasthenia-Gravis"],
-            "pernicious_anaemia": ["autoimmune_disease_list", "Pernicious-anaemia"],
-            "psoriasis": ["autoimmune_disease_list", "Psoriasis"],
-            "psoriatic_arthropathy": ["autoimmune_disease_list", "Psoriatic-arthropathy"],
-            "rheumatoid_arthritis": ["autoimmune_disease_list", "Rheumatoid-arthritis"],
-            "syst_lup_eryth": ["autoimmune_disease_list", "Systemic-lupus-erythematosus"],
-            "systemic_sclerosis": ["autoimmune_disease_list", "Systemic-sclerosis"],
-            "vitiligo": ["autoimmune_disease_list", "Vitiligo"],
-            "autodis_othe": ["autoimmune_disease_list", "Other"],
-
-            "no": ["infections_list", "No"],
-            "groupb": ["infections_list", "Group-B-streptococcus"],
-            "confidential_information": ["infections_list", "Confidential-information"],
-            "hiv": ["infections_list", "Human-immunodeficiency-virus"],
-            "candida": ["infections_list", "Candida"],
-            "habite": ["infections_list", "Habite"],
-            "c_difficile": ["infections_list", "C-Difficile"],
-            "meningitis": ["infections_list", "Meningitis"],
-            "chlamydia": ["infections_list", "Chlamydia"],
-            "mrsa": ["infections_list", "MRSA"],
-            "cytomegalovirus": ["infections_list", "Cytomegalovirus"],
-            "parvovirus": ["infections_list", "Parvovirus"],
-            "genital_herpes": ["infections_list", "Genital-herpes"],
-            "polio": ["infections_list", "Polio"],
-            "genital_warts": ["infections_list", "Genital-warts"],
-            "rubella": ["infections_list", "Rubella"],
-            "glandular_fever": ["infections_list", "Glandular-fever"],
-            "syphilis": ["infections_list", "Syphilis"],
-            "gonorrhoea": ["infections_list", "Gonorrhea"],
-            "toxoplasmosis": ["infections_list", "Toxoplasmosis"],
-            "covid19m6": ["infections_list", "Covid-19-in-the-last-6-months"],
-            "tropical_disease": ["infections_list", "Tropical-disease"],
-            "covid196m": ["infections_list", "Covid-19-more-than-6-months-ago"],
-            "infectothr": ["infections_list", "Other"],
-
-            "fert_no": ["fertility_treatment_list", "No"],
-            "aibd": ["fertility_treatment_list", "Artificial-insemination-by-donor"],
-            "artif_insemin": ["fertility_treatment_list", "Artificial-insemination-by-partner"],
-            "bpdi": ["fertility_treatment_list", "Became-pregnant-during-investigations"],
-            "clomiphene": ["fertility_treatment_list", "Clomiphene"],
-            "gift": ["fertility_treatment_list", "GIFT"],
-            "icsi_own_egg": ["fertility_treatment_list", "ICSI-(own-egg)"],
-            "icsi_donor_egg": ["fertility_treatment_list", "ICSI-(donor-egg)"],
-            "iui": ["fertility_treatment_list", "Intrauterine-insemination-(IUI)"],
-            "ivf_own_egg": ["fertility_treatment_list", "In-vitro-fertilization-(IVF)-(own-egg)"],
-            "ivf_donar_egg": ["fertility_treatment_list", "In-vitro-fertilization-(IVF)-(donor-egg)"],
-            "hgc": ["fertility_treatment_list", "Human-chorionic-gonadotrophin-(HCG)"],
-            "pergonal_or_metrodin": ["fertility_treatment_list", "Pergonal-or-Metrodin"],
-            "reversal_of_sterilisation": ["fertility_treatment_list", "Reversal-of-sterilisation"],
-            "surrogate_pregnancy": ["fertility_treatment_list", "Surrogate-pregnancy"],
-            "tubal_surgery": ["fertility_treatment_list", "Tubal-surgery"],
-            "yes_not_wish": ["fertility_treatment_list", "Yes,-but-does-not-wish-to-discuss"],
-            "fertiother": ["fertility_treatment_list", "Other"],
-
-            "medinone": ["medication_in_pregnancy_list", "None"],
-            "asthma_drugs": ["medication_in_pregnancy_list", "Asthma-drugs"],
-            "analgesics": ["medication_in_pregnancy_list", "Analgesics"],
-            "aspirin": ["medication_in_pregnancy_list", "Aspirin"],
-            "antacids": ["medication_in_pregnancy_list", "Antacids"],
-            "insulin": ["medication_in_pregnancy_list", "Insulin"],
-            "antibiotics": ["medication_in_pregnancy_list", "Antibiotics"],
-            "levothyroxine": ["medication_in_pregnancy_list", "Levothyroxine"],
-            "antid": ["medication_in_pregnancy_list", "Anti-D"],
-            "lithium": ["medication_in_pregnancy_list", "Lithium"],
-            "antidepressants": ["medication_in_pregnancy_list", "Antidepressants"],
-            "multivitamins": ["medication_in_pregnancy_list", "Multivitamins"],
-            "antihypertensives": ["medication_in_pregnancy_list", "Antihypertensives"],
-            "oral_hypoglycemics": ["medication_in_pregnancy_list", "Oral-hypoglycemics"],
-            "oncology_drugs": ["medication_in_pregnancy_list", "Oncology-drugs"],
-            "roaccutane": ["medication_in_pregnancy_list", "Roaccutane"],
-            "vitamind": ["medication_in_pregnancy_list", "Vitamin-D"],
-            "med_opthrt": ["medication_in_pregnancy_list", "Other"],
-
-            "never_used": ["substance_use_before_list", "Never-used"],
-            "crystal_meth": ["substance_use_before_list", "Crystal-meth"],
-            "declined_to_answer": ["substance_use_before_list", "Declined-to-answer"],
-            "diazepam": ["substance_use_before_list", "Diazepam"],
-            "acid": ["substance_use_before_list", "Acid"],
-            "ecstasy": ["substance_use_before_list", "Ecstasy"],
-            "amphetamines": ["substance_use_before_list", "Amphetamines"],
-            "glue": ["substance_use_before_list", "Glue"],
-            "cannabis": ["substance_use_before_list", "Cannabis"],
-            "heroin": ["substance_use_before_list", "Heroin"],
-            "cocaine": ["substance_use_before_list", "Cocaine"],
-            "ketamine": ["substance_use_before_list", "Ketamine"],
-            "crack": ["substance_use_before_list", "Crack"],
-            "khat": ["substance_use_before_list", "Khat"],
-            "lighter_fuel": ["substance_use_before_list", "Lighter-fuel"],
-            "lsd": ["substance_use_before_list", "LSD"],
-            "methadone": ["substance_use_before_list", "Methadone"],
-            "speed": ["substance_use_before_list", "Speed"],
-            "subutex": ["substance_use_before_list", "Subutex"],
-            "temazepam": ["substance_use_before_list", "Temazepam"],
-            "subothr": ["substance_use_before_list", "Other"],
-
-            "no_abnor": ["anomaly_scan_result_list", "No-abnormality-detected"],
-            "anencephaly": ["anomaly_scan_result_list", "Anencephaly"],
-            "bra": ["anomaly_scan_result_list", "Bilateral-renal-agenesis"],
-            "cleft_lip": ["anomaly_scan_result_list", "Cleft-lip"],
-            "diaphragmatic_hernia": ["anomaly_scan_result_list", "Diaphragmatic-hernia"],
-            "exomphalos": ["anomaly_scan_result_list", "Exomphalos"],
-            "gastroschisis": ["anomaly_scan_result_list", "Gastroschisis"],
-            "lethal_sket_dys": ["anomaly_scan_result_list", "Lethal-skeletal-dysplasia"],
-            "osb": ["anomaly_scan_result_list", "Open-spina-bifida"],
-            "sca": ["anomaly_scan_result_list", "Serious-cardiac-abnormality"],
-            "trisomy_13": ["anomaly_scan_result_list", "Trisomy-13"],
-            "trisomy_18": ["anomaly_scan_result_list", "Trisomy-18"],
-            "admonr_other": ["anomaly_scan_result_list", "Other"],
-
-            "no_risk": ["fgr_risks_list", "No-risk-factors-identified"],
-            "antiphospholipid": ["fgr_risks_list", "Antiphospholipid"],
-            "chronic_hypertension": ["fgr_risks_list", "Chronic-Hypertension"],
-            "chronic_rental": ["fgr_risks_list", "Chronic-renal-failure"],
-            "drug_misuse": ["fgr_risks_list", "Drug-misuse"],
-            "suasb": ["fgr_risks_list", "Significant-Uterine-Anomalies"],
-            "smoking_at_booking": ["fgr_risks_list", "Smoking-at-booking"],
-            "ufsfim": ["fgr_risks_list", "Unsuitable-for-SFI-monitoring"],
-            "pappa": ["fgr_risks_list", "Low-PAPP-A"],
-            "frg_othr": ["fgr_risks_list", "Other"],
-
-            "no_risk_pre": ["preterm_birth_risks_list", "No-risks-identified"],
-            "lletz_prev": ["preterm_birth_risks_list", "LLETZ-unknown-depth"],
-            "cbir": ["preterm_birth_risks_list", "Cone-Biopsy"],
-            "hosceehr": ["preterm_birth_risks_list", "HO-significant-cervical-excisional-event"],
-            "hotfcc": ["preterm_birth_risks_list", "HO-trachelectomy-for-cervical-cancer"],
-            "intr_adhe_syndro": ["preterm_birth_risks_list", "Intrauterine-adhesions"],
-            "lletz": ["preterm_birth_risks_list", "LLETZ-gt-10mm-depth-removed"],
-            "lletz_ir": ["preterm_birth_risks_list", "LLETZ-2-or-more-procedures"],
-            "mul_preg": ["preterm_birth_risks_list", "Multiple-Pregnancy"],
-            "prev_cerv_cercl": ["preterm_birth_risks_list", "Prev-cervical-cerclage"],
-            "prev_aila": ["preterm_birth_risks_list", "Previous-c/s-at-full-dilatation"],
-            "prev_pre_birth": ["preterm_birth_risks_list", "Prev-preterm-birth-16-34wks"],
-            "prev_preterm": ["preterm_birth_risks_list", "Prev-preterm-prelabour-SROM"],
-            "uterine_variant": ["preterm_birth_risks_list", "Uterine-variant"],
-
-            "own_fresh": ["ivf_details_list", "Own-fresh-embryos"],
-            "own_frozen": ["ivf_details_list", "Own-frozen-embryos"],
-            "donor_oocyte": ["ivf_details_list", "Donor-oocyte"],
-            "male_fact_indi": ["ivf_details_list", "Male-factor"],
-            "icsiimsi": ["ivf_details_list", "ICSI/IMSI"]
-        };
-
-        Object.keys(checkboxMappings).forEach(key => {
-            if (data[key] === 1 || data[key] === true) {
-                const [inputName, value] = checkboxMappings[key];
-                const checkbox = document.querySelector(`input[name="${inputName}"][value="${value}"]`);
-                if (checkbox) {
-                    checkbox.checked = true;
-                    const modal = checkbox.closest('.modal');
-                    if (modal) saveCheckboxModalState(modal);
-                }
-            }
-        });
     }
 
     // Check for 'name' parameter in URL
@@ -1549,7 +1738,6 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-//========================================
 
 document.getElementById('myCheckbox').addEventListener('change', function () {
     const checkbox = document.getElementById('myCheckbox');
@@ -2060,6 +2248,7 @@ function collectFormData() {
         min10: document.querySelector('input[name="apgar_10min"]')?.value || '',
 
         oligohydra: document.querySelector('input[name="oligohydramnios"]')?.value || '',
+        "4_presentation": document.querySelector('select[name="presentation"]')?.value || '',
         please_select: document.querySelector('select[name="current_mode_of_delivery"]')?.value || '',
         indication: document.querySelector('input[name="delivery_indication"]')?.value || '',
         card_neck: document.querySelector('input[name="cord_around_neck"]')?.value || '',
@@ -2177,35 +2366,73 @@ async function uploadFile(file, apiKey, apiSecret, methodUrl) {
     }
 }
 
-// Function to check if Patient ID already exists
-async function checkPatientIdExists(patientId) {
+// Function to check if Patient ID already exists for the same hospital
+async function checkPatientIdExists(patientId, hospital = null) {
     if (!patientId || patientId.trim() === '') {
         return null;
     }
     
     try {
-        const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}?filters=[["patient_id","=","${patientId}"]]&fields=["name"]`);
+        // If hospital is provided, check both patient_id and hospital combination
+        let filters;
+        if (hospital && hospital.trim() !== '') {
+            filters = `[["patient_id","=","${patientId}"],["hospital","=","${hospital}"]]`;
+        } else {
+            // Fallback to only patient_id if hospital is not provided
+            filters = `[["patient_id","=","${patientId}"]]`;
+        }
+        
+        const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}?filters=${filters}&fields=["name","hospital"]`);
         if (response.ok) {
             const result = await response.json();
             if (result.data && result.data.length > 0) {
-                return result.data[0].name; // Return the document name
+                return result.data[0]; // Return the document with hospital info
             }
         }
     } catch (error) {
-        console.error('Error checking Patient ID:', error);
+        console.error('Error checking Patient ID and Hospital:', error);
+    }
+    return null;
+}
+
+// Function to check if Patient ID exists in any hospital (for informational purposes)
+async function checkPatientIdInAnyHospital(patientId) {
+    if (!patientId || patientId.trim() === '') {
+        return null;
+    }
+    
+    try {
+        const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}?filters=[["patient_id","=","${patientId}"]]&fields=["name","hospital"]`);
+        if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.length > 0) {
+                return result.data; // Return all records for this patient across hospitals
+            }
+        }
+    } catch (error) {
+        console.error('Error checking Patient ID in all hospitals:', error);
     }
     return null;
 }
 
 // Function to load existing patient data
-async function loadPatientData(patientId) {
+async function loadPatientData(patientId, hospital = null) {
     if (!patientId || patientId.trim() === '') {
         return null;
     }
     
     try {
         showStatus('Loading patient data...', 'info');
-        const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}?filters=[["patient_id","=","${patientId}"]]&fields=["*"]`);
+        // If hospital is provided, check both patient_id and hospital combination
+        let filters;
+        if (hospital && hospital.trim() !== '') {
+            filters = `[["patient_id","=","${patientId}"],["hospital","=","${hospital}"]]`;
+        } else {
+            // Fallback to only patient_id if hospital is not provided
+            filters = `[["patient_id","=","${patientId}"]]`;
+        }
+        
+        const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}?filters=${filters}&fields=["*"]`);
         if (response.ok) {
             const result = await response.json();
             if (result.data && result.data.length > 0) {
@@ -2259,6 +2486,17 @@ function populateFormWithData(data) {
     // Update global record name
     window.globalRecordName = data.name;
     
+    // Update button visibility based on document status and user role
+    if (window.canEditSubmitted !== undefined) {
+        // Role check already completed
+        updateButtonVisibility(data.docstatus || 0);
+    } else {
+        // Role check not completed yet, wait for it
+        setTimeout(() => {
+            updateButtonVisibility(data.docstatus || 0);
+        }, 500);
+    }
+    
     showStatus('Patient data loaded successfully!', 'success');
 }
 
@@ -2271,28 +2509,27 @@ async function saveToFrappe(formData) {
             throw new Error('API credentials are not properly configured. Please contact your administrator.');
         }
 
-        // First check if Patient ID exists (if patient_id is provided)
-        let existingRecordName = null;
-        let isUpdate = false;
+        // First check if we're editing an existing document
+        const urlParams = new URLSearchParams(window.location.search);
+        let existingRecordName = urlParams.get('name');
+        let isUpdate = existingRecordName && existingRecordName.trim() !== '';
+        let existingRecord = null;
         
-        if (formData.patient_id && formData.patient_id.trim() !== '') {
-            showStatus('Checking Patient ID...', 'info');
-            existingRecordName = await checkPatientIdExists(formData.patient_id);
+        // Only check Patient ID validation if we're creating a new record (not editing existing)
+        if (!isUpdate && formData.patient_id && formData.patient_id.trim() !== '') {
+            showStatus('Checking Patient ID and Hospital...', 'info');
+            existingRecord = await checkPatientIdExists(formData.patient_id, formData.hospital);
+            existingRecordName = existingRecord ? existingRecord.name : null;
             isUpdate = existingRecordName && existingRecordName.trim() !== '';
             
             if (isUpdate) {
                 // Ask for confirmation if updating existing record
-                const confirmUpdate = confirm(`Patient ID "${formData.patient_id}" already exists. Do you want to update this record?`);
+                const confirmUpdate = confirm(`Patient ID "${formData.patient_id}" already exists for hospital "${formData.hospital}". Do you want to update this record?`);
                 if (!confirmUpdate) {
                     showStatus('Save cancelled by user.', 'info');
                     return;
                 }
             }
-        } else {
-            // If no patient_id, check URL parameters for existing record
-            const urlParams = new URLSearchParams(window.location.search);
-            existingRecordName = urlParams.get('name');
-            isUpdate = existingRecordName && existingRecordName.trim() !== '';
         }
 
         // Extract attachments BEFORE JSON stringification (File objects can't be serialized)
@@ -2347,6 +2584,14 @@ async function saveToFrappe(formData) {
             } else if (response.status === 404) {
                 errorMessage = 'Document type not found. Please check the DOCTYPE_NAME.';
             }
+            
+            // Strip HTML tags from error messages
+            errorMessage = errorMessage.replace(/<[^>]*>/g, '');
+            
+            // Check for specific permission issues
+            if (errorMessage.includes('does not have doctype access')) {
+                errorMessage = 'Permission denied. Contact administrator.';
+            }
 
             throw new Error(errorMessage);
         }
@@ -2372,13 +2617,13 @@ async function saveToFrappe(formData) {
         // Show appropriate success message
         if (isUpdate) {
             if (formData.patient_id) {
-                showStatus(`Patient ID "${formData.patient_id}" record updated successfully!`, 'success');
+                showStatus(`Patient ID "${formData.patient_id}" record for hospital "${formData.hospital}" updated successfully!`, 'success');
             } else {
                 showStatus(`Record ${existingRecordName} updated successfully!`, 'success');
             }
         } else {
             if (formData.patient_id) {
-                showStatus(`New record created for Patient ID "${formData.patient_id}"!`, 'success');
+                showStatus(`New record created for Patient ID "${formData.patient_id}" in hospital "${formData.hospital}"!`, 'success');
             } else {
                 showStatus(`New record ${recordName} created successfully!`, 'success');
             }
@@ -2465,17 +2710,357 @@ async function saveToFrappe(formData) {
     }
 }
 
-// Update the form submit handler
+// Add submit function to properly submit documents
+async function submitDocument(recordName) {
+    try {
+        showStatus('Submitting document...', 'info');
+        
+        const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}/${recordName}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `token ${API_KEY}:${API_SECRET}`
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                docstatus: 1  // This submits the document
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            let errorMessage = 'Failed to submit document';
+            
+            if (errorData._server_messages) {
+                try {
+                    const serverMessages = JSON.parse(errorData._server_messages);
+                    errorMessage = serverMessages.map(m => JSON.parse(m).message).join(', ');
+                } catch (e) {
+                    errorMessage = errorData.message || errorMessage;
+                }
+            } else if (errorData.message) {
+                errorMessage = errorData.message;
+            }
+            
+            throw new Error(errorMessage);
+        }
+
+        const result = await response.json();
+        showStatus('Document submitted successfully!', 'success');
+        return result;
+        
+    } catch (err) {
+        console.error('Submit failed:', err);
+        showStatus(err.message || 'Failed to submit document', 'error');
+        throw err;
+    }
+}
+
+// Add function to cancel (unsubmit) document for editing
+async function cancelDocument(recordName) {
+    try {
+        showStatus('Cancelling submission for editing...', 'info');
+        
+        const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}/${recordName}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `token ${API_KEY}:${API_SECRET}`
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                docstatus: 2  // This cancels the document (makes it editable)
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            let errorMessage = 'Failed to cancel document';
+            
+            if (errorData._server_messages) {
+                try {
+                    const serverMessages = JSON.parse(errorData._server_messages);
+                    errorMessage = serverMessages.map(m => JSON.parse(m).message).join(', ');
+                } catch (e) {
+                    errorMessage = errorData.message || errorMessage;
+                }
+            } else if (errorData.message) {
+                errorMessage = errorData.message;
+            }
+            
+            // Strip HTML tags from error messages
+            errorMessage = errorMessage.replace(/<[^>]*>/g, '');
+            
+            // Check for permission issues specifically
+            if (response.status === 403 || errorMessage.includes('does not have doctype access')) {
+                errorMessage = 'Permission denied. Contact administrator.';
+            }
+            
+            throw new Error(errorMessage);
+        }
+
+        const result = await response.json();
+        showStatus('Document cancelled successfully!', 'success');
+        return result;
+        
+    } catch (err) {
+        console.error('Cancel failed:', err);
+        showStatus(err.message || 'Failed to cancel document', 'error');
+        throw err;
+    }
+}
+
+// Function to update button visibility based on document status
+function updateButtonVisibility(docstatus = 0) {
+    const saveBtn = document.getElementById('saveBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (!saveBtn || !submitBtn) {
+        return;
+    }
+    
+    // Hide all buttons first
+    saveBtn.classList.add('hidden');
+    submitBtn.classList.add('hidden');
+    
+    if (docstatus === 0) {
+        // Draft document - show both buttons for all users
+        saveBtn.classList.remove('hidden');
+        submitBtn.classList.remove('hidden');
+        submitBtn.textContent = 'SUBMIT';
+        saveBtn.textContent = 'SAVE';
+        
+    } else if (docstatus === 1) {
+        // Submitted document - check if user can edit
+        if (window.hasMedicalAssessmentEditor || window.hasSystemManager) {
+            // Users with edit roles can edit submitted documents
+            saveBtn.classList.remove('hidden');
+            submitBtn.classList.remove('hidden');
+            submitBtn.textContent = 'SUBMIT';
+            saveBtn.textContent = 'SAVE';
+            
+        } else {
+            // Regular users cannot edit submitted documents
+            saveBtn.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+        }
+        
+    } else if (docstatus === 2) {
+        // Cancelled document - show both buttons for resubmission
+        saveBtn.classList.remove('hidden');
+        submitBtn.classList.remove('hidden');
+        submitBtn.textContent = 'SUBMIT';
+        saveBtn.textContent = 'SAVE';
+    }
+}
+
+// Update the save button handler
+const saveBtn = document.getElementById('saveBtn');
+if (saveBtn) {
+    saveBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+            const formData = collectFormData();
+            
+            // Get current document status to determine workflow
+            const urlParams = new URLSearchParams(window.location.search);
+            const docName = urlParams.get('name');
+            
+            if (!docName) {
+                // New document save
+                const result = await saveToFrappe(formData);
+                if (result && result.data) {
+                    updateButtonVisibility(result.data.docstatus || 0);
+                }
+                return;
+            }
+            
+            // Existing document - fetch current status first
+            let currentDoc = null;
+            
+            try {
+                const statusResponse = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}/${docName}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `token ${API_KEY}:${API_SECRET}`
+                    },
+                    credentials: 'include'
+                });
+                
+                if (statusResponse.ok) {
+                    const result = await statusResponse.json();
+                    currentDoc = result.data;
+                }
+            } catch (err) {
+                // If we can't get the document status, try normal save
+                const result = await saveToFrappe(formData);
+                if (result && result.data) {
+                    updateButtonVisibility(result.data.docstatus || 0);
+                }
+                return;
+            }
+            
+            if (!currentDoc) {
+                // If we can't get the document status, try normal save
+                const result = await saveToFrappe(formData);
+                if (result && result.data) {
+                    updateButtonVisibility(result.data.docstatus || 0);
+                }
+                return;
+            }
+            
+            // Handle based on document status
+            if (currentDoc.docstatus === 1) {
+                // Submitted document - check if user can edit
+                if (window.hasMedicalAssessmentEditor || window.hasSystemManager) {
+                    try {
+                        await cancelDocument(docName);
+                        
+                        // Wait for cancellation to complete
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        
+                        // Now save the changes
+                        const result = await saveToFrappe(formData);
+                        if (result && result.data) {
+                            updateButtonVisibility(result.data.docstatus || 0);
+                        }
+                    } catch (cancelError) {
+                        showStatus('Failed to edit submitted document: ' + cancelError.message, 'error');
+                    }
+                    
+                } else {
+                    // User does not have required role
+                    showStatus('Access denied. Medical Assessment Editor role required.', 'error');
+                    return; // Stop execution
+                }
+                
+            } else if (currentDoc.docstatus === 0) {
+                // Draft document - normal save
+                const result = await saveToFrappe(formData);
+                
+                // Reset unsaved changes flag
+                if (window.resetUnsavedChanges) {
+                    window.resetUnsavedChanges();
+                }
+                
+                if (result && result.data) {
+                    updateButtonVisibility(result.data.docstatus || 0);
+                }
+            } else if (currentDoc.docstatus === 2) {
+                // Cancelled document - use custom backend API
+                try {
+                    const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.update_cancelled_medical_assessment`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            document_name: docName,
+                            form_data: formData
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        let errorMessage = 'Failed to update cancelled document';
+                        
+                        if (errorData._server_messages) {
+                            try {
+                                const serverMessages = JSON.parse(errorData._server_messages);
+                                errorMessage = serverMessages.map(m => JSON.parse(m).message).join(', ');
+                            } catch (e) {
+                                errorMessage = errorData.message || errorMessage;
+                            }
+                        } else if (errorData.message) {
+                            errorMessage = errorData.message;
+                        }
+                        
+                        // Strip HTML tags from error messages
+                        errorMessage = errorMessage.replace(/<[^>]*>/g, '');
+                        
+                        throw new Error(errorMessage);
+                    }
+
+                    const result = await response.json();
+                    showStatus('Document updated successfully!', 'success');
+                    
+                    // Reset unsaved changes flag
+                    if (window.resetUnsavedChanges) {
+                        window.resetUnsavedChanges();
+                    }
+                    
+                    if (result && result.data) {
+                        updateButtonVisibility(result.data.docstatus || 0);
+                    }
+                    
+                } catch (updateError) {
+                    showStatus('Failed to update cancelled document: ' + updateError.message, 'error');
+                }
+            } else {
+                // Unknown document status
+                showStatus('Unknown document status. Contact administrator.', 'error');
+            }
+            
+        } catch (error) {
+            showStatus('Save failed: ' + error.message, 'error');
+        }
+    });
+}
+
+// ... rest of the code remains the same ...
+// Update the submit button handler
 const submitBtn = document.getElementById('submitBtn');
 if (submitBtn) {
     submitBtn.addEventListener('click', async (e) => {
-        e.preventDefault(); // prevents any default submit behavior (optional if not in <form>)
+        e.preventDefault();
         try {
-            const formData = collectFormData();
-            console.log('Collected Form Data:', formData);
-            await saveToFrappe(formData);
+            const urlParams = new URLSearchParams(window.location.search);
+            const docName = urlParams.get('name');
+            
+            if (!docName) {
+                // New document workflow - save then submit
+                const formData = collectFormData();
+                console.log('Saving before submit:', formData);
+                const saveResult = await saveToFrappe(formData);
+                
+                if (saveResult && saveResult.data && saveResult.data.name) {
+                    // Now submit the document
+                    console.log('Submitting document:', saveResult.data.name);
+                    await submitDocument(saveResult.data.name);
+                    
+                    // Update button visibility after submission
+                    updateButtonVisibility(1);
+                }
+            } else {
+                // Existing document workflow - check current status
+                const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}/${docName}`, {
+                    headers: {
+                        'Authorization': `token ${API_KEY}:${API_SECRET}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    const currentDoc = result.data;
+                    
+                    if (currentDoc.docstatus === 1 && window.canEditSubmitted) {
+                        // Cancel the submitted document
+                        await cancelDocument(docName);
+                        updateButtonVisibility(2);
+                    } else if (currentDoc.docstatus === 0 || currentDoc.docstatus === 2) {
+                        // Submit or resubmit the document
+                        await submitDocument(docName);
+                        updateButtonVisibility(1);
+                    }
+                }
+            }
         } catch (error) {
-            console.error('Button click error:', error);
+            console.error('Submit button error:', error);
         }
     });
 }
@@ -2698,6 +3283,7 @@ class FileUploadManager {
     }
 }
 
+
 // Initialize the file upload manager
 const fileUploadManager = new FileUploadManager();
 window._fileUploadManager = fileUploadManager;
@@ -2744,19 +3330,37 @@ if (patientIdInput) {
     patientIdInput.addEventListener('input', (e) => {
         clearTimeout(loadTimeout);
         const patientId = e.target.value.trim();
+        const hospital = document.querySelector('input[name="hospital"]')?.value || '';
+        
+        // Skip validation if document is being loaded
+        if (window.isLoadingDocument) {
+            return;
+        }
         
         if (patientId.length >= 3) { // Start checking after 3 characters
             loadTimeout = setTimeout(async () => {
                 try {
-                    const existingData = await loadPatientData(patientId);
+                    // First check if patient exists in the current hospital
+                    const existingData = await loadPatientData(patientId, hospital);
                     if (existingData) {
-                        const confirmLoad = confirm(`Existing data found for Patient ID "${patientId}". Do you want to load this data for editing?`);
+                        const confirmLoad = confirm(`Existing data found for Patient ID "${patientId}" in hospital "${hospital}". Do you want to load this data for editing?`);
                         if (confirmLoad) {
                             populateFormWithData(existingData);
                         }
+                    } else {
+                        // If not found in current hospital, check if patient exists in other hospitals
+                        const allHospitalRecords = await checkPatientIdInAnyHospital(patientId);
+                        if (allHospitalRecords && allHospitalRecords.length > 0) {
+                            const otherHospitals = allHospitalRecords.map(record => record.hospital).join(', ');
+                            const confirmNew = confirm(`Patient ID "${patientId}" exists in other hospital(s): ${otherHospitals}. This will be a new record for hospital "${hospital}". Continue?`);
+                            if (!confirmNew) {
+                                e.target.value = ''; // Clear the input
+                                return;
+                            }
+                        }
                     }
                 } catch (error) {
-                    console.error('Error checking Patient ID:', error);
+                    console.error('Error checking Patient ID and Hospital:', error);
                 }
             }, 1000); // Wait 1 second after user stops typing
         }
@@ -2766,18 +3370,24 @@ if (patientIdInput) {
     patientIdInput.addEventListener('blur', async (e) => {
         clearTimeout(loadTimeout);
         const patientId = e.target.value.trim();
+        const hospital = document.querySelector('input[name="hospital"]')?.value || '';
+        
+        // Skip validation if document is being loaded
+        if (window.isLoadingDocument) {
+            return;
+        }
         
         if (patientId.length >= 3) {
             try {
-                const existingData = await loadPatientData(patientId);
+                const existingData = await loadPatientData(patientId, hospital);
                 if (existingData) {
-                    const confirmLoad = confirm(`Existing data found for Patient ID "${patientId}". Do you want to load this data for editing?`);
+                    const confirmLoad = confirm(`Existing data found for Patient ID "${patientId}" in hospital "${hospital}". Do you want to load this data for editing?`);
                     if (confirmLoad) {
                         populateFormWithData(existingData);
                     }
                 }
             } catch (error) {
-                console.error('Error checking Patient ID:', error);
+                console.error('Error checking Patient ID and Hospital:', error);
             }
         }
     });
@@ -3420,21 +4030,85 @@ async function checkUserRole() {
         
         if (response.ok) {
             const data = await response.json();
-            if (data.message && data.message.role_profile === "Doctor") {
+            const userData = data.message || {};
+            
+            if (userData.role_profile === "Doctor") {
                 document.getElementById('get-data-points-btn').style.display = 'block';
             }
+            
+            // Store user roles and permissions globally
+            window.userRoles = userData.roles || [];
+            window.userRole = userData.role_profile || null;
+            window.hasMedicalAssessmentEditor = userData.has_medical_assessment_editor || false;
+            window.hasSystemManager = userData.has_system_manager || false;
+            window.canEditSubmitted = userData.can_edit_submitted || false;
+            
+            return { 
+                userRole: window.userRole, 
+                userRoles: window.userRoles,
+                canEditSubmitted: window.canEditSubmitted,
+                hasMedicalAssessmentEditor: window.hasMedicalAssessmentEditor,
+                hasSystemManager: window.hasSystemManager
+            };
         } else {
-            console.error('Failed to fetch user role');
+            window.userRoles = [];
+            window.userRole = null;
+            window.hasMedicalAssessmentEditor = false;
+            window.hasSystemManager = false;
+            window.canEditSubmitted = false;
+            return { userRole: null, userRoles: [], canEditSubmitted: false };
         }
     } catch (error) {
-        console.error('Error checking user role:', error);
+        window.userRoles = [];
+        window.userRole = null;
+        window.hasMedicalAssessmentEditor = false;
+        window.hasSystemManager = false;
+        window.canEditSubmitted = false;
+        return { userRole: null, userRoles: [], canEditSubmitted: false };
     }
 }
 
 // Initialize attachments when page loads
 document.addEventListener('DOMContentLoaded', function () {
-    // Check user role when page loads
-    checkUserRole();
+    // Check user role when page loads and then initialize buttons
+    checkUserRole().then(() => {
+        // Initialize button visibility after role check completes
+        updateButtonVisibility(0);
+    }).catch(err => {
+        // Initialize with default permissions
+        window.userRole = null;
+        window.canEditSubmitted = false;
+        updateButtonVisibility(0);
+    });
+    
+    // Track unsaved changes
+    let hasUnsavedChanges = false;
+    
+    // Monitor form changes
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('change', () => {
+            hasUnsavedChanges = true;
+        });
+        
+        form.addEventListener('input', () => {
+            hasUnsavedChanges = true;
+        });
+    }
+    
+    // Warn before leaving page with unsaved changes
+    window.addEventListener('beforeunload', (e) => {
+        if (hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            return e.returnValue;
+        }
+    });
+    
+    // Reset unsaved changes flag after successful save
+    window.resetUnsavedChanges = () => {
+        hasUnsavedChanges = false;
+    };
     
     // Wait a bit for globalRecordName to be set
     setTimeout(() => {

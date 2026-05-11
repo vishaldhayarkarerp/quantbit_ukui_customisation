@@ -8,6 +8,28 @@ from frappe.model.document import Document
 
 class MedicalAssessment(Document):
 
+    def validate(self):
+        """Validate duplicate patient_id within the same hospital"""
+        self.validate_duplicate_patient_hospital()
+    
+    def validate_duplicate_patient_hospital(self):
+        """Check if patient_id already exists for the same hospital"""
+        if not self.patient_id or not self.hospital:
+            return
+            
+        # Check if there's an existing record with same patient_id AND same hospital
+        # This allows the same patient to have records in different hospitals
+        existing_doc = frappe.db.exists("Medical Assessment", {
+            "patient_id": self.patient_id,
+            "hospital": self.hospital,
+            "name": ["!=", self.name] if self.name else ["!=", ""]
+        })
+        
+        if existing_doc:
+            frappe.throw(f"Patient ID '{self.patient_id}' already exists for hospital '{self.hospital}'. "
+                        f"Please update the existing record instead of creating a duplicate. "
+                        f"Existing document: {existing_doc}")
+
     def before_save(self):           
         try:
            

@@ -529,7 +529,8 @@
   "tab_6_tab",
   "hospital",
   "column_break_klci",
-  "patient_id"
+  "patient_id",
+  "amended_from"
  ],
  "fields": [
   {
@@ -2914,7 +2915,7 @@
   },
   {
    "fieldname": "rupt_mem",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "50. Date and time of rupture of membranes"
   },
   {
@@ -3428,21 +3429,32 @@
   {
    "fieldname": "patient_id",
    "fieldtype": "Data",
-   "label": " Patient ID",
-   "unique": 1
+   "label": " Patient ID"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Medical Assessment",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-04-22 16:08:59.897988",
- "modified_by": "b13776941@gmail.com",
+ "modified": "2026-05-02 11:21:01.193444",
+ "modified_by": "sahil.sawant@erpdata.in",
  "module": "quantbit_ukui_customisation",
  "name": "Medical Assessment",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "taruna.patil@erpdata.in",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -3452,7 +3464,28 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Medical Assessment Editor",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "role": "All"
   }
  ],
  "row_format": "Dynamic",
