@@ -239,6 +239,8 @@
                 const patientId = document.getElementById('patientIdFilter').value.trim();
                 const hospitalName = document.getElementById('hospitalNameFilter').value.trim();
 
+                console.log('Filters:', { assessmentId, patientId, hospitalName });
+
                 loader.classList.remove('hidden');
                 listContainer.classList.add('hidden');
                 pagination.classList.add('hidden');
@@ -306,6 +308,7 @@
 
                     loader.classList.add('hidden');
                     listContainer.classList.remove('hidden');
+                    console.log('fetchAssessments completed successfully, found', assessments.length, 'assessments');
                 } catch (error) {
                     console.error('Error fetching assessments:', error);
                     loader.classList.add('hidden');
@@ -557,10 +560,17 @@
                         }
                     });
 
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
                     const result = await response.json();
+                    console.log('Delete response:', result);
                     
-                    if (result.http_status_code === 200) {
-                        showSuccess(result.message);
+                    // Check for successful deletion (multiple possible response formats)
+                    if (result.http_status_code === 200 || result.status === 'success' || result.message?.includes('successfully') || response.ok) {
+                        showSuccess(result.message || 'Assessment deleted successfully');
+                        console.log('Calling fetchAssessments after single delete...');
                         await fetchAssessments();
                     } else {
                         showError(result.message || 'Failed to delete assessment');
@@ -596,10 +606,15 @@
                         }
                     });
 
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
                     const result = await response.json();
                     
-                    if (result.http_status_code === 200) {
-                        showSuccess(result.message);
+                    // Check for successful deletion (multiple possible response formats)
+                    if (result.http_status_code === 200 || result.status === 'success' || result.message?.includes('successfully') || response.ok) {
+                        showSuccess(result.message || 'Assessments deleted successfully');
                         clearSelections();
                         await fetchAssessments();
                     } else {
