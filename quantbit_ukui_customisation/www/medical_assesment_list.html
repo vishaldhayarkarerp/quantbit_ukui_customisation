@@ -1,295 +1,291 @@
 {% if user == "Guest" %}
-    <script>
-        window.location.href = "/login?redirect-to=/medical_assesment_list";
-    </script>
-    {% endif %}
-    <!DOCTYPE html>
-    <html lang="en">
+<script>
+    window.location.href = "/login?redirect-to=/medical_assesment_list";
+</script>
+{% endif %}
+<!DOCTYPE html>
+<html lang="en">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Medical Assessment List</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-        <link rel="stylesheet" href="medical_assesment_list.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Assessment List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="medical_assesment_list.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
 
-    <body class="bg-gray-900 text-white min-h-screen font-inter px-4 pb-4 md:px-8 md:pb-8 pt-0 md:pt-0 ">
-        <div class="container mx-auto">
-            <div class="header">
-                <div class="header-content">
-                    <h1>Medical Assessments</h1>
-                    <div class="header-buttons">
-                        <button id="userListBtn" onclick="window.location.href='/app/user'" class="header-btn"
-                            style="display: none;">
-                            User List
-                        </button>
-                        <button onclick="logout()" class="header-btn">
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="content-area">
-                <div class="filters-container mt-0">
-                    <div class="filter-group">
-                        <label for="assessmentIdFilter" class="filter-label">Assessment ID</label>
-                        <input type="text" id="assessmentIdFilter" class="filter-input" placeholder="Search by ID...">
-                    </div>
-                    <div class="filter-group">
-                        <label for="patientIdFilter" class="filter-label">Patient ID</label>
-                        <input type="text" id="patientIdFilter" class="filter-input" placeholder="Search by Patient ID...">
-                    </div>
-                    <div class="filter-group">
-                        <label for="hospitalNameFilter" class="filter-label">Hospital Name</label>
-                        <input type="text" id="hospitalNameFilter" class="filter-input"
-                            placeholder="Search by hospital name...">
-                    </div>
-                    <div class="filter-group">
-                        <label for="hospitalFilterExport" class="filter-label">Hospital (Export)</label>
-                        <select id="hospitalFilterExport" class="filter-input">
-                            <option value="">Select Hospital</option>
-                        </select>
-                    </div>
-                    <button id="applyFiltersBtn" class="btn-filter">Search</button>
-                    <a href="/uk" class="btn-filter">Add new</a>
-                    <button id="exportCtgBtn" class="btn-export-ctg" disabled title="Select a hospital and click to export CTG data">Export CTG Data</button>
-                    <button id="deleteSelectedBtn" class="btn-delete-selected hidden" disabled>Delete Selected</button>
-                </div>
-
-                <div id="loader" class="loader">
-                    <div class="spinner"></div>
-                </div>
-
-                <div id="listContainer" class="list-container hidden">
-                    <table class="assessment-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">
-                                    <input type="checkbox" id="selectAllCheckbox" class="select-all-checkbox">
-                                </th>
-                                <th>Assessment ID</th>
-                                <th>Patient ID</th>
-                                <th>Hospital Name</th>
-                                <th>CTG Data</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="assessmentTableBody">
-                            <!-- Data will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="pagination" class="pagination-container hidden">
-                    <button id="prevBtn" class="btn-pagination" disabled>Previous</button>
-                    <span id="pageInfo" class="page-info">Page 1</span>
-                    <button id="nextBtn" class="btn-pagination">Next</button>
-                </div>
-
-                <div id="errorMessage"
-                    class="hidden p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 text-center">
-                    Failed to load assessments. Please try again later.
+<body class="bg-gray-900 text-white min-h-screen font-inter px-4 pb-4 md:px-8 md:pb-8 pt-0 md:pt-0 ">
+    <div class="container mx-auto">
+        <div class="header">
+            <div class="header-content">
+                <h1>Medical Assessments</h1>
+                <div class="header-buttons">
+                    <button id="userListBtn" onclick="window.location.href='/app/user'" class="header-btn"
+                        style="display: none;">
+                        User List
+                    </button>
+                    <button onclick="logout()" class="header-btn">
+                        Logout
+                    </button>
                 </div>
             </div>
         </div>
 
-        <script>
-            let currentPage = 1;
-            const pageSize = 10;
-            let allAssessments = [];
-            let hasNextPage = false;
+        <div class="content-area">
+            <div class="filters-container mt-0">
+                <div class="filter-group">
+                    <label for="assessmentIdFilter" class="filter-label">Assessment ID</label>
+                    <input type="text" id="assessmentIdFilter" class="filter-input" placeholder="Search by ID...">
+                </div>
 
-            async function checkUserRole() {
-                try {
-                    const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.get_user_role_profile`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    });
+                <div class="filter-group">
+                    <label for="hospitalNameFilter" class="filter-label">Hospital Name</label>
+                    <input type="text" id="hospitalNameFilter" class="filter-input"
+                        placeholder="Search by hospital name...">
+                </div>
+                <div class="filter-group">
+                    <label for="hospitalFilterExport" class="filter-label">Hospital (Export)</label>
+                    <select id="hospitalFilterExport" class="filter-input">
+                        <option value="">Select Hospital</option>
+                    </select>
+                </div>
+                <button id="applyFiltersBtn" class="btn-filter">Search</button>
+                <a href="/uk" class="btn-filter">Add new</a>
+                <button id="exportCtgBtn" class="btn-export-ctg" disabled
+                    title="Select a hospital and click to export CTG data">Export CTG Data</button>
+                <button id="deleteSelectedBtn" class="btn-delete-selected hidden" disabled>Delete Selected</button>
+            </div>
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.message && data.message.role_profile === "Doctor") {
-                            document.getElementById('userListBtn').style.display = 'block';
-                        }
-                    } else {
-                        console.error('Failed to fetch user role');
+            <div id="loader" class="loader">
+                <div class="spinner"></div>
+            </div>
+
+            <div id="listContainer" class="list-container hidden">
+                <table class="assessment-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">
+                                <input type="checkbox" id="selectAllCheckbox" class="select-all-checkbox">
+                            </th>
+                            <th>Assessment ID</th>
+
+                            <th>Hospital Name</th>
+                            <th>CTG Data</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assessmentTableBody">
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="pagination" class="pagination-container hidden">
+                <button id="prevBtn" class="btn-pagination" disabled>Previous</button>
+                <span id="pageInfo" class="page-info">Page 1</span>
+                <button id="nextBtn" class="btn-pagination">Next</button>
+            </div>
+
+            <div id="errorMessage"
+                class="hidden p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 text-center">
+                Failed to load assessments. Please try again later.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const pageSize = 10;
+        let allAssessments = [];
+        let hasNextPage = false;
+
+        async function checkUserRole() {
+            try {
+                const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.get_user_role_profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
                     }
-                } catch (error) {
-                    console.error('Error checking user role:', error);
-                }
-            }
+                });
 
-            async function loadHospitalsForExportFilter() {
-                try {
-                    const fields = JSON.stringify(["name"]);
-                    const url = `${window.location.origin}/api/resource/Hospital?fields=${encodeURIComponent(fields)}&limit_page_length=500`;
-                    
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error('Failed to load hospitals');
-                    
-                    const result = await response.json();
-                    const hospitals = result.data || [];
-                    
-                    const hospitalSelect = document.getElementById('hospitalFilterExport');
-                    hospitals.forEach(hospital => {
-                        const option = document.createElement('option');
-                        option.value = hospital.name;
-                        option.textContent = hospital.name;
-                        hospitalSelect.appendChild(option);
-                    });
-                } catch (error) {
-                    console.error('Error loading hospitals:', error);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.message && data.message.role_profile === "Doctor") {
+                        document.getElementById('userListBtn').style.display = 'block';
+                    }
+                } else {
+                    console.error('Failed to fetch user role');
                 }
+            } catch (error) {
+                console.error('Error checking user role:', error);
             }
+        }
 
-            document.addEventListener('DOMContentLoaded', () => {
-                checkUserRole();
-                loadHospitalsForExportFilter();
+        async function loadHospitalsForExportFilter() {
+            try {
+                const fields = JSON.stringify(["name"]);
+                const url = `${window.location.origin}/api/resource/Hospital?fields=${encodeURIComponent(fields)}&limit_page_length=500`;
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to load hospitals');
+
+                const result = await response.json();
+                const hospitals = result.data || [];
+
+                const hospitalSelect = document.getElementById('hospitalFilterExport');
+                hospitals.forEach(hospital => {
+                    const option = document.createElement('option');
+                    option.value = hospital.name;
+                    option.textContent = hospital.name;
+                    hospitalSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading hospitals:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUserRole();
+            loadHospitalsForExportFilter();
+            fetchAssessments();
+
+            document.getElementById('applyFiltersBtn').addEventListener('click', () => {
+                currentPage = 1;
                 fetchAssessments();
-
-                document.getElementById('applyFiltersBtn').addEventListener('click', () => {
-                    currentPage = 1;
-                    fetchAssessments();
-                });
-
-                document.getElementById('prevBtn').addEventListener('click', () => {
-                    if (currentPage > 1) {
-                        currentPage--;
-                        fetchAssessments();
-                    }
-                });
-
-                document.getElementById('nextBtn').addEventListener('click', () => {
-                    currentPage++;
-                    fetchAssessments();
-                });
-
-                // Export CTG button event
-                document.getElementById('exportCtgBtn').addEventListener('click', exportCtgData);
-
-                // Hospital filter change event
-                document.getElementById('hospitalFilterExport').addEventListener('change', () => {
-                    const selectedHospital = document.getElementById('hospitalFilterExport').value;
-                    document.getElementById('exportCtgBtn').disabled = !selectedHospital;
-                });
-
-                // Delete selected button event
-                document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedAssessments);
-
-                // Select all checkbox event
-                document.getElementById('selectAllCheckbox').addEventListener('change', function() {
-                    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-                    rowCheckboxes.forEach(checkbox => {
-                        checkbox.checked = this.checked;
-                    });
-                    updateDeleteSelectedButton();
-                });
-
-                // Allow enter key to trigger search
-                document.querySelectorAll('.filter-input').forEach(input => {
-                    if (input.tagName.toLowerCase() === 'input') {
-                        input.addEventListener('keypress', (e) => {
-                            if (e.key === 'Enter') {
-                                currentPage = 1;
-                                fetchAssessments();
-                            }
-                        });
-                    }
-                });
-
-                // Event delegation for row checkboxes
-                document.getElementById('assessmentTableBody').addEventListener('change', function(e) {
-                    if (e.target.classList.contains('row-checkbox')) {
-                        updateDeleteSelectedButton();
-                        updateSelectAllCheckbox();
-                    }
-                });
             });
 
-            /**
-             * Update pagination UI based on current page and results count
-             */
-            function updatePaginationUI(resultsCount) {
-                const prevBtn = document.getElementById('prevBtn');
-                const nextBtn = document.getElementById('nextBtn');
-                const pageInfo = document.getElementById('pageInfo');
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchAssessments();
+                }
+            });
 
-                prevBtn.disabled = currentPage <= 1;
-                // If we got a full page of results, there might be more
-                nextBtn.disabled = resultsCount < pageSize;
-                pageInfo.textContent = `Page ${currentPage}`;
-            }
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                currentPage++;
+                fetchAssessments();
+            });
 
-            async function fetchAssessments() {
-                const loader = document.getElementById('loader');
-                const listContainer = document.getElementById('listContainer');
-                const pagination = document.getElementById('pagination');
-                const errorMessage = document.getElementById('errorMessage');
-                const tableBody = document.getElementById('assessmentTableBody');
+            // Export CTG button event
+            document.getElementById('exportCtgBtn').addEventListener('click', exportCtgData);
 
-                const assessmentId = document.getElementById('assessmentIdFilter').value.trim();
-                const patientId = document.getElementById('patientIdFilter').value.trim();
-                const hospitalName = document.getElementById('hospitalNameFilter').value.trim();
+            // Hospital filter change event
+            document.getElementById('hospitalFilterExport').addEventListener('change', () => {
+                const selectedHospital = document.getElementById('hospitalFilterExport').value;
+                document.getElementById('exportCtgBtn').disabled = !selectedHospital;
+            });
 
-                console.log('Filters:', { assessmentId, patientId, hospitalName });
+            // Delete selected button event
+            document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedAssessments);
 
-                loader.classList.remove('hidden');
-                listContainer.classList.add('hidden');
-                pagination.classList.add('hidden');
-                errorMessage.classList.add('hidden');
+            // Select all checkbox event
+            document.getElementById('selectAllCheckbox').addEventListener('change', function () {
+                const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+                rowCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateDeleteSelectedButton();
+            });
 
-                try {
-                    const start = (currentPage - 1) * pageSize;
+            // Allow enter key to trigger search
+            document.querySelectorAll('.filter-input').forEach(input => {
+                if (input.tagName.toLowerCase() === 'input') {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            currentPage = 1;
+                            fetchAssessments();
+                        }
+                    });
+                }
+            });
 
-                    const fields = JSON.stringify(["name", "patient_id", "hospital", "hospital.hospital_name", "hospital.hospital_id", "modified", "final_ctg_data"]);
-                    let url = `${window.location.origin}/api/resource/Medical%20Assessment?order_by=modified%20desc&fields=${encodeURIComponent(fields)}&limit_start=${start}&limit_page_length=${pageSize}`;
+            // Event delegation for row checkboxes
+            document.getElementById('assessmentTableBody').addEventListener('change', function (e) {
+                if (e.target.classList.contains('row-checkbox')) {
+                    updateDeleteSelectedButton();
+                    updateSelectAllCheckbox();
+                }
+            });
+        });
 
-                    let filters = [];
-                    if (assessmentId) {
-                        filters.push(["name", "like", `%${assessmentId}%`]);
-                    }
-                    if (patientId) {
-                        filters.push(["patient_id", "like", `%${patientId}%`]);
-                    }
-                    if (hospitalName) {
-                        filters.push(["hospital", "like", `%${hospitalName}%`]);
-                    }
-                    if (filters.length > 0) {
-                        url += `&filters=${encodeURIComponent(JSON.stringify(filters))}`;
-                    }
+        /**
+         * Update pagination UI based on current page and results count
+         */
+        function updatePaginationUI(resultsCount) {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const pageInfo = document.getElementById('pageInfo');
 
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error('Network response was not ok');
+            prevBtn.disabled = currentPage <= 1;
+            // If we got a full page of results, there might be more
+            nextBtn.disabled = resultsCount < pageSize;
+            pageInfo.textContent = `Page ${currentPage}`;
+        }
 
-                    const result = await response.json();
-                    const assessments = result.data || [];
-                    allAssessments = assessments;
+        async function fetchAssessments() {
+            const loader = document.getElementById('loader');
+            const listContainer = document.getElementById('listContainer');
+            const pagination = document.getElementById('pagination');
+            const errorMessage = document.getElementById('errorMessage');
+            const tableBody = document.getElementById('assessmentTableBody');
 
-                    if (assessments.length === 0 && currentPage === 1) {
-                        tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-400">No assessments found.</td></tr>';
-                        pagination.classList.add('hidden');
-                        document.getElementById('deleteSelectedBtn').classList.add('hidden');
-                    } else {
-                        tableBody.innerHTML = assessments.map(item => {
-                            const ctgCell = item.final_ctg_data 
-                                ? `<a href="javascript:void(0)" onclick="downloadSingleCtgFile('${item.name}', '${item.patient_id || ''}', '${escapeForAttr(item.final_ctg_data)}')" class="btn-download-ctg">Download CTG</a>`
-                                : '<span class="text-gray-500">--</span>';
-                            
-                            return `
+            const assessmentId = document.getElementById('assessmentIdFilter').value.trim();
+
+            const hospitalName = document.getElementById('hospitalNameFilter').value.trim();
+
+            console.log('Filters:', { assessmentId, hospitalName });
+
+            loader.classList.remove('hidden');
+            listContainer.classList.add('hidden');
+            pagination.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+
+            try {
+                const start = (currentPage - 1) * pageSize;
+
+                const fields = JSON.stringify(["name", "hospital", "hospital.hospital_name", "hospital.hospital_id", "modified", "final_ctg_data"]);
+                let url = `${window.location.origin}/api/resource/Medical%20Assessment?order_by=modified%20desc&fields=${encodeURIComponent(fields)}&limit_start=${start}&limit_page_length=${pageSize}`;
+
+                let filters = [];
+                if (assessmentId) {
+                    filters.push(["name", "like", `%${assessmentId}%`]);
+                }
+
+                if (hospitalName) {
+                    filters.push(["hospital", "like", `%${hospitalName}%`]);
+                }
+                if (filters.length > 0) {
+                    url += `&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+                }
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const result = await response.json();
+                const assessments = result.data || [];
+                allAssessments = assessments;
+
+                if (assessments.length === 0 && currentPage === 1) {
+                    tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-400">No assessments found.</td></tr>';
+                    pagination.classList.add('hidden');
+                    document.getElementById('deleteSelectedBtn').classList.add('hidden');
+                } else {
+                    tableBody.innerHTML = assessments.map(item => {
+                        const ctgCell = item.final_ctg_data
+                            ? `<a href="javascript:void(0)" onclick="downloadSingleCtgFile('${item.name}', '${escapeForAttr(item.final_ctg_data)}')" class="btn-download-ctg">Download CTG</a>`
+                            : '<span class="text-gray-500">--</span>';
+
+                        return `
                     <tr data-assessment-name="${item.name}">
                         <td>
                             <input type="checkbox" class="row-checkbox" data-assessment-name="${item.name}">
                         </td>
                         <td class="assessment-name">${item.name}</td>
-                        <td>${item.patient_id || '--'}</td>
+
                         <td>${item.hospital_name || item.hospital || '--'}</td>
                         <td>
                             ${ctgCell}
@@ -300,395 +296,393 @@
                         </td>
                     </tr>
                 `;
-                        }).join('');
+                    }).join('');
 
-                        updatePaginationUI(assessments.length);
-                        pagination.classList.remove('hidden');
-                    }
-
-                    loader.classList.add('hidden');
-                    listContainer.classList.remove('hidden');
-                    console.log('fetchAssessments completed successfully, found', assessments.length, 'assessments');
-                } catch (error) {
-                    console.error('Error fetching assessments:', error);
-                    loader.classList.add('hidden');
-                    errorMessage.classList.remove('hidden');
-                }
-            }
-
-            /**
-             * Escape a string for safe use inside HTML attribute (single-quoted onclick)
-             */
-            function escapeForAttr(str) {
-                if (!str) return '';
-                return str
-                    .replace(/\\/g, '\\\\')
-                    .replace(/'/g, "\\'")
-                    .replace(/"/g, '&quot;')
-                    .replace(/\n/g, '')
-                    .replace(/\r/g, '');
-            }
-
-            /**
-             * Sanitize filename to prevent path traversal
-             */
-            function sanitizeFileName(fileName) {
-                if (!fileName) return '';
-                return fileName.split('/').pop();
-            }
-
-            /**
-             * Construct proper file download URL from a stored file reference
-             * Frappe stores files like "/private/files/foo.csv" or "/files/foo.csv"
-             */
-            function getFileDownloadUrl(fileReference) {
-                if (!fileReference) return '';
-                
-                const origin = window.location.origin;
-
-                // Already an absolute URL
-                if (fileReference.startsWith('http://') || fileReference.startsWith('https://')) {
-                    return fileReference;
+                    updatePaginationUI(assessments.length);
+                    pagination.classList.remove('hidden');
                 }
 
-                // Frappe standard paths: /private/files/... or /files/...
-                if (fileReference.startsWith('/private/files/') || fileReference.startsWith('/files/')) {
-                    return `${origin}${fileReference}`;
-                }
+                loader.classList.add('hidden');
+                listContainer.classList.remove('hidden');
+                console.log('fetchAssessments completed successfully, found', assessments.length, 'assessments');
+            } catch (error) {
+                console.error('Error fetching assessments:', error);
+                loader.classList.add('hidden');
+                errorMessage.classList.remove('hidden');
+            }
+        }
 
-                // Just a filename — try /files/ path
-                const sanitized = sanitizeFileName(fileReference);
-                return `${origin}/files/${sanitized}`;
+        /**
+         * Escape a string for safe use inside HTML attribute (single-quoted onclick)
+         */
+        function escapeForAttr(str) {
+            if (!str) return '';
+            return str
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '&quot;')
+                .replace(/\n/g, '')
+                .replace(/\r/g, '');
+        }
+
+        /**
+         * Sanitize filename to prevent path traversal
+         */
+        function sanitizeFileName(fileName) {
+            if (!fileName) return '';
+            return fileName.split('/').pop();
+        }
+
+        /**
+         * Construct proper file download URL from a stored file reference
+         * Frappe stores files like "/private/files/foo.csv" or "/files/foo.csv"
+         */
+        function getFileDownloadUrl(fileReference) {
+            if (!fileReference) return '';
+
+            const origin = window.location.origin;
+
+            // Already an absolute URL
+            if (fileReference.startsWith('http://') || fileReference.startsWith('https://')) {
+                return fileReference;
             }
 
-            /**
-             * Download a single CTG file as CSV
-             */
-            async function downloadSingleCtgFile(assessmentName, patientId, fileName) {
-                try {
-                    showLoading(true);
-                    
-                    const fileUrl = getFileDownloadUrl(fileName);
-                    console.log('Downloading single CTG from:', fileUrl);
-                    
-                    const response = await fetch(fileUrl);
-                    
-                    if (!response.ok) {
-                        throw new Error(`Failed to download file. Status: ${response.status}`);
-                    }
-                    
-                    const blob = await response.blob();
-                    
-                    if (blob.size === 0) {
-                        throw new Error('Downloaded file is empty');
-                    }
-                    
-                    // Force CSV content type
-                    const csvBlob = new Blob([blob], { type: 'text/csv' });
+            // Frappe standard paths: /private/files/... or /files/...
+            if (fileReference.startsWith('/private/files/') || fileReference.startsWith('/files/')) {
+                return `${origin}${fileReference}`;
+            }
 
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(csvBlob);
-                    const safeName = (assessmentName || 'assessment').replace(/[^a-zA-Z0-9_-]/g, '_');
-                    const safePatient = (patientId || 'patient').replace(/[^a-zA-Z0-9_-]/g, '_');
-                    link.download = `${safeName}_${safePatient}.csv`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(link.href);
-                    
+            // Just a filename — try /files/ path
+            const sanitized = sanitizeFileName(fileReference);
+            return `${origin}/files/${sanitized}`;
+        }
+
+        /**
+         * Download a single CTG file as CSV
+         */
+        async function downloadSingleCtgFile(assessmentName, fileName) {
+            try {
+                showLoading(true);
+
+                const fileUrl = getFileDownloadUrl(fileName);
+                console.log('Downloading single CTG from:', fileUrl);
+
+                const response = await fetch(fileUrl);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to download file. Status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+
+                if (blob.size === 0) {
+                    throw new Error('Downloaded file is empty');
+                }
+
+                // Force CSV content type
+                const csvBlob = new Blob([blob], { type: 'text/csv' });
+
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(csvBlob);
+                const safeName = (assessmentName || 'assessment').replace(/[^a-zA-Z0-9_-]/g, '_');
+                link.download = `${safeName}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+
+                showLoading(false);
+                showSuccess('CTG file downloaded successfully');
+            } catch (error) {
+                console.error('Error downloading CTG file:', error);
+                showLoading(false);
+                showError('Failed to download CTG file: ' + error.message);
+            }
+        }
+
+        /**
+         * Export CTG data for selected hospital as ZIP containing individual CSVs
+         */
+        async function exportCtgData() {
+            const selectedHospital = document.getElementById('hospitalFilterExport').value;
+
+            if (!selectedHospital) {
+                showError('Please select a hospital first');
+                return;
+            }
+
+            try {
+                showLoading(true);
+
+                // Fetch all assessments for the selected hospital (up to 999)
+                const fields = JSON.stringify(["name", "hospital", "hospital.hospital_name", "final_ctg_data"]);
+                const filters = JSON.stringify([["hospital", "=", selectedHospital]]);
+                const url = `${window.location.origin}/api/resource/Medical%20Assessment?fields=${encodeURIComponent(fields)}&filters=${encodeURIComponent(filters)}&limit_page_length=999`;
+
+                console.log('Fetching assessments for export from:', url);
+
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch assessments. Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const assessments = result.data || [];
+
+                // Filter to only those with CTG data
+                const assessmentsWithCtg = assessments.filter(a => a.final_ctg_data && a.final_ctg_data.trim() !== '');
+
+                if (assessmentsWithCtg.length === 0) {
+                    showError(`No CTG data files found for ${selectedHospital}`);
                     showLoading(false);
-                    showSuccess('CTG file downloaded successfully');
-                } catch (error) {
-                    console.error('Error downloading CTG file:', error);
-                    showLoading(false);
-                    showError('Failed to download CTG file: ' + error.message);
-                }
-            }
-
-            /**
-             * Export CTG data for selected hospital as ZIP containing individual CSVs
-             */
-            async function exportCtgData() {
-                const selectedHospital = document.getElementById('hospitalFilterExport').value;
-                
-                if (!selectedHospital) {
-                    showError('Please select a hospital first');
                     return;
                 }
 
-                try {
-                    showLoading(true);
-                    
-                    // Fetch all assessments for the selected hospital (up to 999)
-                    const fields = JSON.stringify(["name", "patient_id", "hospital", "hospital.hospital_name", "final_ctg_data"]);
-                    const filters = JSON.stringify([["hospital", "=", selectedHospital]]);
-                    const url = `${window.location.origin}/api/resource/Medical%20Assessment?fields=${encodeURIComponent(fields)}&filters=${encodeURIComponent(filters)}&limit_page_length=999`;
-                    
-                    console.log('Fetching assessments for export from:', url);
-                    
-                    const response = await fetch(url);
-                    if (!response.ok) {
-                        throw new Error(`Failed to fetch assessments. Status: ${response.status}`);
-                    }
-                    
-                    const result = await response.json();
-                    const assessments = result.data || [];
-                    
-                    // Filter to only those with CTG data
-                    const assessmentsWithCtg = assessments.filter(a => a.final_ctg_data && a.final_ctg_data.trim() !== '');
-                    
-                    if (assessmentsWithCtg.length === 0) {
-                        showError(`No CTG data files found for ${selectedHospital}`);
-                        showLoading(false);
-                        return;
-                    }
-                    
-                    // Build ZIP
-                    const zip = new JSZip();
-                    let downloadedCount = 0;
-                    let failedCount = 0;
-                    
-                    for (const assessment of assessmentsWithCtg) {
-                        try {
-                            const fileUrl = getFileDownloadUrl(assessment.final_ctg_data);
-                            console.log(`Fetching CTG for ${assessment.name} from: ${fileUrl}`);
-                            
-                            const fileResponse = await fetch(fileUrl);
-                            
-                            if (fileResponse.ok) {
-                                const fileBlob = await fileResponse.blob();
-                                
-                                if (fileBlob.size > 0) {
-                                    const safeName = (assessment.name || 'assessment').replace(/[^a-zA-Z0-9_-]/g, '_');
-                                    const safePatient = (assessment.patient_id || 'patient').replace(/[^a-zA-Z0-9_-]/g, '_');
-                                    const fileName = `${safeName}_${safePatient}.csv`;
-                                    zip.file(fileName, fileBlob);
-                                    downloadedCount++;
-                                    console.log(`Added ${fileName} to ZIP (${fileBlob.size} bytes)`);
-                                } else {
-                                    failedCount++;
-                                    console.warn(`File for ${assessment.name} is empty`);
-                                }
+                // Build ZIP
+                const zip = new JSZip();
+                let downloadedCount = 0;
+                let failedCount = 0;
+
+                for (const assessment of assessmentsWithCtg) {
+                    try {
+                        const fileUrl = getFileDownloadUrl(assessment.final_ctg_data);
+                        console.log(`Fetching CTG for ${assessment.name} from: ${fileUrl}`);
+
+                        const fileResponse = await fetch(fileUrl);
+
+                        if (fileResponse.ok) {
+                            const fileBlob = await fileResponse.blob();
+
+                            if (fileBlob.size > 0) {
+                                const safeName = (assessment.name || 'assessment').replace(/[^a-zA-Z0-9_-]/g, '_');
+                                const fileName = `${safeName}.csv`;
+                                zip.file(fileName, fileBlob);
+                                downloadedCount++;
+                                console.log(`Added ${fileName} to ZIP (${fileBlob.size} bytes)`);
                             } else {
                                 failedCount++;
-                                console.error(`Failed to download ${assessment.name}: HTTP ${fileResponse.status}`);
+                                console.warn(`File for ${assessment.name} is empty`);
                             }
-                        } catch (fileError) {
-                            console.error(`Error downloading file for ${assessment.name}:`, fileError);
+                        } else {
                             failedCount++;
+                            console.error(`Failed to download ${assessment.name}: HTTP ${fileResponse.status}`);
                         }
+                    } catch (fileError) {
+                        console.error(`Error downloading file for ${assessment.name}:`, fileError);
+                        failedCount++;
                     }
-                    
-                    if (downloadedCount === 0) {
-                        showError('Failed to download any CTG files. Check that files are accessible.');
-                        showLoading(false);
-                        return;
-                    }
-                    
-                    // Generate and trigger ZIP download
-                    console.log(`Generating ZIP with ${downloadedCount} file(s)...`);
-                    const zipBlob = await zip.generateAsync({ type: 'blob' });
-                    
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(zipBlob);
-                    const dateStr = new Date().toISOString().split('T')[0];
-                    const safeHospital = selectedHospital.replace(/[^a-zA-Z0-9_-]/g, '_');
-                    link.download = `CTG_Data_${safeHospital}_${dateStr}.zip`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(link.href);
-                    
-                    showLoading(false);
-                    const msg = failedCount > 0
-                        ? `Exported ${downloadedCount} CTG file(s). ${failedCount} file(s) could not be downloaded.`
-                        : `Successfully exported ${downloadedCount} CTG file(s) for ${selectedHospital}`;
-                    showSuccess(msg);
-                } catch (error) {
-                    console.error('Error exporting CTG data:', error);
-                    showLoading(false);
-                    showError('Failed to export CTG data: ' + error.message);
                 }
-            }
 
-            // Get CSRF token for API calls
-            async function getCsrfToken() {
-                try {
-                    const cookies = document.cookie.split(';');
-                    for (let cookie of cookies) {
-                        const [name, value] = cookie.trim().split('=');
-                        if (name === 'csrf_token') {
-                            return decodeURIComponent(value);
-                        }
-                    }
-                    
-                    const response = await fetch(`${window.location.origin}/api/method/frappe.auth.get_csrf_token`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const result = await response.json();
-                        return result.data || result.message || '';
-                    }
-                } catch (error) {
-                    console.error('Error getting CSRF token:', error);
-                }
-                return '';
-            }
-
-            // ── Delete functionality ────────────────────────────────────────────
-
-            async function deleteSingleAssessment(assessmentName) {
-                if (!assessmentName) {
-                    showError('Assessment name is required');
+                if (downloadedCount === 0) {
+                    showError('Failed to download any CTG files. Check that files are accessible.');
+                    showLoading(false);
                     return;
                 }
 
-                const confirmed = confirm(`Are you sure you want to delete Medical Assessment "${assessmentName}"? This action cannot be undone.`);
-                if (!confirmed) return;
+                // Generate and trigger ZIP download
+                console.log(`Generating ZIP with ${downloadedCount} file(s)...`);
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
 
-                try {
-                    showLoading(true);
-                    
-                    const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.delete_medical_assessment_get?assessment_name=${encodeURIComponent(assessmentName)}`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(zipBlob);
+                const dateStr = new Date().toISOString().split('T')[0];
+                const safeHospital = selectedHospital.replace(/[^a-zA-Z0-9_-]/g, '_');
+                link.download = `CTG_Data_${safeHospital}_${dateStr}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    console.log('Delete response:', result);
-                    
-                    // Check for successful deletion (multiple possible response formats)
-                    if (result.http_status_code === 200 || result.status === 'success' || result.message?.includes('successfully') || response.ok) {
-                        showSuccess(result.message || 'Assessment deleted successfully');
-                        console.log('Calling fetchAssessments after single delete...');
-                        await fetchAssessments();
-                    } else {
-                        showError(result.message || 'Failed to delete assessment');
-                    }
-                } catch (error) {
-                    console.error('Error deleting assessment:', error);
-                    showError('Failed to delete assessment. Please try again.');
-                } finally {
-                    showLoading(false);
-                }
+                showLoading(false);
+                const msg = failedCount > 0
+                    ? `Exported ${downloadedCount} CTG file(s). ${failedCount} file(s) could not be downloaded.`
+                    : `Successfully exported ${downloadedCount} CTG file(s) for ${selectedHospital}`;
+                showSuccess(msg);
+            } catch (error) {
+                console.error('Error exporting CTG data:', error);
+                showLoading(false);
+                showError('Failed to export CTG data: ' + error.message);
             }
+        }
 
-            async function deleteSelectedAssessments() {
-                const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-                
-                if (selectedCheckboxes.length === 0) {
-                    showError('No assessments selected for deletion');
-                    return;
-                }
-
-                const selectedNames = Array.from(selectedCheckboxes).map(cb => cb.dataset.assessmentName);
-                const confirmed = confirm(`Are you sure you want to delete ${selectedNames.length} selected Medical Assessment(s)? This action cannot be undone.`);
-                if (!confirmed) return;
-
-                try {
-                    showLoading(true);
-                    
-                    const assessmentNamesJson = JSON.stringify(selectedNames);
-                    const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.delete_multiple_medical_assessments_get?assessment_names_json=${encodeURIComponent(assessmentNamesJson)}`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+        // Get CSRF token for API calls
+        async function getCsrfToken() {
+            try {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name === 'csrf_token') {
+                        return decodeURIComponent(value);
                     }
+                }
 
-                    const result = await response.json();
-                    
-                    // Check for successful deletion (multiple possible response formats)
-                    if (result.http_status_code === 200 || result.status === 'success' || result.message?.includes('successfully') || response.ok) {
-                        showSuccess(result.message || 'Assessments deleted successfully');
-                        clearSelections();
-                        await fetchAssessments();
-                    } else {
-                        showError(result.message || 'Failed to delete assessments');
+                const response = await fetch(`${window.location.origin}/api/method/frappe.auth.get_csrf_token`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
-                } catch (error) {
-                    console.error('Error deleting assessments:', error);
-                    showError('Failed to delete assessments. Please try again.');
-                } finally {
-                    showLoading(false);
-                }
-            }
-
-            function updateDeleteSelectedButton() {
-                const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-                const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-                
-                if (selectedCheckboxes.length > 0) {
-                    deleteSelectedBtn.classList.remove('hidden');
-                    deleteSelectedBtn.disabled = false;
-                    deleteSelectedBtn.textContent = `Delete Selected (${selectedCheckboxes.length})`;
-                } else {
-                    deleteSelectedBtn.classList.add('hidden');
-                    deleteSelectedBtn.disabled = true;
-                }
-            }
-
-            function updateSelectAllCheckbox() {
-                const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-                const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-                const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-                
-                if (rowCheckboxes.length === 0) {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = false;
-                } else if (checkedCheckboxes.length === 0) {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = false;
-                } else if (checkedCheckboxes.length === rowCheckboxes.length) {
-                    selectAllCheckbox.checked = true;
-                    selectAllCheckbox.indeterminate = false;
-                } else {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = true;
-                }
-            }
-
-            function clearSelections() {
-                document.getElementById('selectAllCheckbox').checked = false;
-                document.getElementById('selectAllCheckbox').indeterminate = false;
-                document.querySelectorAll('.row-checkbox').forEach(checkbox => {
-                    checkbox.checked = false;
                 });
-                
-                const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+
+                if (response.ok) {
+                    const result = await response.json();
+                    return result.data || result.message || '';
+                }
+            } catch (error) {
+                console.error('Error getting CSRF token:', error);
+            }
+            return '';
+        }
+
+        // ── Delete functionality ────────────────────────────────────────────
+
+        async function deleteSingleAssessment(assessmentName) {
+            if (!assessmentName) {
+                showError('Assessment name is required');
+                return;
+            }
+
+            const confirmed = confirm(`Are you sure you want to delete Medical Assessment "${assessmentName}"? This action cannot be undone.`);
+            if (!confirmed) return;
+
+            try {
+                showLoading(true);
+
+                const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.delete_medical_assessment_get?assessment_name=${encodeURIComponent(assessmentName)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('Delete response:', result);
+
+                // Check for successful deletion (multiple possible response formats)
+                if (result.http_status_code === 200 || result.status === 'success' || result.message?.includes('successfully') || response.ok) {
+                    showSuccess(result.message || 'Assessment deleted successfully');
+                    console.log('Calling fetchAssessments after single delete...');
+                    await fetchAssessments();
+                } else {
+                    showError(result.message || 'Failed to delete assessment');
+                }
+            } catch (error) {
+                console.error('Error deleting assessment:', error);
+                showError('Failed to delete assessment. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function deleteSelectedAssessments() {
+            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+
+            if (selectedCheckboxes.length === 0) {
+                showError('No assessments selected for deletion');
+                return;
+            }
+
+            const selectedNames = Array.from(selectedCheckboxes).map(cb => cb.dataset.assessmentName);
+            const confirmed = confirm(`Are you sure you want to delete ${selectedNames.length} selected Medical Assessment(s)? This action cannot be undone.`);
+            if (!confirmed) return;
+
+            try {
+                showLoading(true);
+
+                const assessmentNamesJson = JSON.stringify(selectedNames);
+                const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.delete_multiple_medical_assessments_get?assessment_names_json=${encodeURIComponent(assessmentNamesJson)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                // Check for successful deletion (multiple possible response formats)
+                if (result.http_status_code === 200 || result.status === 'success' || result.message?.includes('successfully') || response.ok) {
+                    showSuccess(result.message || 'Assessments deleted successfully');
+                    clearSelections();
+                    await fetchAssessments();
+                } else {
+                    showError(result.message || 'Failed to delete assessments');
+                }
+            } catch (error) {
+                console.error('Error deleting assessments:', error);
+                showError('Failed to delete assessments. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function updateDeleteSelectedButton() {
+            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+
+            if (selectedCheckboxes.length > 0) {
+                deleteSelectedBtn.classList.remove('hidden');
+                deleteSelectedBtn.disabled = false;
+                deleteSelectedBtn.textContent = `Delete Selected (${selectedCheckboxes.length})`;
+            } else {
                 deleteSelectedBtn.classList.add('hidden');
                 deleteSelectedBtn.disabled = true;
             }
+        }
 
-            // ── UI helpers ──────────────────────────────────────────────────────
+        function updateSelectAllCheckbox() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+            const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
 
-            function showLoading(show) {
-                const loader = document.getElementById('loader');
-                if (show) {
-                    loader.classList.remove('hidden');
-                } else {
-                    loader.classList.add('hidden');
-                }
+            if (rowCheckboxes.length === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes.length === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes.length === rowCheckboxes.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
             }
+        }
 
-            function showSuccess(message) {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-                alertDiv.innerHTML = `
+        function clearSelections() {
+            document.getElementById('selectAllCheckbox').checked = false;
+            document.getElementById('selectAllCheckbox').indeterminate = false;
+            document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+            deleteSelectedBtn.classList.add('hidden');
+            deleteSelectedBtn.disabled = true;
+        }
+
+        // ── UI helpers ──────────────────────────────────────────────────────
+
+        function showLoading(show) {
+            const loader = document.getElementById('loader');
+            if (show) {
+                loader.classList.remove('hidden');
+            } else {
+                loader.classList.add('hidden');
+            }
+        }
+
+        function showSuccess(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            alertDiv.innerHTML = `
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -696,16 +690,16 @@
                         <span>${message}</span>
                     </div>
                 `;
-                document.body.appendChild(alertDiv);
-                setTimeout(() => {
-                    if (alertDiv.parentNode) alertDiv.parentNode.removeChild(alertDiv);
-                }, 3000);
-            }
+            document.body.appendChild(alertDiv);
+            setTimeout(() => {
+                if (alertDiv.parentNode) alertDiv.parentNode.removeChild(alertDiv);
+            }, 3000);
+        }
 
-            function showError(message) {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-                alertDiv.innerHTML = `
+        function showError(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            alertDiv.innerHTML = `
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
@@ -713,31 +707,31 @@
                         <span>${message}</span>
                     </div>
                 `;
-                document.body.appendChild(alertDiv);
-                setTimeout(() => {
-                    if (alertDiv.parentNode) alertDiv.parentNode.removeChild(alertDiv);
-                }, 5000);
-            }
+            document.body.appendChild(alertDiv);
+            setTimeout(() => {
+                if (alertDiv.parentNode) alertDiv.parentNode.removeChild(alertDiv);
+            }, 5000);
+        }
 
-            async function logout() {
-                try {
-                    const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.logout`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    });
-
-                    if (response.ok) {
-                        window.location.href = '/login';
-                    } else {
-                        console.error('Logout failed');
+        async function logout() {
+            try {
+                const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
                     }
-                } catch (error) {
-                    console.error('Error during logout:', error);
-                }
-            }
-        </script>
-    </body>
+                });
 
-    </html>
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    console.error('Logout failed');
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
