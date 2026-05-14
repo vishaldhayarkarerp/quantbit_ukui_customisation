@@ -706,8 +706,45 @@ document.addEventListener('DOMContentLoaded', function () {
         prevBtn.style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
         nextBtn.style.visibility = currentIndex === tabs.length - 1 ? 'hidden' : 'visible';
     }
-
     // --- Initialize Application ---
+    async function initializeMedicalAssessment() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let assessmentId = urlParams.get('name');
+        const displayElement = document.getElementById('assessmentIdDisplay');
+
+        if (assessmentId) {
+            // Existing assessment from URL
+            window.globalRecordName = assessmentId;
+            if (displayElement) displayElement.textContent = assessmentId;
+            console.log('Loaded assessment from URL:', assessmentId);
+        } else {
+            // Create new assessment
+            try {
+                if (displayElement) displayElement.textContent = 'Creating...';
+                const response = await fetch('/api/method/quantbit_ukui_customisation.api.create_new_medical_assessment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                if (result.message && result.message.status === 'success') {
+                    assessmentId = result.message.name;
+                    window.globalRecordName = assessmentId;
+                    if (displayElement) displayElement.textContent = assessmentId;
+                    
+                    // Update URL without reload
+                    const newUrl = window.location.pathname + '?name=' + assessmentId;
+                    window.history.pushState({ path: newUrl }, '', newUrl);
+                    console.log('Created new assessment:', assessmentId);
+                } else {
+                    throw new Error(result.message || 'Failed to create assessment');
+                }
+            } catch (error) {
+                console.error('Error creating assessment:', error);
+                if (displayElement) displayElement.textContent = 'Error';
+            }
+        }
+    }
+
     setupEventListeners();
     updateNavigationButtons();
     setupInputValidation();
@@ -717,6 +754,9 @@ document.addEventListener('DOMContentLoaded', function () {
     setupLmpLogic();
     setupDatePickers();
     setupHospitalModal();
+    initializeMedicalAssessment();
+
+
 
     const getDataPointsBtn = document.getElementById('get-data-points-btn');
     const wpdIframe = document.getElementById('wpd-iframe');

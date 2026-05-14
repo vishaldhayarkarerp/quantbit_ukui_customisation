@@ -57,7 +57,7 @@
                 <a href="/uk" class="btn-filter">Add new</a>
                 <button id="exportCtgBtn" class="btn-export-ctg" disabled
                     title="Select a hospital and click to export CTG data">Export CTG Data</button>
-                <button id="deleteSelectedBtn" class="btn-delete-selected hidden" disabled>Delete Selected</button>
+                <button id="deleteSelectedBtn" class="btn-delete-selected hidden" disabled>Delete</button>
             </div>
 
             <div id="loader" class="loader">
@@ -629,7 +629,7 @@
             if (selectedCheckboxes.length > 0) {
                 deleteSelectedBtn.classList.remove('hidden');
                 deleteSelectedBtn.disabled = false;
-                deleteSelectedBtn.textContent = `Delete Selected (${selectedCheckboxes.length})`;
+                deleteSelectedBtn.textContent = `Delete (${selectedCheckboxes.length})`;
             } else {
                 deleteSelectedBtn.classList.add('hidden');
                 deleteSelectedBtn.disabled = true;

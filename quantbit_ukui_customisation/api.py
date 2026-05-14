@@ -692,3 +692,21 @@ def create_hospital(hospital_id, hospital_name):
     except Exception as e:
         frappe.log_error(title="Create Hospital Error", message=frappe.get_traceback())
         return gen_response(500, f"Failed to create hospital: {str(e)}")
+
+
+@frappe.whitelist(allow_guest=False)
+def create_new_medical_assessment():
+    """
+    Create a new Medical Assessment document and return its name
+    """
+    try:
+        doc = frappe.new_doc("Medical Assessment")
+        doc.insert(ignore_permissions=True)
+        frappe.db.commit()
+        return {
+            "status": "success",
+            "name": doc.name
+        }
+    except Exception as e:
+        frappe.log_error(title="Create New Medical Assessment Error", message=frappe.get_traceback())
+        return gen_response(500, f"Failed to create new assessment: {str(e)}")
