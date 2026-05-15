@@ -9,9 +9,12 @@ from frappe.model.document import Document
 class MedicalAssessment(Document):
 
 
-    def before_save(self):           
+    def before_save(self):
+        self.process_ctg_merging()
+        self.generate_patient_metadata_excel()
+
+    def process_ctg_merging(self):
         try:
-           
             attachments = self.get("attachments", [])
             if not attachments:
                 return                  
@@ -64,12 +67,15 @@ class MedicalAssessment(Document):
                     merged_data.append(merged)
             
             if not merged_data:
-                frappe.throw("No valid files found for merging")
+                return
             
             final_merged = pd.concat(merged_data).drop_duplicates(subset=["x"]).sort_values("x")
             
             # Delete existing files starting with final_ctg_signal.csv
             files_dir = os.path.join(frappe.get_site_path(), "public", "files")
+            if not os.path.exists(files_dir):
+                os.makedirs(files_dir)
+                
             for filename in os.listdir(files_dir):
                 if filename.startswith("final") and filename.endswith(".csv"):
                     try:
@@ -78,7 +84,7 @@ class MedicalAssessment(Document):
                         pass
             
             merged_filename = "final_ctg_signal.csv"
-            merged_filepath = os.path.join(frappe.get_site_path(), "public", "files", merged_filename)
+            merged_filepath = os.path.join(files_dir, merged_filename)
             final_merged.to_csv(merged_filepath, index=False)
             
             self.final_ctg_data = "/files/" + merged_filename
@@ -87,3 +93,43 @@ class MedicalAssessment(Document):
         except Exception as e:
             frappe.log_error(str(e), "CTG Processing Error")
             frappe.throw(f"Error merging files: {str(e)}")
+
+    def generate_patient_metadata_excel(self):
+        try:
+            meta = frappe.get_meta(self.doctype)
+            data = {}
+            
+            # Fields to exclude from the Excel export
+            exclude_types = ['Section Break', 'Column Break', 'Tab Break', 'HTML', 'Button', 'Table']
+            
+            for field in meta.fields:
+                if field.fieldtype not in exclude_types:
+                    # Get value from document, using fieldname
+                    value = self.get(field.fieldname)
+                    
+                    # Check if the field is empty or not filled
+                    if value is None or value == "":
+                        value = "No Data"
+                    
+                    # Use label as column header, fallback to fieldname
+                    column_name = field.label or field.fieldname
+                    data[column_name] = [value]
+            
+            # Create DataFrame and export to Excel
+            df = pd.DataFrame(data)
+            
+            file_name = f"{self.name}_metadata.xlsx"
+            files_dir = os.path.join(frappe.get_site_path(), "public", "files")
+            
+            if not os.path.exists(files_dir):
+                os.makedirs(files_dir)
+                
+            file_path = os.path.join(files_dir, file_name)
+            df.to_excel(file_path, index=False)
+            
+            # Update the patient_metadata field with the relative path
+            self.patient_metadata = "/files/" + file_name
+            
+        except Exception as e:
+            frappe.log_error(str(e), "Patient Metadata Excel Generation Error")
+            frappe.msgprint(f"Warning: Could not generate metadata Excel: {str(e)}")

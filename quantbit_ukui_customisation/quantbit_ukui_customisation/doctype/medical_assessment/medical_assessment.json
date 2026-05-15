@@ -525,6 +525,9 @@
   "attachments_tab",
   "section_break_xyyt",
   "attachments",
+  "section_break_irnj",
+  "patient_metadata",
+  "column_break_pqbp",
   "final_ctg_data",
   "tab_6_tab",
   "hospital",
@@ -3440,14 +3443,27 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "patient_metadata",
+   "fieldtype": "Attach",
+   "label": "Patient Metadata"
+  },
+  {
+   "fieldname": "section_break_irnj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_pqbp",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-02 11:21:01.193444",
- "modified_by": "sahil.sawant@erpdata.in",
+ "modified": "2026-05-15 15:37:12.433132",
+ "modified_by": "Administrator",
  "module": "quantbit_ukui_customisation",
  "name": "Medical Assessment",
  "naming_rule": "By \"Naming Series\" field",

@@ -114,7 +114,8 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.message && data.message.role_profile === "Doctor") {
+                    if (data.message && (data.message.role_profile === "Doctor" ||
+                        data.message.role_profile === "Medical Assessment Editor")) {
                         document.getElementById('userListBtn').style.display = 'block';
                     }
                 } else {

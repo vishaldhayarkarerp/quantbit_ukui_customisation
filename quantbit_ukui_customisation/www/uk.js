@@ -730,7 +730,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     assessmentId = result.message.name;
                     window.globalRecordName = assessmentId;
                     if (displayElement) displayElement.textContent = assessmentId;
-                    
+
                     // Update URL without reload
                     const newUrl = window.location.pathname + '?name=' + assessmentId;
                     window.history.pushState({ path: newUrl }, '', newUrl);
@@ -2476,7 +2476,7 @@ function populateFormWithData(data) {
 
 async function saveToFrappe(formData) {
     try {
-        showStatus('Saving data...', 'info');
+
 
         // Debug credentials first
         if (!debugCredentials()) {
@@ -2601,7 +2601,7 @@ async function saveToFrappe(formData) {
 
         if (localFiles.length > 0) {
             showStatus('Uploading pending attachments...', 'info');
-            console.log('Processing local attachments:', localFiles.length, 'files');
+
 
             // Upload each local file and create File documents linked to the main record
             await Promise.all(
@@ -2681,7 +2681,7 @@ async function saveToFrappe(formData) {
 // Add submit function to properly submit documents
 async function submitDocument(recordName) {
     try {
-        showStatus('Submitting document...', 'info');
+
 
         const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}/${recordName}`, {
             method: 'PUT',
@@ -2734,8 +2734,6 @@ async function submitDocument(recordName) {
 // Add function to cancel (unsubmit) document for editing
 async function cancelDocument(recordName) {
     try {
-        showStatus('Cancelling submission for editing...', 'info');
-
         const response = await fetch(`${FRAPPE_API_BASE}/${DOCTYPE_NAME}/${recordName}`, {
             method: 'PUT',
             headers: {
@@ -2776,7 +2774,7 @@ async function cancelDocument(recordName) {
         }
 
         const result = await response.json();
-        showStatus('Document cancelled successfully!', 'success');
+
         return result;
 
     } catch (err) {
@@ -2872,43 +2870,59 @@ function updateButtonVisibility(docstatus = 0) {
 
     if (docstatus === 0) {
         // Draft or New
-        // Only show save button if it's new or has unsaved changes
         if (!isExisting || hasUnsavedChanges) {
             saveBtn.classList.remove('hidden');
-        }
-
-        if (isExisting) {
+            saveBtn.textContent = 'SAVE';
+        } else if (isExisting) {
             submitBtn.classList.remove('hidden');
+            submitBtn.textContent = 'SUBMIT';
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('bg-gray-500', 'cursor-not-allowed');
+            submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
         }
-
-        submitBtn.textContent = 'SUBMIT';
-        submitBtn.disabled = false;
-        saveBtn.textContent = 'SAVE';
-        submitBtn.classList.remove('bg-gray-500', 'cursor-not-allowed');
-        submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
 
         makeFormReadOnly(false);
 
     } else if (docstatus === 1) {
-        // Submitted document
-        saveBtn.classList.add('hidden');
-        submitBtn.classList.remove('hidden');
-        submitBtn.textContent = 'SUBMITTED';
-        submitBtn.disabled = true;
+        // Submitted document - check if user can edit
+        if (window.hasMedicalAssessmentEditor || window.hasSystemManager) {
+            if (hasUnsavedChanges) {
+                saveBtn.classList.remove('hidden');
+                saveBtn.textContent = 'SAVE';
+            } else {
+                submitBtn.classList.remove('hidden');
+                submitBtn.textContent = 'SUBMITTED';
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                submitBtn.classList.add('bg-gray-500', 'cursor-not-allowed');
+            }
 
-        // Style as a status label rather than an active button
-        submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-        submitBtn.classList.add('bg-gray-500', 'cursor-not-allowed');
+            makeFormReadOnly(false);
+        } else {
+            saveBtn.classList.add('hidden');
+            submitBtn.classList.remove('hidden');
+            submitBtn.textContent = 'SUBMITTED';
+            submitBtn.disabled = true;
 
-        makeFormReadOnly(true);
+            // Style as a status label rather than an active button
+            submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            submitBtn.classList.add('bg-gray-500', 'cursor-not-allowed');
+
+            makeFormReadOnly(true);
+        }
 
     } else if (docstatus === 2) {
-        // Cancelled document - show both buttons for resubmission
-        saveBtn.classList.remove('hidden');
-        submitBtn.classList.remove('hidden');
-        submitBtn.textContent = 'SUBMIT';
-        submitBtn.disabled = false;
-        saveBtn.textContent = 'SAVE';
+        // Cancelled document
+        if (hasUnsavedChanges) {
+            saveBtn.classList.remove('hidden');
+            saveBtn.textContent = 'SAVE';
+        } else {
+            submitBtn.classList.remove('hidden');
+            submitBtn.textContent = 'SUBMIT';
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('bg-gray-500', 'cursor-not-allowed');
+            submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        }
         makeFormReadOnly(false);
     }
 }
@@ -2980,11 +2994,37 @@ if (saveBtn) {
                         // Wait for cancellation to complete
                         await new Promise(resolve => setTimeout(resolve, 1000));
 
-                        // Now save the changes
-                        const result = await saveToFrappe(formData);
+                        // Now use custom API to update the cancelled document and set to draft
+                        const response = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.update_cancelled_medical_assessment`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                document_name: docName,
+                                form_data: formData
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to update after cancellation');
+                        }
+
+                        const result = await response.json();
+                        showStatus('Document updated successfully!', 'success');
+
+                        // Reset unsaved changes flag
+                        if (window.resetUnsavedChanges) {
+                            window.resetUnsavedChanges();
+                        }
+
                         if (result && result.data) {
                             updateButtonVisibility(result.data.docstatus || 0);
+                        } else {
+                            updateButtonVisibility(0);
                         }
+
                     } catch (cancelError) {
                         showStatus('Failed to edit submitted document: ' + cancelError.message, 'error');
                     }
@@ -3108,7 +3148,33 @@ if (submitBtn) {
                     if (currentDoc.docstatus === 1 && window.canEditSubmitted) {
                         // Cancel the submitted document
                         await cancelDocument(docName);
-                        updateButtonVisibility(2);
+
+                        // Wait for cancellation to complete
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+
+                        // Collect latest form data
+                        const formData = collectFormData();
+
+                        // Update the cancelled document using custom API
+                        const updateResponse = await fetch(`${window.location.origin}/api/method/quantbit_ukui_customisation.api.update_cancelled_medical_assessment`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                document_name: docName,
+                                form_data: formData
+                            })
+                        });
+
+                        if (updateResponse.ok) {
+                            // Now submit it again
+                            await submitDocument(docName);
+                            updateButtonVisibility(1);
+                        } else {
+                            throw new Error('Failed to update document before resubmission');
+                        }
                     } else if (currentDoc.docstatus === 0 || currentDoc.docstatus === 2) {
                         // Submit or resubmit the document
                         await submitDocument(docName);
@@ -4020,7 +4086,7 @@ async function checkUserRole() {
             const data = await response.json();
             const userData = data.message || {};
 
-            if (userData.role_profile === "Doctor") {
+            if (userData.role_profile === "Doctor" || userData.role_profile === "Medical Assessment Editor") {
                 document.getElementById('get-data-points-btn').style.display = 'block';
             }
 
@@ -4104,7 +4170,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.resetUnsavedChanges = () => {
         window.hasUnsavedChanges = false;
         // Update button visibility after reset
-        updateButtonVisibility(0);
+        updateButtonVisibility(window.currentDocStatus || 0);
     };
 
     // Wait a bit for globalRecordName to be set
