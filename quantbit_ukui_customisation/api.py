@@ -5,6 +5,9 @@ from frappe.utils import flt, get_datetime, generate_hash
 from frappe.auth import LoginManager, check_password
 from frappe.utils.password import update_password
 from bs4 import BeautifulSoup
+import pandas as pd
+import os
+import json
 
 
 @frappe.whitelist(allow_guest=False)
@@ -710,3 +713,57 @@ def create_new_medical_assessment():
     except Exception as e:
         frappe.log_error(title="Create New Medical Assessment Error", message=frappe.get_traceback())
         return gen_response(500, f"Failed to create new assessment: {str(e)}")
+
+@frappe.whitelist(allow_guest=False)
+def export_metadata_from_payload(document_name, payload):
+    """
+    Generate Excel metadata export using provided payload data
+    """
+    try:
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+            
+        # Get doctype metadata
+        meta = frappe.get_meta("Medical Assessment")
+        data = {}
+        
+        # Fields to exclude from the Excel export
+        exclude_types = ['Section Break', 'Column Break', 'Tab Break', 'HTML', 'Button', 'Table']
+        
+        for field in meta.fields:
+            if field.fieldtype not in exclude_types:
+                # Use value from payload if exists, otherwise mark as "No Data"
+                value = payload.get(field.fieldname)
+                
+                if value is None or value == "":
+                    value = "No Data"
+                
+                # Use label as column header
+                column_name = field.label or field.fieldname
+                data[column_name] = [value]
+        
+        # Create DataFrame and export to Excel
+        df = pd.DataFrame(data)
+        
+        file_name = f"{document_name}_metadata.xlsx"
+        files_dir = os.path.join(frappe.get_site_path(), "public", "files")
+        
+        if not os.path.exists(files_dir):
+            os.makedirs(files_dir)
+            
+        file_path = os.path.join(files_dir, file_name)
+        df.to_excel(file_path, index=False)
+        
+        # Update the document with the new attachment path
+        frappe.db.set_value("Medical Assessment", document_name, "patient_metadata", "/files/" + file_name)
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": f"Excel metadata exported for {document_name}",
+            "file_url": "/files/" + file_name
+        }
+        
+    except Exception as e:
+        frappe.log_error(title="Export Metadata Payload Error", message=frappe.get_traceback())
+        return {"status": "error", "message": str(e)}

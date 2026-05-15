@@ -2522,7 +2522,27 @@ async function saveToFrappe(formData) {
         console.log('Response status:', response.status);
         console.log('Response headers:', response.headers);
 
-        if (!response.ok) {
+        let result = null;
+        if (response.ok) {
+            result = await response.json();
+            const recordName = isUpdate ? existingRecordName : (result.data ? result.data.name : null);
+            
+            if (recordName) {
+                // Generate Excel metadata from payload
+                try {
+                    await fetch('/api/method/quantbit_ukui_customisation.api.export_metadata_from_payload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            document_name: recordName,
+                            payload: payload
+                        })
+                    });
+                } catch (e) {
+                    console.error('Failed to export metadata:', e);
+                }
+            }
+        } else {
             const errorData = await response.json().catch(() => ({}));
             console.error('Error response:', errorData);
             let errorMessage = 'Failed to save data';
@@ -2555,8 +2575,7 @@ async function saveToFrappe(formData) {
             throw new Error(errorMessage);
         }
 
-        const result = await response.json();
-        const recordName = isUpdate ? existingRecordName : result.data.name; // Use existing name for update, new name for create
+        const recordName = isUpdate ? existingRecordName : (result.data ? result.data.name : null);
 
         console.log('Main record saved:', recordName);
 
@@ -2716,6 +2735,21 @@ async function submitDocument(recordName) {
 
         const result = await response.json();
         showStatus('Document submitted successfully!', 'success');
+
+        // Generate Excel metadata from current form data during submission
+        try {
+            const currentPayload = collectFormData();
+            await fetch('/api/method/quantbit_ukui_customisation.api.export_metadata_from_payload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    document_name: recordName,
+                    payload: currentPayload
+                })
+            });
+        } catch (e) {
+            console.error('Failed to export metadata during submission:', e);
+        }
 
         // Reset unsaved changes flag after successful submission
         if (window.resetUnsavedChanges) {
