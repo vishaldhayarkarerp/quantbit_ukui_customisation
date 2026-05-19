@@ -548,7 +548,7 @@
   },
   {
    "fieldname": "maternal_age",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "1. Maternal Age"
   },
   {
@@ -585,7 +585,7 @@
   },
   {
    "fieldname": "gestation_weeks",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "4. Current Gestational Age in Weeks",
    "non_negative": 1
   },
@@ -633,7 +633,7 @@
   },
   {
    "fieldname": "number_of_loss",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "Number of Loss"
   },
   {
@@ -2259,7 +2259,7 @@
   },
   {
    "fieldname": "co_ppm",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "35. What is the CO reading at booking (ppm)?"
   },
   {
@@ -2284,7 +2284,7 @@
   },
   {
    "fieldname": "alco_wek",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "37. How many units of alcohol per week are consumed now?"
   },
   {
@@ -2909,7 +2909,7 @@
   },
   {
    "fieldname": "total_dose",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "Total Dose"
   },
   {
@@ -2960,7 +2960,7 @@
   },
   {
    "fieldname": "oxytocin_hr",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "How many hours of oxytocin ?"
   },
   {
@@ -3003,7 +3003,7 @@
   },
   {
    "fieldname": "donar_age",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "Age of donor, if known"
   },
   {
@@ -3166,17 +3166,17 @@
   },
   {
    "fieldname": "min1",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "1 Minute"
   },
   {
    "fieldname": "min5",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "5 Minute"
   },
   {
    "fieldname": "min10",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "10 Minute"
   },
   {
@@ -3462,7 +3462,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-19 11:10:44.566392",
+ "modified": "2026-05-19 11:26:56.961760",
  "modified_by": "Administrator",
  "module": "quantbit_ukui_customisation",
  "name": "Medical Assessment",
