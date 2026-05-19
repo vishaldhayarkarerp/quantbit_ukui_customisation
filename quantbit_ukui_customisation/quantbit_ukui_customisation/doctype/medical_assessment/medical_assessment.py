@@ -11,6 +11,7 @@ class MedicalAssessment(Document):
 
     def before_save(self):
         self.process_ctg_merging()
+        self.generate_patient_metadata()
 
     def process_ctg_merging(self):
         try:
@@ -92,4 +93,115 @@ class MedicalAssessment(Document):
         except Exception as e:
             frappe.log_error(str(e), "CTG Processing Error")
             frappe.throw(f"Error merging files: {str(e)}")
+
+    def generate_patient_metadata(self):
+        try:
+            import re
+            # Get doctype metadata
+            meta = frappe.get_meta(self.doctype)
+            
+            # Fields to exclude from the Excel export
+            exclude_types = ['Section Break', 'Column Break', 'Tab Break', 'HTML', 'Button', 'Table', 'Fold']
+            
+            # First pass: Get all field values to easily lookup header values
+            field_values = {}
+            for field in meta.fields:
+                if field.fieldtype not in exclude_types:
+                    val = self.get(field.fieldname)
+                    if val is None or val == "":
+                        val = "No Data"
+                    field_values[field.fieldname] = val
+
+            # Second pass: Process fields with section tracking
+            labels = []
+            fieldnames = []
+            values = []
+            current_header_value = None
+            
+            for field in meta.fields:
+                # Track section breaks and their depends_on values
+                if field.fieldtype == 'Section Break':
+                    depends_on = field.get('depends_on')
+                    header_fieldname = None
+                    if depends_on:
+                        match = re.search(r'eval:\s*doc\.([a-zA-Z0-9_]+)\s*==', depends_on)
+                        if match:
+                            header_fieldname = match.group(1)
+                    
+                    if header_fieldname:
+                        current_header_value = field_values.get(header_fieldname)
+                    else:
+                        current_header_value = None
+                        
+                elif field.fieldtype == 'Tab Break':
+                    # Reset section tracking on Tab Break
+                    current_header_value = None
+                    
+                elif field.fieldtype not in exclude_types:
+                    label = field.label or field.fieldname
+                    fieldname = field.fieldname
+                    value = self.get(fieldname)
+                    
+                    # Apply override if the current section's header question is "No Data"
+                    if current_header_value == "No Data":
+                        value = "No Data"
+                    else:
+                        if value is None or value == "":
+                            value = "No Data"
+                    
+                    labels.append(label)
+                    fieldnames.append(fieldname)
+                    values.append(value)
+            
+            if not labels:
+                return
+                
+            df = pd.DataFrame([fieldnames, values], columns=labels)
+            
+            import io
+            
+            # Write dataframe to bytes
+            output = io.BytesIO()
+            df.to_excel(output, index=False)
+            excel_bytes = output.getvalue()
+            
+            # Find existing attachment File documents for this field
+            existing_files = frappe.get_all(
+                "File", 
+                filters={
+                    "attached_to_doctype": "Medical Assessment", 
+                    "attached_to_name": self.name, 
+                    "attached_to_field": "patient_metadata"
+                }
+            )
+            
+            # Delete existing files completely (DB and disk)
+            for f in existing_files:
+                frappe.delete_doc("File", f.name, ignore_permissions=True)
+                
+            # Safely create a new File document
+            safe_name = "".join([c for c in self.name if c.isalnum() or c in ("-", "_")])
+            file_name = f"patient_metadata_{safe_name}.xlsx"
+            
+            # Use Frappe's file manager to create and save the file
+            f_doc = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "attached_to_doctype": "Medical Assessment",
+                "attached_to_name": self.name,
+                "attached_to_field": "patient_metadata",
+                "folder": "Home/Attachments",
+                "is_private": 0,
+                "content": excel_bytes
+            })
+            f_doc.insert(ignore_permissions=True)
+            
+            # Update the reference field
+            self.patient_metadata = f_doc.file_url
+            
+        except Exception as e:
+            frappe.log_error(title="Generate Patient Metadata Error", message=frappe.get_traceback())
+            frappe.throw(f"Error generating patient metadata: {str(e)}")
+
+
 
