@@ -12,6 +12,7 @@ class MedicalAssessment(Document):
     def before_save(self):
         self.process_ctg_merging()
         self.generate_patient_metadata()
+        self.generate_final_ctg_data()
 
     def process_ctg_merging(self):
         try:
@@ -87,7 +88,7 @@ class MedicalAssessment(Document):
             merged_filepath = os.path.join(files_dir, merged_filename)
             final_merged.to_csv(merged_filepath, index=False)
             
-            self.final_ctg_data = "/files/" + merged_filename
+            self.signal_data = "/files/" + merged_filename
             frappe.msgprint("FHR & UC files merged successfully")
             
         except Exception as e:
@@ -202,6 +203,86 @@ class MedicalAssessment(Document):
         except Exception as e:
             frappe.log_error(title="Generate Patient Metadata Error", message=frappe.get_traceback())
             frappe.throw(f"Error generating patient metadata: {str(e)}")
+
+    def generate_final_ctg_data(self):
+        try:
+            import io
+            import pandas as pd
+            import os
+            
+            metadata_df = None
+            if self.patient_metadata:
+                m_path = self.patient_metadata.lstrip("/")
+                if m_path.startswith("private/"):
+                    metadata_path = frappe.get_site_path("private", "files", m_path.split("private/files/")[-1])
+                elif m_path.startswith("files/"):
+                    metadata_path = frappe.get_site_path("public", "files", m_path.split("files/")[-1])
+                else:
+                    metadata_path = frappe.get_site_path("public", m_path)
+                
+                if os.path.exists(metadata_path):
+                    metadata_df = pd.read_excel(metadata_path)
+                    
+            signal_df = None
+            if self.signal_data:
+                s_path = self.signal_data.lstrip("/")
+                if s_path.startswith("private/"):
+                    signal_path = frappe.get_site_path("private", "files", s_path.split("private/files/")[-1])
+                elif s_path.startswith("files/"):
+                    signal_path = frappe.get_site_path("public", "files", s_path.split("files/")[-1])
+                else:
+                    signal_path = frappe.get_site_path("public", s_path)
+                
+                if os.path.exists(signal_path):
+                    signal_df = pd.read_csv(signal_path)
+                else:
+                    frappe.msgprint(f"Signal file not found at: {signal_path}")
+                    
+            if metadata_df is None and signal_df is None:
+                return
+                
+            # Create a combined Excel file with BytesIO
+            output = io.BytesIO()
+            with pd.ExcelWriter(output) as writer:
+                if metadata_df is not None:
+                    metadata_df.to_excel(writer, sheet_name="Patient Metadata", index=False)
+                if signal_df is not None:
+                    signal_df.to_excel(writer, sheet_name="Signal Data", index=False)
+                    
+            excel_bytes = output.getvalue()
+            
+            # Find and delete existing File documents for final_ctg_data
+            existing_files = frappe.get_all(
+                "File", 
+                filters={
+                    "attached_to_doctype": "Medical Assessment", 
+                    "attached_to_name": self.name, 
+                    "attached_to_field": "final_ctg_data"
+                }
+            )
+            for f in existing_files:
+                frappe.delete_doc("File", f.name, ignore_permissions=True)
+                
+            safe_name = "".join([c for c in self.name if c.isalnum() or c in ("-", "_")])
+            file_name = f"final_ctg_data_{safe_name}.xlsx"
+            
+            f_doc = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "attached_to_doctype": "Medical Assessment",
+                "attached_to_name": self.name,
+                "attached_to_field": "final_ctg_data",
+                "folder": "Home/Attachments",
+                "is_private": 0,
+                "content": excel_bytes
+            })
+            f_doc.insert(ignore_permissions=True)
+            
+            self.final_ctg_data = f_doc.file_url
+            
+        except Exception as e:
+            frappe.log_error(title="Generate Final CTG Data Error", message=frappe.get_traceback())
+            frappe.msgprint(f"Error generating final CTG data: {str(e)}")
 
 
 

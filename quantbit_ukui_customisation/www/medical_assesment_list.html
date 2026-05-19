@@ -380,13 +380,13 @@
                     throw new Error('Downloaded file is empty');
                 }
 
-                // Force CSV content type
-                const csvBlob = new Blob([blob], { type: 'text/csv' });
+                // Force Excel content type
+                const excelBlob = new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
                 const link = document.createElement('a');
-                link.href = URL.createObjectURL(csvBlob);
+                link.href = URL.createObjectURL(excelBlob);
                 const safeName = (assessmentName || 'assessment').replace(/[^a-zA-Z0-9_-]/g, '_');
-                link.download = `${safeName}.csv`;
+                link.download = `${safeName}.xlsx`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -456,7 +456,7 @@
 
                             if (fileBlob.size > 0) {
                                 const safeName = (assessment.name || 'assessment').replace(/[^a-zA-Z0-9_-]/g, '_');
-                                const fileName = `${safeName}.csv`;
+                                const fileName = `${safeName}.xlsx`;
                                 zip.file(fileName, fileBlob);
                                 downloadedCount++;
                                 console.log(`Added ${fileName} to ZIP (${fileBlob.size} bytes)`);
