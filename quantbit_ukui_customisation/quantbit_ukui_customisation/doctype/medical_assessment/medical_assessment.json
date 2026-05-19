@@ -668,7 +668,7 @@
   },
   {
    "fieldname": "papp_a_level",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "11. PAPP-A Level",
    "non_negative": 1,
    "precision": "2"
@@ -679,7 +679,7 @@
   },
   {
    "fieldname": "bmi",
-   "fieldtype": "Float",
+   "fieldtype": "Date",
    "label": "12. BMI",
    "non_negative": 1
   },
@@ -2445,7 +2445,7 @@
   },
   {
    "fieldname": "wom_hg",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "39. What is the woman's height? (m)"
   },
   {
@@ -2467,7 +2467,7 @@
   },
   {
    "fieldname": "wom_wg",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "40. What was the woman's weight at booking? (kg)"
   },
   {
@@ -3146,7 +3146,7 @@
   },
   {
    "fieldname": "birthweight",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "5. Birth Weight (grams)"
   },
   {
@@ -3276,14 +3276,14 @@
   },
   {
    "fieldname": "ph",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "pH",
    "non_negative": 1,
    "precision": "3"
   },
   {
    "fieldname": "po2",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "pO2"
   },
   {
@@ -3292,12 +3292,12 @@
   },
   {
    "fieldname": "base_excess",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "Base Excess"
   },
   {
    "fieldname": "pco2",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "pCO2"
   },
   {
@@ -3306,12 +3306,12 @@
   },
   {
    "fieldname": "lactate",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "Lactate"
   },
   {
    "fieldname": "hco3",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "HCO3"
   },
   {
@@ -3320,7 +3320,7 @@
   },
   {
    "fieldname": "foetal_hb",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "Foetal Hb"
   },
   {
@@ -3330,12 +3330,12 @@
   },
   {
    "fieldname": "phv",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "pH"
   },
   {
    "fieldname": "po2v",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "pO2"
   },
   {
@@ -3344,13 +3344,13 @@
   },
   {
    "fieldname": "basev",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "Base Excess",
    "non_negative": 1
   },
   {
    "fieldname": "pco2v",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "pCO2"
   },
   {
@@ -3359,12 +3359,12 @@
   },
   {
    "fieldname": "lactatev",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "Lactate"
   },
   {
    "fieldname": "hco3v",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "HCO3"
   },
   {
@@ -3373,7 +3373,7 @@
   },
   {
    "fieldname": "foetalv",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "Foetal Hb"
   },
   {
@@ -3462,7 +3462,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-15 15:37:12.433132",
+ "modified": "2026-05-19 11:10:44.566392",
  "modified_by": "Administrator",
  "module": "quantbit_ukui_customisation",
  "name": "Medical Assessment",
