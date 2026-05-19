@@ -526,6 +526,7 @@
   "section_break_xyyt",
   "attachments",
   "section_break_irnj",
+  "signal_data",
   "patient_metadata",
   "column_break_pqbp",
   "final_ctg_data",
@@ -3456,13 +3457,18 @@
   {
    "fieldname": "column_break_pqbp",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "signal_data",
+   "fieldtype": "Attach",
+   "label": "Signal Data "
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-19 11:26:56.961760",
+ "modified": "2026-05-19 12:32:26.183323",
  "modified_by": "Administrator",
  "module": "quantbit_ukui_customisation",
  "name": "Medical Assessment",
