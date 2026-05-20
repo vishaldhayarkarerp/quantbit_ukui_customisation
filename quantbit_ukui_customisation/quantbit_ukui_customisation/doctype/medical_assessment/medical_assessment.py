@@ -21,6 +21,7 @@ class MedicalAssessment(Document):
                 return                  
             fhr_files = []
             uc_files = []
+            mp_files = []
             
             for attachment in attachments:
                 # Get filename with multiple fallbacks to ensure it's never None
@@ -44,6 +45,8 @@ class MedicalAssessment(Document):
                     fhr_files.append(attachment)
                 elif filename and filename.upper().startswith("UC"):
                     uc_files.append(attachment)
+                elif filename and filename.upper().startswith("MP"):
+                    mp_files.append(attachment)
             
             if not fhr_files or not uc_files:
                 return
@@ -64,8 +67,20 @@ class MedicalAssessment(Document):
                         
                     df_uc = pd.read_csv(uc_path, header=None, names=["x", "UC"])
                     
-                    merged = pd.merge(df_fhr, df_uc, on="x", how="outer").fillna(0).sort_values("x")
-                    merged_data.append(merged)
+                    if mp_files:
+                        for mp_file in mp_files:
+                            mp_path = os.path.join(frappe.get_site_path(), "public", mp_file.get("attachment", "").lstrip("/"))
+                            if not os.path.exists(mp_path):
+                                continue
+                                
+                            df_mp = pd.read_csv(mp_path, header=None, names=["x", "MP"])
+                            
+                            merged = pd.merge(df_fhr, df_uc, on="x", how="outer").fillna(0)
+                            merged = pd.merge(merged, df_mp, on="x", how="outer").fillna(0).sort_values("x")
+                            merged_data.append(merged)
+                    else:
+                        merged = pd.merge(df_fhr, df_uc, on="x", how="outer").fillna(0).sort_values("x")
+                        merged_data.append(merged)
             
             if not merged_data:
                 return
@@ -89,7 +104,10 @@ class MedicalAssessment(Document):
             final_merged.to_csv(merged_filepath, index=False)
             
             self.signal_data = "/files/" + merged_filename
-            frappe.msgprint("FHR & UC files merged successfully")
+            if mp_files:
+                frappe.msgprint("FHR, UC & MP files merged successfully")
+            else:
+                frappe.msgprint("FHR & UC files merged successfully")
             
         except Exception as e:
             frappe.log_error(str(e), "CTG Processing Error")
