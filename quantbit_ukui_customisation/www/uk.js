@@ -2904,7 +2904,7 @@ function updateButtonVisibility(docstatus = 0) {
 
     } else if (docstatus === 1) {
         // Submitted document - check if user can edit
-        if (window.hasMedicalAssessmentEditor || window.hasSystemManager) {
+        if (window.hasMedicalAssessmentEditor) {
             if (hasUnsavedChanges) {
                 saveBtn.classList.remove('hidden');
                 saveBtn.textContent = 'SAVE';
