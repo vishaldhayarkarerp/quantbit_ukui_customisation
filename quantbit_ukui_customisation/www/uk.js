@@ -383,47 +383,47 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setupPreviousPregnancies() {
-    if (!numPreviousPregnanciesInput) return;
-    
-    const btn = document.getElementById('previousPregnanciesBtn');
-    if (!btn) return;
+        if (!numPreviousPregnanciesInput) return;
 
-    btn.addEventListener("click", () => {
-        const numPreg = parseInt(numPreviousPregnanciesInput.value) || 0;
-        
-        // Get current data from table before regenerating (to preserve values)
-        const existingData = {};
-        for (let i = 1; i <= 10; i++) {  // Safety limit
-            const problems = document.querySelector(`input[name="prev_preg_${i}_problems"]`);
-            const outcome = document.querySelector(`select[name="prev_preg_${i}_outcome"]`);
-            const mode = document.querySelector(`select[name="prev_preg_${i}_mode"]`);
-            const weight = document.querySelector(`input[name="prev_preg_${i}_weight"]`);
-            const ga = document.querySelector(`input[name="prev_preg_${i}_ga"]`);
+        const btn = document.getElementById('previousPregnanciesBtn');
+        if (!btn) return;
 
-            if (problems || outcome || mode || weight || ga) {
-                existingData[i] = {
-                    problems: problems ? problems.value : '',
-                    outcome: outcome ? outcome.value : '',
-                    mode: mode ? mode.value : '',
-                    weight: weight ? weight.value : '',
-                    ga: ga ? ga.value : ''
-                };
+        btn.addEventListener("click", () => {
+            const numPreg = parseInt(numPreviousPregnanciesInput.value) || 0;
+
+            // Get current data from table before regenerating (to preserve values)
+            const existingData = {};
+            for (let i = 1; i <= 10; i++) {  // Safety limit
+                const problems = document.querySelector(`input[name="prev_preg_${i}_problems"]`);
+                const outcome = document.querySelector(`select[name="prev_preg_${i}_outcome"]`);
+                const mode = document.querySelector(`select[name="prev_preg_${i}_mode"]`);
+                const weight = document.querySelector(`input[name="prev_preg_${i}_weight"]`);
+                const ga = document.querySelector(`input[name="prev_preg_${i}_ga"]`);
+
+                if (problems || outcome || mode || weight || ga) {
+                    existingData[i] = {
+                        problems: problems ? problems.value : '',
+                        outcome: outcome ? outcome.value : '',
+                        mode: mode ? mode.value : '',
+                        weight: weight ? weight.value : '',
+                        ga: ga ? ga.value : ''
+                    };
+                }
             }
-        }
 
-        // Clear and regenerate table
-        previousPregnanciesTableBody.innerHTML = '';
+            // Clear and regenerate table
+            previousPregnanciesTableBody.innerHTML = '';
 
-        if (numPreg === 0) {
-            previousPregnanciesTableBody.innerHTML = '<tr><td colspan="6" class="p-2 text-center text-gray-400">No previous pregnancies entered.</td></tr>';
-            return;
-        }
+            if (numPreg === 0) {
+                previousPregnanciesTableBody.innerHTML = '<tr><td colspan="6" class="p-2 text-center text-gray-400">No previous pregnancies entered.</td></tr>';
+                return;
+            }
 
-        for (let i = 1; i <= numPreg; i++) {
-            const row = document.createElement('tr');
-            const data = existingData[i] || {};
+            for (let i = 1; i <= numPreg; i++) {
+                const row = document.createElement('tr');
+                const data = existingData[i] || {};
 
-            row.innerHTML = `
+                row.innerHTML = `
                 <td class="p-2 border border-gray-600">${i}</td>
                 <td class="p-2 border border-gray-600">
                     <input type="text" name="prev_preg_${i}_problems" class="form-input" 
@@ -458,10 +458,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 </td>
             `;
 
-            previousPregnanciesTableBody.appendChild(row);
-        }
-    });
-}
+                previousPregnanciesTableBody.appendChild(row);
+            }
+        });
+    }
 
     // Hospital API functions
     async function searchHospitals(query = '') {
@@ -1098,240 +1098,240 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function fillFormFields(data) {
-    if (!data) return;
+        if (!data) return;
 
-    const directMapping = {
-        // Maternal – basic
-        maternal_age: "maternal_age",
-        maternal_parity: "maternal_parity",
-        previous_pregnancies: "previous_pregnancies",
-        gestation_weeks: "gestation_weeks",
-        papp_a_level: "papp_a_level",
-        bmi: "bmi",
-        wom_blod_pres: "bp_at_booking",
-        antenatal_problems: "antenatal_problems",
-        gyn_his: "gynaecological_history",
-        mat_cond: "maternal_condition",
-        mat_lb: "maternal_medication",
+        const directMapping = {
+            // Maternal – basic
+            maternal_age: "maternal_age",
+            maternal_parity: "maternal_parity",
+            previous_pregnancies: "previous_pregnancies",
+            gestation_weeks: "gestation_weeks",
+            papp_a_level: "papp_a_level",
+            bmi: "bmi",
+            wom_blod_pres: "bp_at_booking",
+            antenatal_problems: "antenatal_problems",
+            gyn_his: "gynaecological_history",
+            mat_cond: "maternal_condition",
+            mat_lb: "maternal_medication",
 
-        // Yes/No fields
-        prev_iud_stillbirth: "prev_iud_stillbirth",
-        prev_iugr_sga: "prev_iugr_sga",
-        pregnancy_loss: "pregnancy_loss",
-        hypertension: "hypertension",
-        diabetes: "diabetes",
-        autoimmune: "autoimmune",
-        smoking_in_pregnancy: "smoking_in_pregnancy",
-        respiratory_problems: "respiratory",
-        inherited_disorders: "inherited_disorder",
-        cardiac_prob: "cardiac_problems",
-        hypertension_ever: "hypertension_history",
-        anaemia_prb: "haematological_problems",
-        ther_disord: "thromboembolic_disorder",
-        liver_prd: "hepatic_problems",
-        foetal_movements: "foetal_movements",
-        gas_prb: "gastrointestinal_problems",
-        endo: "endocrine_problems",
-        neuro_prd: "neurological_problems",
-        auto_dis: "autoimmune_disease",
-        infection: "infections",
-        fert_tre: "fertility_treatment",
-        smoked: "ever_smoked",
-        hou_smok: "smoker_in_household",
-        sub_preg: "substance_use_before",
-        sep: "maternal_sepsis",
-        slw_prw: "slow_progress",
-        epid: "epidural",
-        ivf: "ivf_details",
-        fev_lab: "maternal_fever",
-        plac_path: "apla_syndrome",
-        pre_ecla: "preeclampsia",
-        iugr: "current_iugr",
-        abnor_drop: "abnormal_dopplers",
-        oligohydra: "oligohydramnios",
-        card_neck: "cord_around_neck",
-        plactal_abrupt: "placental_abruption",
-        babycried: "baby_cried",
-        gr_res_prb: "fgr_risks",
-        pre_tr_birth: "preterm_birth_risks",
-        abnor_scn: "anomaly_scan_result",
+            // Yes/No fields
+            prev_iud_stillbirth: "prev_iud_stillbirth",
+            prev_iugr_sga: "prev_iugr_sga",
+            pregnancy_loss: "pregnancy_loss",
+            hypertension: "hypertension",
+            diabetes: "diabetes",
+            autoimmune: "autoimmune",
+            smoking_in_pregnancy: "smoking_in_pregnancy",
+            respiratory_problems: "respiratory",
+            inherited_disorders: "inherited_disorder",
+            cardiac_prob: "cardiac_problems",
+            hypertension_ever: "hypertension_history",
+            anaemia_prb: "haematological_problems",
+            ther_disord: "thromboembolic_disorder",
+            liver_prd: "hepatic_problems",
+            foetal_movements: "foetal_movements",
+            gas_prb: "gastrointestinal_problems",
+            endo: "endocrine_problems",
+            neuro_prd: "neurological_problems",
+            auto_dis: "autoimmune_disease",
+            infection: "infections",
+            fert_tre: "fertility_treatment",
+            smoked: "ever_smoked",
+            hou_smok: "smoker_in_household",
+            sub_preg: "substance_use_before",
+            sep: "maternal_sepsis",
+            slw_prw: "slow_progress",
+            epid: "epidural",
+            ivf: "ivf_details",
+            fev_lab: "maternal_fever",
+            plac_path: "apla_syndrome",
+            pre_ecla: "preeclampsia",
+            iugr: "current_iugr",
+            abnor_drop: "abnormal_dopplers",
+            oligohydra: "oligohydramnios",
+            card_neck: "cord_around_neck",
+            plactal_abrupt: "placental_abruption",
+            babycried: "baby_cried",
+            gr_res_prb: "fgr_risks",
+            pre_tr_birth: "preterm_birth_risks",
+            abnor_scn: "anomaly_scan_result",
 
-        // Race
-        ethnic_category: "race_category",
-        ethnic_subcategory: "race_subcategory",
+            // Race
+            ethnic_category: "race_category",
+            ethnic_subcategory: "race_subcategory",
 
-        // LMP
-        lmpopt: "lmp_option",
+            // LMP
+            lmpopt: "lmp_option",
 
-        // Measurements
-        wom_hg: "height_m",
-        wom_wg: "weight_at_booking",
+            // Measurements
+            wom_hg: "height_m",
+            wom_wg: "weight_at_booking",
 
-        // Selects
-        plac_abnor: "placental_abnormality",
-        fdr: "fgr_risk_status",
-        asssris: "aspirin_risk_assessment",
-        dvit: "vitamin_d_assessment",
-        liq_col: "liquor_color",
-        sme_liq: "liquor_smell",
-        "4_presentation": "presentation",
-        type: "multiple_pregnancy_type",
-        chorionicity: "multiple_pregnancy_chorionicity",
-        zygosity: "multiple_pregnancy_zygosity",
+            // Selects
+            plac_abnor: "placental_abnormality",
+            fdr: "fgr_risk_status",
+            asssris: "aspirin_risk_assessment",
+            dvit: "vitamin_d_assessment",
+            liq_col: "liquor_color",
+            sme_liq: "liquor_smell",
+            "4_presentation": "presentation",
+            type: "multiple_pregnancy_type",
+            chorionicity: "multiple_pregnancy_chorionicity",
+            zygosity: "multiple_pregnancy_zygosity",
 
-        // Numeric fields
-        alco_wek: "alcohol_at_booking",
-        co_ppm: "co_reading_ppm",
-        oxytocin_hr: "oxytocin_duration",
-        donar_age: "donor_age",
-        episodes: "episodes",
+            // Numeric fields
+            alco_wek: "alcohol_at_booking",
+            co_ppm: "co_reading_ppm",
+            oxytocin_hr: "oxytocin_duration",
+            donar_age: "donor_age",
+            episodes: "episodes",
 
-        // Induction
-        method: "induction_method",
-        medication: "induction_medication",
-        total_dose: "induction_dose",
+            // Induction
+            method: "induction_method",
+            medication: "induction_medication",
+            total_dose: "induction_dose",
 
-        // Birth / fetal
-        birthweight: "birth_weight",
-        babys: "baby_sex",
-        please_select: "current_mode_of_delivery",
-        indication: "delivery_indication",
-        birth_related: "birth_related",
-        neon_resus: "resuscitation_reason",
-        neonatal_malfun: "congenital_malformations_details",
-        neonatal_icu: "nicu_reason",
+            // Birth / fetal
+            birthweight: "birth_weight",
+            babys: "baby_sex",
+            please_select: "current_mode_of_delivery",
+            indication: "delivery_indication",
+            birth_related: "birth_related",
+            neon_resus: "resuscitation_reason",
+            neonatal_malfun: "congenital_malformations_details",
+            neonatal_icu: "nicu_reason",
 
-        // Cord blood arterial
-        ph: "arterial_ph",
-        base_excess: "arterial_base_excess",
-        lactate: "arterial_lactate",
-        foetal_hb: "arterial_hb",
-        po2: "arterial_po2",
-        pco2: "arterial_pco2",
-        hco3: "arterial_hco3",
+            // Cord blood arterial
+            ph: "arterial_ph",
+            base_excess: "arterial_base_excess",
+            lactate: "arterial_lactate",
+            foetal_hb: "arterial_hb",
+            po2: "arterial_po2",
+            pco2: "arterial_pco2",
+            hco3: "arterial_hco3",
 
-        // Cord blood venous
-        phv: "venous_ph",
-        basev: "venous_base_excess",
-        lactatev: "venous_lactate",
-        foetalv: "venous_hb",
-        po2v: "venous_po2",
-        pco2v: "venous_pco2",
-        hco3v: "venous_hco3",
+            // Cord blood venous
+            phv: "venous_ph",
+            basev: "venous_base_excess",
+            lactatev: "venous_lactate",
+            foetalv: "venous_hb",
+            po2v: "venous_po2",
+            pco2v: "venous_pco2",
+            hco3v: "venous_hco3",
 
-        // APGAR
-        min1: "apgar_1min",
-        min5: "apgar_5min",
-        min10: "apgar_10min",
+            // APGAR
+            min1: "apgar_1min",
+            min5: "apgar_5min",
+            min10: "apgar_10min",
 
             // Hospital
-        hospital: "hospital",
+            hospital: "hospital",
 
 
             // Pregnancy-loss details
-        select_trimester: "trimester",
-        number_of_loss: "loss_count",
-    };
+            select_trimester: "trimester",
+            number_of_loss: "loss_count",
+        };
 
-    function setFlatpickrValue(inputName, value) {
-        if (!value) return;
-        const el = document.querySelector(`input[name="${inputName}"]`);
-        if (!el) return;
-        if (el._flatpickr) {
-            el._flatpickr.setDate(value, true);
-        } else {
-            el.value = value;
-        }
-    }
-
-    function setField(htmlName, value) {
-        if (value === null || value === undefined || value === "") return;
-        const inputs = document.querySelectorAll(
-            `input[name="${htmlName}"], select[name="${htmlName}"], textarea[name="${htmlName}"]`
-        );
-        inputs.forEach(el => {
-            if (el.type === "checkbox") {
-                el.checked = (value === 1 || value === true || value === "Yes");
+        function setFlatpickrValue(inputName, value) {
+            if (!value) return;
+            const el = document.querySelector(`input[name="${inputName}"]`);
+            if (!el) return;
+            if (el._flatpickr) {
+                el._flatpickr.setDate(value, true);
             } else {
                 el.value = value;
+            }
+        }
+
+        function setField(htmlName, value) {
+            if (value === null || value === undefined || value === "") return;
+            const inputs = document.querySelectorAll(
+                `input[name="${htmlName}"], select[name="${htmlName}"], textarea[name="${htmlName}"]`
+            );
+            inputs.forEach(el => {
+                if (el.type === "checkbox") {
+                    el.checked = (value === 1 || value === true || value === "Yes");
+                } else {
+                    el.value = value;
                 }
                 el.dispatchEvent(new Event("change", { bubbles: true }));
                 el.dispatchEvent(new Event("input", { bubbles: true }));
-        });
-    }
+            });
+        }
 
-    function clickYesNo(targetName, yesOrNo) {
-        const btn = document.querySelector(
-            `.yes-no-group button[data-target="${targetName}"][data-value="${yesOrNo}"]`
-        );
-        if (btn) {
+        function clickYesNo(targetName, yesOrNo) {
+            const btn = document.querySelector(
+                `.yes-no-group button[data-target="${targetName}"][data-value="${yesOrNo}"]`
+            );
+            if (btn) {
                 // Use the existing handler so modals / sub-sections stay in sync
-            if (typeof handleYesNoClick === "function") {
-                handleYesNoClick(btn);
-            } else {
-                btn.click();
+                if (typeof handleYesNoClick === "function") {
+                    handleYesNoClick(btn);
+                } else {
+                    btn.click();
+                }
             }
         }
-    }
 
-    // Apply direct field mappings
-    Object.keys(directMapping).forEach(dbKey => {
-        const value = data[dbKey];
-        if (value === null || value === undefined || value === "") return;
-        const htmlName = directMapping[dbKey];
-        setField(htmlName, value);
-    });
+        // Apply direct field mappings
+        Object.keys(directMapping).forEach(dbKey => {
+            const value = data[dbKey];
+            if (value === null || value === undefined || value === "") return;
+            const htmlName = directMapping[dbKey];
+            setField(htmlName, value);
+        });
 
-    const yesNoMappings = {
+        const yesNoMappings = {
             // DB key              : HTML data-target
-        prev_iud_stillbirth: "prev_iud_stillbirth",
-        prev_iugr_sga: "prev_iugr_sga",
-        pregnancy_loss: "pregnancy_loss",
-        hypertension: "hypertension",
-        diabetes: "diabetes",
-        autoimmune: "autoimmune",
-        smoking_in_pregnancy: "smoking_in_pregnancy",
-        respiratory_problems: "respiratory",
-        inherited_disorders: "inherited_disorder",
-        cardiac_prob: "cardiac_problems",
-        hypertension_ever: "hypertension_history",
-        anaemia_prb: "haematological_problems",
-        ther_disord: "thromboembolic_disorder",
-        liver_prd: "hepatic_problems",
-        foetal_movements: "foetal_movements",
-        gas_prb: "gastrointestinal_problems",
-        endo: "endocrine_problems",
-        neuro_prd: "neurological_problems",
-        auto_dis: "autoimmune_disease",
-        infection: "infections",
-        fert_tre: "fertility_treatment",
-        smoked: "ever_smoked",
-        hou_smok: "smoker_in_household",
-        sub_preg: "substance_use_before",
-        sep: "maternal_sepsis",
-        slw_prw: "slow_progress",
-        epid: "epidural",
-        ivf: "ivf_details",
-        fev_lab: "maternal_fever",
-        plac_path: "apla_syndrome",
-        pre_ecla: "preeclampsia",
-        iugr: "current_iugr",
-        abnor_drop: "abnormal_dopplers",
-        oligohydra: "oligohydramnios",
-        card_neck: "cord_around_neck",
-        plactal_abrupt: "placental_abruption",
-        babycried: "baby_cried",
-        gr_res_prb: "fgr_risks",
-        pre_tr_birth: "preterm_birth_risks",
-        abnor_scn: "anomaly_scan_result",
-    };
+            prev_iud_stillbirth: "prev_iud_stillbirth",
+            prev_iugr_sga: "prev_iugr_sga",
+            pregnancy_loss: "pregnancy_loss",
+            hypertension: "hypertension",
+            diabetes: "diabetes",
+            autoimmune: "autoimmune",
+            smoking_in_pregnancy: "smoking_in_pregnancy",
+            respiratory_problems: "respiratory",
+            inherited_disorders: "inherited_disorder",
+            cardiac_prob: "cardiac_problems",
+            hypertension_ever: "hypertension_history",
+            anaemia_prb: "haematological_problems",
+            ther_disord: "thromboembolic_disorder",
+            liver_prd: "hepatic_problems",
+            foetal_movements: "foetal_movements",
+            gas_prb: "gastrointestinal_problems",
+            endo: "endocrine_problems",
+            neuro_prd: "neurological_problems",
+            auto_dis: "autoimmune_disease",
+            infection: "infections",
+            fert_tre: "fertility_treatment",
+            smoked: "ever_smoked",
+            hou_smok: "smoker_in_household",
+            sub_preg: "substance_use_before",
+            sep: "maternal_sepsis",
+            slw_prw: "slow_progress",
+            epid: "epidural",
+            ivf: "ivf_details",
+            fev_lab: "maternal_fever",
+            plac_path: "apla_syndrome",
+            pre_ecla: "preeclampsia",
+            iugr: "current_iugr",
+            abnor_drop: "abnormal_dopplers",
+            oligohydra: "oligohydramnios",
+            card_neck: "cord_around_neck",
+            plactal_abrupt: "placental_abruption",
+            babycried: "baby_cried",
+            gr_res_prb: "fgr_risks",
+            pre_tr_birth: "preterm_birth_risks",
+            abnor_scn: "anomaly_scan_result",
+        };
 
-    Object.keys(yesNoMappings).forEach(dbKey => {
-        const value = data[dbKey];
-        if (!value) return;
-        const normalised = (value === 1 || value === true || value === "Yes") ? "Yes" : "No";
-        clickYesNo(yesNoMappings[dbKey], normalised);
-    });
+        Object.keys(yesNoMappings).forEach(dbKey => {
+            const value = data[dbKey];
+            if (!value) return;
+            const normalised = (value === 1 || value === true || value === "Yes") ? "Yes" : "No";
+            clickYesNo(yesNoMappings[dbKey], normalised);
+        });
         if (data.lmp) {
             setFlatpickrValue("lmp_date", data.lmp);
         }
@@ -1348,15 +1348,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.rupt_mem) {
             setFlatpickrValue("rom_datetime", data.rupt_mem);
         }
-    const hasInduction = data.method || data.medication || data.total_dose;
-    if (hasInduction) {
-        clickYesNo("induction_of_labor", "Yes");
-        setTimeout(() => {
-            setField("induction_method", data.method || "");
-            setField("induction_medication", data.medication || "");
-            setField("induction_dose", data.total_dose || "");
-        }, 100);
-    }
+        const hasInduction = data.method || data.medication || data.total_dose;
+        if (hasInduction) {
+            clickYesNo("induction_of_labor", "Yes");
+            setTimeout(() => {
+                setField("induction_method", data.method || "");
+                setField("induction_medication", data.medication || "");
+                setField("induction_dose", data.total_dose || "");
+            }, 100);
+        }
 
         if (data.timendate) {
             setFlatpickrValue("birth_datetime", data.timendate);
@@ -1727,16 +1727,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         // ====================== FIXED: Previous Pregnancies Table ======================
-    if (data.table_vtci && Array.isArray(data.table_vtci) && data.table_vtci.length > 0) {
-        console.log(`Loading ${data.table_vtci.length} previous pregnancies`);
+        if (data.table_vtci && Array.isArray(data.table_vtci) && data.table_vtci.length > 0) {
+            console.log(`Loading ${data.table_vtci.length} previous pregnancies`);
 
-        const numInput = document.querySelector('input[name="previous_pregnancies"]');
-        if (numInput) {
-            numInput.value = data.table_vtci.length;
+            const numInput = document.querySelector('input[name="previous_pregnancies"]');
+            if (numInput) {
+                numInput.value = data.table_vtci.length;
+            }
+            // Silently generate the table rows (without opening modal)
+            generatePreviousPregnanciesTable(data.table_vtci);
         }
-          // Silently generate the table rows (without opening modal)
-        generatePreviousPregnanciesTable(data.table_vtci);
-    }
 
         // Update button visibility based on document status and user role
         if (window.canEditSubmitted !== undefined) {
@@ -1748,7 +1748,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateButtonVisibility(data.docstatus || 0);
             }, 500);
         }
-}
+    }
 
     // Check for 'name' parameter in URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -2856,16 +2856,18 @@ function makeFormReadOnly(isReadOnly = true) {
         }
     });
 
-    // Handle specific interactive elements like raceLookupBtn
-    const lookupBtns = form.querySelectorAll('#raceLookupBtn, #hospitalLookupBtn, .btn-specify');
+    // Handle specific interactive elements like raceLookupBtn and file upload
+    const lookupBtns = form.querySelectorAll('#raceLookupBtn, #hospitalLookupBtn, .btn-specify, .file-upload');
     lookupBtns.forEach(btn => {
         btn.disabled = isReadOnly;
         if (isReadOnly) {
             btn.style.pointerEvents = 'none';
             btn.style.opacity = '0.5';
+            btn.classList.add('cursor-not-allowed');
         } else {
             btn.style.pointerEvents = 'auto';
             btn.style.opacity = '1';
+            btn.classList.remove('cursor-not-allowed');
         }
     });
 }
@@ -2894,7 +2896,7 @@ function updateButtonVisibility(docstatus = 0) {
             saveBtn.textContent = 'SAVE';
         } else if (isExisting) {
             submitBtn.classList.remove('hidden');
-            submitBtn.textContent = 'SUBMIT';
+            submitBtn.textContent = 'LOCK';
             submitBtn.disabled = false;
             submitBtn.classList.remove('bg-gray-500', 'cursor-not-allowed');
             submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
@@ -2910,7 +2912,7 @@ function updateButtonVisibility(docstatus = 0) {
                 saveBtn.textContent = 'SAVE';
             } else {
                 submitBtn.classList.remove('hidden');
-                submitBtn.textContent = 'SUBMITTED';
+                submitBtn.textContent = 'LOCKED';
                 submitBtn.disabled = true;
                 submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
                 submitBtn.classList.add('bg-gray-500', 'cursor-not-allowed');
@@ -2920,7 +2922,7 @@ function updateButtonVisibility(docstatus = 0) {
         } else {
             saveBtn.classList.add('hidden');
             submitBtn.classList.remove('hidden');
-            submitBtn.textContent = 'SUBMITTED';
+            submitBtn.textContent = 'LOCKED';
             submitBtn.disabled = true;
 
             // Style as a status label rather than an active button
@@ -2937,7 +2939,7 @@ function updateButtonVisibility(docstatus = 0) {
             saveBtn.textContent = 'SAVE';
         } else {
             submitBtn.classList.remove('hidden');
-            submitBtn.textContent = 'SUBMIT';
+            submitBtn.textContent = 'LOCK';
             submitBtn.disabled = false;
             submitBtn.classList.remove('bg-gray-500', 'cursor-not-allowed');
             submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
@@ -3134,6 +3136,11 @@ const submitBtn = document.getElementById('submitBtn');
 if (submitBtn) {
     submitBtn.addEventListener('click', async (e) => {
         e.preventDefault();
+
+        if (!confirm("Once locked, this data cannot be edited again. Please contact the administrator if further changes are required.\nAre you sure you want to proceed?")) {
+            return;
+        }
+        N
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const docName = urlParams.get('name');
